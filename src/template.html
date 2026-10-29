@@ -27,7 +27,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 #where .brand b{color:#e0566b;font-weight:700}
 #near{font-size:18px;font-weight:600;line-height:1.15;text-wrap:balance}
 #coords{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-#mini{top:calc(12px + env(safe-area-inset-top,0px));right:12px;width:180px;height:180px;padding:0;overflow:hidden}
+#mini{top:calc(12px + env(safe-area-inset-top,0px));right:12px;width:180px;height:180px;padding:0;overflow:hidden;border-radius:50%}
 #mini canvas{display:block;width:100%;height:100%}
 #heading{position:absolute;left:0;right:0;bottom:4px;text-align:center;font-family:var(--f-mono);font-size:11px;color:var(--ink);text-shadow:0 1px 2px #000;pointer-events:none}
 #keys{left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));padding:8px 12px;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px;max-width:calc(100vw - 48px)}
@@ -56,7 +56,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 #map h2{margin:0;font-family:var(--f-display);font-size:18px;letter-spacing:.06em;color:var(--limestone)}
 #map header span{font-size:14px;color:var(--muted)}
 #mapwrap{position:relative;min-height:0;display:grid;place-items:center}
-#bigmap{max-width:100%;max-height:100%;cursor:crosshair;border:1px solid var(--hud-line);image-rendering:pixelated}
+#bigmap,#bigmapfx{grid-area:1/1;max-width:100%;max-height:100%;border:1px solid var(--hud-line)}#bigmap{cursor:crosshair;image-rendering:pixelated}#bigmapfx{pointer-events:none;border-color:transparent}
 #padcur{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.6);pointer-events:none}#padcur::before,#padcur::after{content:'';position:absolute;background:#fff;left:50%;top:50%}#padcur::before{width:2px;height:34px;margin:-17px 0 0 -1px}#padcur::after{width:34px;height:2px;margin:-1px 0 0 -17px}
 #touch{position:fixed;inset:0;pointer-events:none}
 #joy{position:fixed;left:24px;bottom:calc(70px + env(safe-area-inset-bottom,0px));width:120px;height:120px;border-radius:50%;border:2px solid var(--hud-line);background:rgba(0,0,0,.2);pointer-events:auto}
@@ -155,7 +155,7 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
 
 <div id="map" hidden>
   <header><h2>CAMPUS MAP</h2><span id="maphelp">Click to teleport · M or Esc to close</span></header>
-  <div id="mapwrap"><canvas id="bigmap"></canvas><div id="padcur" hidden></div></div>
+  <div id="mapwrap"><canvas id="bigmap"></canvas><canvas id="bigmapfx"></canvas><div id="padcur" hidden></div></div>
 </div>
 
 <script>/*__DATA__*/</script>
@@ -2078,23 +2078,49 @@ function buildMapCanvas(ground) {
 }
 function drawBigMap() {
   const bm = $('bigmap'); bm.width = mapCanvas.width; bm.height = mapCanvas.height; const g = bm.getContext('2d');
+  const fx = $('bigmapfx'); fx.width = bm.width; fx.height = bm.height;
   g.drawImage(mapCanvas, 0, 0);
   g.font = '600 15px "Barlow Semi Condensed", sans-serif'; g.textAlign = 'center';
   for (const l of labels) { const X = (l.x + W / 2) * mapScale, Z = (l.z + H / 2) * mapScale; g.lineWidth = 4; g.strokeStyle = 'rgba(0,0,0,.75)'; g.strokeText(l.name, X, Z); g.fillStyle = '#fff'; g.fillText(l.name, X, Z); }
   const X = (P.x + W / 2) * mapScale, Z = (P.z + H / 2) * mapScale;
   g.save(); g.translate(X, Z); g.rotate(-yaw); g.fillStyle = '#e0566b'; g.strokeStyle = '#fff'; g.lineWidth = 3; g.beginPath(); g.moveTo(0, -16); g.lineTo(11, 12); g.lineTo(0, 6); g.lineTo(-11, 12); g.closePath(); g.stroke(); g.fill(); g.restore();
 }
+// the officers chasing the local player, as world positions (on foot, or in their car)
+function chasingCops() { return Cops.list.filter(c => c.state === 'chase' && c.data.target === P).map(c => c.officer.onFoot ? c.officer : c.car); }
+const chaserCol = () => Math.floor(performance.now() / 250) % 2 ? '#2a5bff' : '#ff2020';   // police lights: red / blue
+function chaserDot(g, x, y, r, col) {   // a dot with a white outline and a faint glow ring of its colour
+  g.strokeStyle = col; g.globalAlpha = .4; g.lineWidth = r * .5; g.beginPath(); g.arc(x, y, r * 1.6, 0, 7); g.stroke(); g.globalAlpha = 1;
+  g.fillStyle = col; g.strokeStyle = '#fff'; g.lineWidth = r * .3; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.stroke();
+}
 function drawMini() {
-  const mc = $('minic'), g = mc.getContext('2d'), S = mc.width, view = 220;   // metres across
-  const k = mapScale, sx = (P.x + W / 2) * k - view * k / 2, sz = (P.z + H / 2) * k - view * k / 2;
+  const mc = $('minic'), g = mc.getContext('2d'), S = mc.width, view = 220, view2 = view * 1.42;   // metres across; the source is 1.42x bigger so a rotated square never shows corners
+  const k = mapScale, sx = (P.x + W / 2) * k - view2 * k / 2, sz = (P.z + H / 2) * k - view2 * k / 2;
+  g.save(); g.beginPath(); g.arc(S / 2, S / 2, S / 2, 0, Math.PI * 2); g.clip();   // round minimap
   g.fillStyle = '#3b4a33'; g.fillRect(0, 0, S, S);
   g.save(); g.translate(S / 2, S / 2); g.rotate(yaw); g.translate(-S / 2, -S / 2);
-  g.drawImage(mapCanvas, sx, sz, view * k, view * k, 0, 0, S, S); g.restore();
+  g.drawImage(mapCanvas, sx, sz, view2 * k, view2 * k, -S * .21, -S * .21, S * 1.42, S * 1.42); g.restore();
   g.fillStyle = '#e0566b'; g.strokeStyle = '#fff'; g.lineWidth = 3; g.beginPath(); g.moveTo(S / 2, S / 2 - 16); g.lineTo(S / 2 + 11, S / 2 + 12); g.lineTo(S / 2, S / 2 + 6); g.lineTo(S / 2 - 11, S / 2 + 12); g.closePath(); g.stroke(); g.fill();
+  // chasing officers; any beyond the rim are pinned to it
+  for (const p of chasingCops()) {
+    const dx = p.x - P.x, dz = p.z - P.z; let x = S / 2 + (dx * Math.cos(yaw) - dz * Math.sin(yaw)) * S / view, y = S / 2 + (dx * Math.sin(yaw) + dz * Math.cos(yaw)) * S / view;
+    const d = Math.hypot(x - S / 2, y - S / 2), R = S / 2 - 10;
+    if (d > R) { x = S / 2 + (x - S / 2) * R / d; y = S / 2 + (y - S / 2) * R / d; }
+    chaserDot(g, x, y, 7, chaserCol());
+  }
+  g.restore();
   // north marker
   const nr = S / 2 - 18, na = yaw - Math.PI / 2, nx = S / 2 + Math.cos(na) * nr, ny = S / 2 + Math.sin(na) * nr;
   g.font = '700 22px Silkscreen, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillStyle = '#fff'; g.strokeStyle = '#000'; g.lineWidth = 4; g.strokeText('N', nx, ny); g.fillText('N', nx, ny);
+}
+
+// the chasers on the big map, blinking, with the player as a white dot; drawn each frame while it is open
+function drawBigFx() {
+  const fx = $('bigmapfx'), g = fx.getContext('2d'), w = fx.width, h = fx.height, cops = chasingCops();
+  g.clearRect(0, 0, w, h); if (!Bank.wanted && !cops.length) return;
+  const at = p => [(p.x + W / 2) / W * w, (p.z + H / 2) / H * h], r = w / 160, col = chaserCol();
+  const [px, pz] = at(P); g.fillStyle = '#fff'; g.beginPath(); g.arc(px, pz, r * .6, 0, 7); g.fill();
+  for (const p of cops) { const [x, y] = at(p); chaserDot(g, x, y, r, col); }
 }
 
 /* ---------------- labels in 3D ---------------- */
@@ -2236,6 +2262,7 @@ function toggleMap(force) {
   if (mapOpen) { if (locked()) document.exitPointerLock(); drawBigMap();
     mapCur.fx = Math.max(0, Math.min(1, (P.x + W / 2) / W)); mapCur.fz = Math.max(0, Math.min(1, (P.z + H / 2) / H));
     $('padcur').hidden = !usingPad; placePadCur(); }
+  else { const fx = $('bigmapfx'); fx.getContext('2d').clearRect(0, 0, fx.width, fx.height); }
 }
 function mapTeleport(fx, fz) {
   const x = fx * W - W / 2, z = fz * H - H / 2;
@@ -2763,7 +2790,7 @@ const CAR_PARTS = [
   [[.26, .64, .64], [.8, .32, 1.38], '#151515', 'lam', null, 4],
   [[.28, .26, .26], [.8, .32, 1.38], '#9aa0a6', 'lam', null, 4],
   [[.38, .16, .06], [.58, .8, 2.16], '#fff4cf', 'basic', null, 2],
-  [[.36, .14, .06], [.6, .82, -2.16], '#c0161b', 'basic', null, 2],
+  [[.36, .14, .06], [.6, .82, -2.16], '#5e0a0c', 'basic', null, 2],
   [[1.5, .14, .45], [0, .99, .8], '#3a3d42', 'lam'],
   [[.34, .24, .04], [.4, 1.02, .5], '#111111', 'lam'],
   [[1.84, .34, 1.9], [0, .74, -.1], '#f2f2f2', 'lam', 'cop'],
@@ -2772,6 +2799,7 @@ const CAR_PARTS = [
   [[.46, .14, .3], [-.3, 1.69, -.25], '#10205a', 'basic', 'cop'],  // blue
 ];
 const RED_PART = 12, BLUE_PART = 13, LIGHT_ON = [new THREE.Color(0xff2020), new THREE.Color(0x2a5bff)], LIGHT_OFF = [new THREE.Color(0x5a1010), new THREE.Color(0x10205a)];
+const TAIL_PART = 7, TAIL_ON = new THREE.Color(0xff2a1a), TAIL_OFF = new THREE.Color(0x5e0a0c);
 const Vehicles = {
   list: [], parked: 0, player: null, parts: [], frozen: null, cam: 'cab', lookCar: null, pending: null, rental: null,
   lights: false, siren: false, pull: null, offenders: [], camBase: 0, prevPos: null,
@@ -2789,13 +2817,27 @@ const Vehicles = {
       c.npc = { seed: 1000 + i, ph: i / 19 * NPC_SLOT, cop, k: null, legs: [], ov: null, sched: {} };
       if (cop) cops.push(c);
     }
-    this.buildMeshes();
+    this.buildMeshes(); for (const c of this.list) if (c.cop) this.addDecals(c);
     for (const c of this.list) { if (c.kind !== 'npc') this.pose(c, true); this.place(c); }
     for (const c of cops) Cops.add(c);
   },
   add(o) { const c = Object.assign({ id: this.list.length, y: 0, v: 0, pt: 0, rl: 0, kind: 'parked', roof: null, flash: false, steer: 0 }, o); if (!c.roof) c.roof = c.col; this.list.push(c); return c; },
+  addDecals(car) {   // GROOVE CITY POLICE on both front doors (the white door panel); placed in place()
+    if (!this._decalMat) {
+      const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96; const g = cv.getContext('2d');
+      g.fillStyle = '#0f1f4a'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = '800 44px "Barlow Semi Condensed", Arial, sans-serif';
+      g.fillText('GROOVE CITY POLICE', 256, 38); g.fillRect(60, 68, 392, 4);
+      const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
+      this._decalMat = new THREE.MeshLambertMaterial({ map: t, transparent: true, depthWrite: false }); this._decalGeo = new THREE.PlaneGeometry(1.9, .36);
+    }
+    car.decals = [[.93, Math.PI / 2], [-.93, -Math.PI / 2]].map(([x, ry]) => {   // driver's side faces +x, passenger's -x
+      const d = new THREE.Mesh(this._decalGeo, this._decalMat); d.matrixAutoUpdate = false; d.matrixWorldNeedsUpdate = true;
+      d.userData.local = new THREE.Matrix4().compose(new THREE.Vector3(x, .76, -.1), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), ry), new THREE.Vector3(1, 1, 1));
+      scene.add(d); return d;
+    });
+  },
   buildMeshes() {
-    const mats = { lam: new THREE.MeshLambertMaterial({ color: 0xffffff }), basic: new THREE.MeshBasicMaterial({ color: 0xffffff }), glass: new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x0a0f14 }) };
+    const mats ={ lam: new THREE.MeshLambertMaterial({ color: 0xffffff }), basic: new THREE.MeshBasicMaterial({ color: 0xffffff }), glass: new THREE.MeshLambertMaterial({ color: 0xffffff, emissive: 0x0a0f14 }) };
     const col = new THREE.Color();
     CAR_PARTS.forEach(([s, p, cl, mat, only, copies = 1, shadow = false], i) => {
       const loc = [];
@@ -2813,6 +2855,7 @@ const Vehicles = {
   place(car) {
     const e = this._e || (this._e = new THREE.Euler(0, 0, 0, 'YXZ')), q = this._q || (this._q = new THREE.Quaternion()), m = this._m || (this._m = new THREE.Matrix4()), l = this._l || (this._l = new THREE.Matrix4()), v = this._v || (this._v = new THREE.Vector3()), one = this._one || (this._one = new THREE.Vector3(1, 1, 1));
     e.set(-car.pt, car.h, car.rl); q.setFromEuler(e); m.compose(v.set(car.x, car.y, car.z), q, one);
+    if (car.decals) for (const d of car.decals) { d.matrix.multiplyMatrices(m, d.userData.local); d.matrixWorldNeedsUpdate = true; }
     for (const P of this.parts) { const b = car.slot[P.i]; if (b == null) continue; for (let j = 0; j < P.loc.length; j++) { l.multiplyMatrices(m, P.loc[j]); P.mesh.setMatrixAt(b + j, l); } P.dirty = true; (P.ranges || (P.ranges = [])).push(b, P.loc.length); }
   },
   // upload only the instances that moved this frame (merged into runs), not the whole fleet
@@ -2828,6 +2871,11 @@ const Vehicles = {
     this.parts[RED_PART].mesh.setColorAt(car.slot[RED_PART], on && ph ? LIGHT_ON[0] : LIGHT_OFF[0]);
     this.parts[BLUE_PART].mesh.setColorAt(car.slot[BLUE_PART], on && !ph ? LIGHT_ON[1] : LIGHT_OFF[1]);
     this.parts[RED_PART].cdirty = this.parts[BLUE_PART].cdirty = true;
+  },
+  setBrake(car, on) {   // tail lights: bright while braking, dim otherwise (both copies)
+    const key = on ? 1 : 0; if (car.brakeKey === key || car.slot == null) return; car.brakeKey = key;
+    const T = this.parts[TAIL_PART], col = on ? TAIL_ON : TAIL_OFF;
+    T.mesh.setColorAt(car.slot[TAIL_PART], col); T.mesh.setColorAt(car.slot[TAIL_PART] + 1, col); T.cdirty = true;
   },
   // sit the car on the ground (bridges included), tilted to the slope
   pose(car, snap) {
@@ -2914,7 +2962,7 @@ const Vehicles = {
   exit(quiet) {
     const c = this.player; if (!c) return;
     if (this.frozen && !quiet) { toast('Wait for the officer to finish', 'info'); return; }
-    this.player = null; this.frozen = null; c.kind = 'parked'; c.v = 0; this.setFlash(c, false); Siren.stop(); this.lights = this.siren = false; this.pull = null;
+    this.player = null; this.frozen = null; c.kind = 'parked'; c.v = 0; this.setFlash(c, false); this.setBrake(c, false); Siren.stop(); this.lights = this.siren = false; this.pull = null;
     if (this.rental) { const mins = this.rental.paid; if (!quiet) toast(`Rental ended: ${mins} min, ${money(mins * 5)}`, 'info'); this.rental = null; }
     if (netSock && netSock.readyState === 1) netSock.send(JSON.stringify({ t: 'park', id: c.id, x: +c.x.toFixed(2), z: +c.z.toFixed(2), h: +c.h.toFixed(3) }));
     // step out of the driver's door
@@ -2942,6 +2990,7 @@ const Vehicles = {
       const due = Math.floor((Date.now() - this.rental.t0) / 60000) + 1;
       if (due > this.rental.paid) { this.rental.paid = due; Profile.charge(5, 'car rental', { quiet: true }); }
     }
+    this.braking = brake || (f * c.v < 0 && Math.abs(c.v) > .5); this.setBrake(c, this.braking);
     this.place(c); c.flash = c.cop && this.lights; if (c.cop) this.setFlash(c, this.lights, Math.floor(performance.now() / 180) % 2);
     P.set(c.x, c.y, c.z); V.set(0, 0, 0);
     // camera: from the driver's seat (look around with the mouse; it eases back to the road) or a chase view from above
@@ -2983,6 +3032,7 @@ const Vehicles = {
         if (o.rr && c.v > 1) N.redT = now;
         N.seen = true;
       } else if (N.ov.fn) N.ov.fn(c, dt, now, t);
+      this.setBrake(c, Math.abs(c.v) < .3 || (c.pv ?? c.v) - c.v > .5 * dt); c.pv = c.v;   // braking: slowing hard, or stopped
       const far = Math.abs(c.x - P.x) > 300 || Math.abs(c.z - P.z) > 300;
       if (far) { c.y = terrainY(c.x, c.z); c.pt = c.rl = 0; } else this.pose(c, Math.hypot(c.x - px, c.z - pz) > 8);
       this.place(c);
@@ -3075,7 +3125,7 @@ const Vehicles = {
   onCar(m) {
     const c = this.list[m.id]; if (!c || m.id >= this.parked || c === this.player) return;
     if (m.d) { if (m.d !== myId) c.kind = 'remote'; return; }
-    c.kind = 'parked'; c.v = 0; c.flash = false; this.setFlash(c, false);
+    c.kind = 'parked'; c.v = 0; c.flash = false; this.setFlash(c, false); this.setBrake(c, false);
     if (m.x != null) { c.x = m.x; c.z = m.z; c.h = m.h; this.pose(c, true); this.place(c); }
   },
   onEvt(m) {
@@ -3489,7 +3539,7 @@ function applyMove(p) {
 function dropRemote(id) {
   const r = remotes.get(id); if (!r) return;
   Bank.release(id);   // cops chasing them go back to patrol
-  if (r.car && r.car.kind === 'remote') { r.car.kind = 'parked'; r.car.v = 0; r.car.flash = false; Vehicles.setFlash(r.car, false); }   // the Worker parks it where they left it
+  if (r.car && r.car.kind === 'remote') { r.car.kind = 'parked'; r.car.v = 0; r.car.flash = false; Vehicles.setFlash(r.car, false); Vehicles.setBrake(r.car, false); }   // the Worker parks it where they left it
   scene.remove(r.g); r.g.traverse(o => { if (o.material) { o.material.map?.dispose(); o.material.dispose(); } });
   remotes.delete(id);
 }
@@ -3503,12 +3553,12 @@ function updateRemotes(dt) {
     r.walk += dt * 9 * Math.min(1, sp / 3);
     const sw = Math.sin(r.walk) * .6 * Math.min(1, sp / 2);
     const car = r.v >= 0 ? Vehicles.list[r.v] : null;
-    if (r.car && r.car !== car && r.car.kind === 'remote') { r.car.v = 0; r.car.flash = false; Vehicles.setFlash(r.car, false); }
+    if (r.car && r.car !== car && r.car.kind === 'remote') { r.car.v = 0; r.car.flash = false; Vehicles.setFlash(r.car, false); Vehicles.setBrake(r.car, false); }
     r.car = car && car !== Vehicles.player ? car : null;
     if (r.car) {   // driving: move their car instead of the avatar
       const c = r.car, jump = c.kind !== 'remote' || Math.hypot(c.x - r.x, c.z - r.z) > 15; c.kind = 'remote';
       const dh = wrapA(r.cy - c.h); c.h = jump ? r.cy : c.h + dh * k; c.x = r.x; c.z = r.z;
-      c.v = sp * (Math.cos(Math.atan2(r.x - px, r.z - pz) - c.h) < 0 ? -1 : 1); c.flash = !!(r.f & 1);
+      c.v = sp * (Math.cos(Math.atan2(r.x - px, r.z - pz) - c.h) < 0 ? -1 : 1); c.flash = !!(r.f & 1); Vehicles.setBrake(c, !!(r.f & 4));
       Vehicles.pose(c, jump); Vehicles.place(c);
     }
     r.g.visible = !r.car;
@@ -3520,7 +3570,7 @@ function updateRemotes(dt) {
 function sendMove(now) {
   if (!netSock || netSock.readyState !== 1 || now - netSentAt < 120) return;   // at most about 8 updates a second
   if (now - (netSent?.ping || 0) > 30000) { netSock.send(JSON.stringify({ t: 'ping', c: Date.now() })); if (netSent) netSent.ping = now; }   // keep the shared clock honest
-  const c = Vehicles.player, f = c ? (Vehicles.lights || (c.cop && Vehicles.siren) ? 1 : 0) | (Vehicles.siren ? 2 : 0) : 0, cy = c ? c.h : 0;
+  const c = Vehicles.player, f = c ? (Vehicles.lights || (c.cop && Vehicles.siren) ? 1 : 0) | (Vehicles.siren ? 2 : 0) | (Vehicles.braking ? 4 : 0) : 0, cy = c ? c.h : 0;
   const moved = !netSent || Math.hypot(P.x - netSent.x, P.z - netSent.z) > .02 || Math.abs(P.y - netSent.y) > .02 || Math.abs(yaw - netSent.yaw) > .01 || (c ? c.id : -1) !== netSent.v || Math.abs(cy - netSent.cy) > .01 || f !== netSent.f;
   if (!moved && now - netSentAt < 4000) return;   // standing still: a keep-alive every 4 s
   netSentAt = now; netSent = { x: P.x, y: P.y, z: P.z, yaw, v: c ? c.id : -1, cy, f, ping: netSent?.ping || now };
@@ -3590,6 +3640,7 @@ function frame(now) {
   if (clouds) clouds.position.x = ((now / 1000 * 1.5) % 300);
   for (const sp of labelSprites) { const d = Math.hypot(sp.position.x - P.x, sp.position.z - P.z); sp.visible = showLabels && d < 260 && d > 6; if (sp.visible) sp.material.opacity = Math.min(1, (260 - d) / 60); }
   if (started && now - hudT > 120) { hudT = now; updateHUD(); drawMini(); }
+  if (mapOpen) drawBigFx();
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
 }

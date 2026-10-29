@@ -29,7 +29,7 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [x] Chick-fil-A redesigned to look like the real one in the photos
 
 ## In progress
-- [ ] Quick fixes from your ideas (brake lights, police livery, cops on the map, minimap clipping)
+- [ ] Phase 1 restructure (below)
 
 ## Up next: restructure (Phase 1)
 - [ ] Split the single game file into modules (no gameplay change)
@@ -99,8 +99,8 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [ ] Deploy to the live site (`npm run deploy` in `worker/`)
 
 ## Your ideas
-- [ ] Cars need break lights
-- [ ] cop cars should say "groove city police"
-- [ ] cops should show up on the map when chasing you with little  lights blinking. 
-- [ ] hud map is clipping, make it not clip? 
-- [ ] fix the bridges, they look like they're falling in the ocean, and just do a whole urbansim street design
+- [x] Cars need break lights
+- [x] cop cars should say "groove city police"
+- [x] cops should show up on the map when chasing you with little  lights blinking. 
+- [x] hud map is clipping, make it not clip? 
+- [ ] fix the bridges, they look like they're falling in the ocean, and just do a whole urbansim street design *(planned with the street redesign in Phase 3)*
