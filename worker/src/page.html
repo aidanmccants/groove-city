@@ -137,6 +137,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
       <kbd>F</kbd><span>Toggle flying (C to descend)</span>
       <kbd>M</kbd><span>Campus map; click anywhere on it to teleport</span>
       <kbd>E</kbd><span>Get in a parked car (or serve at Chick-fil-A); in a car: W/S drive, A/D steer, V view, E exit</span>
+      <kbd>🎮</kbd><span>Xbox controller works too: sticks move and look, X use, A jump, Y fly</span>
     </div>
     <div id="bar"><i></i></div>
     <div class="meta" id="status">Laying out campus…</div>
@@ -2013,8 +2014,8 @@ function teleport(x, z) {
 }
 function update(dt) {
   if (Vehicles.player) return Vehicles.updatePlayer(dt);
-  const f = (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + joy.y;
-  const s = (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + joy.x;
+  const f = Math.max(-1, Math.min(1, (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + joy.y + Pad.y));
+  const s = Math.max(-1, Math.min(1, (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + joy.x + Pad.x));
   const run = keys.has('ShiftLeft') || keys.has('ShiftRight');
   const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
   let mx = fx * f + rx * s, mz = fz * f + rz * s; const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
@@ -2058,26 +2059,30 @@ addEventListener('keydown', e => {
   if (!started) return;
   if (newsOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeNews(); } return; }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
-  keys.add(e.code);
+  onKey(e.code, e.repeat);
+});
+// every key action lives here; the gamepad calls it too with fromPad set (the pad keeps its own held keys)
+function onKey(code, repeat, fromPad) {
+  if (!fromPad) keys.add(code);
   if (Vehicles.player) {   // driving: E/F get out, C/V camera, H siren and L lights in a police car
     const cop = Vehicles.player.cop;
-    if ((e.code === 'KeyE' || e.code === 'KeyF') && !e.repeat) Vehicles.exit();
-    else if ((e.code === 'KeyC' || e.code === 'KeyV') && !e.repeat) Vehicles.toggleCam();
-    else if (e.code === 'KeyH' && cop && !e.repeat) { Vehicles.siren = !Vehicles.siren; if (Vehicles.siren) Vehicles.lights = true; }
-    else if (e.code === 'KeyL' && cop && !e.repeat) Vehicles.lights = !Vehicles.lights;
-    else if (e.code === 'KeyL') showLabels = !showLabels;
-    if (e.code === 'KeyM') toggleMap();
-    if (e.code === 'Escape' && mapOpen) toggleMap(false);
-    if (e.code === 'KeyN') cycleTime();
+    if ((code === 'KeyE' || code === 'KeyF') && !repeat) Vehicles.exit();
+    else if ((code === 'KeyC' || code === 'KeyV') && !repeat) Vehicles.toggleCam();
+    else if (code === 'KeyH' && cop && !repeat) { Vehicles.siren = !Vehicles.siren; if (Vehicles.siren) Vehicles.lights = true; }
+    else if (code === 'KeyL' && cop && !repeat) Vehicles.lights = !Vehicles.lights;
+    else if (code === 'KeyL') showLabels = !showLabels;
+    if (code === 'KeyM') toggleMap();
+    if (code === 'Escape' && mapOpen) toggleMap(false);
+    if (code === 'KeyN') cycleTime();
     return;
   }
-  if (e.code === 'KeyF') toggleFly();
-  if (e.code === 'KeyM') toggleMap();
-  if (e.code === 'Escape' && mapOpen) toggleMap(false);
-  if (e.code === 'KeyL') { showLabels = !showLabels; }
-  if (e.code === 'KeyN') cycleTime();
-  if (e.code === 'KeyE' && !e.repeat) { if (CFA.onShift) CFA.serve(); else if (Bank.canSmash()) Bank.smash(); else Vehicles.tryEnter(); }
-});
+  if (code === 'KeyF') toggleFly();
+  if (code === 'KeyM') toggleMap();
+  if (code === 'Escape' && mapOpen) toggleMap(false);
+  if (code === 'KeyL') { showLabels = !showLabels; }
+  if (code === 'KeyN') cycleTime();
+  if (code === 'KeyE' && !repeat) { if (CFA.onShift) CFA.serve(); else if (Bank.canSmash()) Bank.smash(); else Vehicles.tryEnter(); }
+}
 addEventListener('keyup', e => keys.delete(e.code));
 addEventListener('blur', () => keys.clear());
 function toggleFly() {
@@ -2108,6 +2113,50 @@ $('tJump').addEventListener('pointerdown', () => touchUp = true); $('tJump').add
 $('tFly').addEventListener('click', () => Vehicles.player ? Vehicles.exit() : toggleFly());
 $('tUse').addEventListener('click', () => { if (Vehicles.player) Vehicles.toggleCam(); else if (CFA.onShift) CFA.serve(); else if (Bank.canSmash()) Bank.smash(); else Vehicles.tryEnter(); });
 $('tSiren').addEventListener('click', () => { Vehicles.siren = !Vehicles.siren; Vehicles.lights = Vehicles.siren; }); $('tMap').addEventListener('click', () => toggleMap());
+
+/* ---------------- Xbox / standard gamepad (Gamepad API) ---------------- */
+const Pad = {
+  x: 0, y: 0, lx: 0, ly: 0, held: new Set(), prev: [], connected: false,
+  dz: v => Math.abs(v) < 0.15 ? 0 : Math.sign(v) * (Math.abs(v) - 0.15) / 0.85,
+  sync(want) { for (const c of want) keys.add(c); for (const c of this.held) if (!want.has(c)) keys.delete(c); this.held = want; },   // keys the pad holds this frame
+  poll(dt) {
+    const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g && g.connected);
+    const b = i => !!(gp && gp.buttons[i] && gp.buttons[i].pressed), prev = this.prev, down = i => b(i) && !prev[i];
+    this.prev = gp ? gp.buttons.map(x => x.pressed) : [];
+    this.x = this.y = this.lx = this.ly = 0;
+    if (!gp) { this.sync(new Set()); return; }
+    if (!started) { if (down(0) || down(9)) $('go').click(); this.sync(new Set()); return; }
+    if (newsOpen) { if (down(0) || down(1) || down(9)) closeNews(); this.sync(new Set()); return; }
+    if (mapOpen) { if (down(8) || down(1)) toggleMap(false); this.sync(new Set()); return; }
+    const ax = this.dz(gp.axes[0] || 0), ay = this.dz(gp.axes[1] || 0), rx = this.dz(gp.axes[2] || 0), ry = this.dz(gp.axes[3] || 0);
+    this.lx = ax; this.ly = ay;
+    yaw -= Math.sign(rx) * rx * rx * 3.0 * dt; pitch = Math.max(-1.55, Math.min(1.55, pitch - Math.sign(ry) * ry * ry * 2.2 * dt));
+    const want = new Set();
+    if (Vehicles.player) {   // driving: RT gas, LT brake/reverse, A handbrake
+      this.x = ax; this.y = (gp.buttons[7]?.value || 0) - (gp.buttons[6]?.value || 0);
+      if (b(0)) want.add('Space');
+      if (down(1) || down(2)) onKey('KeyE', false, true);
+      if (down(3)) onKey('KeyV', false, true);
+      if (down(5)) onKey('KeyH', false, true);
+      if (down(4)) onKey('KeyL', false, true);
+      if (down(8)) onKey('KeyM', false, true);
+    } else {                 // on foot
+      this.x = ax; this.y = -ay;
+      if (b(0)) want.add('Space');
+      if (b(1)) want.add('KeyC');
+      if (b(4) || b(10)) want.add('ShiftLeft');
+      if (down(2)) onKey('KeyE', false, true);
+      if (down(3)) onKey('KeyF', false, true);
+      if (down(8)) onKey('KeyM', false, true);
+      if (down(12)) onKey('KeyL', false, true);
+      if (down(13)) onKey('KeyN', false, true);
+    }
+    this.sync(want);
+  },
+  rumble(ms, strong) { try { const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g && g.connected); const p = gp?.vibrationActuator?.playEffect('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: strong / 2 }); if (p && p.catch) p.catch(() => { }); } catch (e) { } },
+};
+addEventListener('gamepadconnected', () => { Pad.connected = true; toast('🎮 Controller connected: X use · Y fly · A jump · LB run · View map'); });
+addEventListener('gamepaddisconnected', () => { Pad.connected = false; toast('🎮 Controller disconnected'); });
 
 /* ---------------- time of day ---------------- */
 const TIMES = [
@@ -2166,6 +2215,7 @@ function setHint(html) { if (html === hintText) return; hintText = html; $('hint
 const UPDATE_NOTES = {
   title: 'Jobs, cars, traffic & a bank job',
   items: [
+    ['🎮', 'Xbox controller support', 'Plug in or pair a controller. Left stick moves, right stick looks, A jumps, LB runs, X uses (serve, smash, get in), Y flies, View opens the map. Driving: RT gas, LT brake/reverse, A handbrake, Y camera, X exit, RB siren, LB lights.'],
     ['💵', 'Money & jobs', 'You now carry cash (top right). Earn it, spend it, and keep out of the red: ten minutes in debt and you start over.'],
     ['🥪', 'Work the Chick-fil-A counter', 'Step behind the counter in Breen Student Union to start a shift. Hand customers a sandwich with E or a click for $1 each. Make them wait too long and they leave unhappy.'],
     ['🚗', 'Rent any car', 'Look at a parked car and press E (or click) to rent it: $5 up front, then $5 for every started minute. W/S drive, A/D steer, Space brakes, V swaps the driver\'s seat for a top-down view, E gets you out and the car stays where you left it, for everyone.'],
@@ -2692,8 +2742,8 @@ const Vehicles = {
   /* ---- the player's car ---- */
   updatePlayer(dt) {
     const c = this.player, frozen = !!this.frozen;
-    const f = frozen ? 0 : (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + joy.y;
-    const s = frozen ? 0 : (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + joy.x;
+    const f = frozen ? 0 : Math.max(-1, Math.min(1, (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + joy.y + Pad.y));
+    const s = frozen ? 0 : Math.max(-1, Math.min(1, (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + joy.x + Pad.x));
     const vmax = c.cop ? 36 : 30, brake = frozen || keys.has('Space');
     if (brake) c.v -= Math.sign(c.v) * Math.min(Math.abs(c.v), 14 * dt);
     else if (f > 0.1) c.v += c.v < -.2 ? 12 * dt * f : 6.5 * f * (1 - Math.max(0, c.v) / vmax) * dt;
@@ -2967,7 +3017,7 @@ const Cops = {
       if (cop.state !== 'patrol') continue;
       const p = cop.officer.onFoot ? cop.officer : cop.car; if (Math.hypot(p.x - me.x, p.z - me.z) > COP_NEAR) continue;
       const why = red ? 'running a red light' : `speeding at ${mph(me.v)} mph in a 25`;
-      Vehicles.frozen = why; Vehicles.redT = 0; toast('Pulled over! ' + why[0].toUpperCase() + why.slice(1), 'bad');
+      Vehicles.frozen = why; Vehicles.redT = 0; toast('Pulled over! ' + why[0].toUpperCase() + why.slice(1), 'bad'); Pad.rumble(400, 0.8);
       this.pullOver(cop, me, me); sendEvt('po', [cop.id, +me.x.toFixed(1), +me.z.toFixed(1), +me.h.toFixed(2)]);
       break;
     }
@@ -3050,7 +3100,7 @@ const Bank = {
   },
   cracked(until) {
     this.until = until; this.hits = 0; this.burst(40);
-    Profile.earn(100, 'bank robbery');
+    Profile.earn(100, 'bank robbery'); Pad.rumble(250, 0.6);
     banner('VAULT CRACKED · +$100', 'The alarm is ringing. Stay away from the police for 2:00 and the cash is yours.');
     if (flying) toggleFly();
     this.wanted = { end: performance.now() + WANTED_MS, cops: new Set() }; $('wanted').hidden = false;
@@ -3344,6 +3394,7 @@ let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   Rail.update(now); Traffic.update();
+  Pad.poll(dt);
   if (started && !mapOpen && !newsOpen) update(dt);
   Cops.update(dt, now); updateRemotes(dt); Vehicles.update(dt, now); Bank.update(dt, now);
   updatePeople(dt, now); updateCFA(now);
