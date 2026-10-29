@@ -57,6 +57,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 #map header span{font-size:14px;color:var(--muted)}
 #mapwrap{position:relative;min-height:0;display:grid;place-items:center}
 #bigmap{max-width:100%;max-height:100%;cursor:crosshair;border:1px solid var(--hud-line);image-rendering:pixelated}
+#padcur{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.6);pointer-events:none}#padcur::before,#padcur::after{content:'';position:absolute;background:#fff;left:50%;top:50%}#padcur::before{width:2px;height:34px;margin:-17px 0 0 -1px}#padcur::after{width:34px;height:2px;margin:-1px 0 0 -17px}
 #touch{position:fixed;inset:0;pointer-events:none}
 #joy{position:fixed;left:24px;bottom:calc(70px + env(safe-area-inset-bottom,0px));width:120px;height:120px;border-radius:50%;border:2px solid var(--hud-line);background:rgba(0,0,0,.2);pointer-events:auto}
 #joy i{position:absolute;left:40px;top:40px;width:40px;height:40px;border-radius:50%;background:rgba(244,239,227,.5)}
@@ -65,6 +66,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 #cash{font-family:var(--f-display);font-size:18px;letter-spacing:.04em;color:#9fdc8a;font-variant-numeric:tabular-nums}
 #money.debt{border-color:rgba(224,86,107,.7)}#money.debt #cash{color:#ff6b7f}
 #debt{font-family:var(--f-mono);font-size:11px;color:#ffb3bd;font-variant-numeric:tabular-nums}
+#fsbtn{top:calc(12px + env(safe-area-inset-top,0px));right:200px;width:44px;height:44px;padding:0;font-size:20px;line-height:42px;text-align:center;color:var(--ink);cursor:pointer}
 #toasts{position:fixed;top:calc(250px + env(safe-area-inset-top,0px));right:12px;display:grid;justify-items:end;gap:6px;pointer-events:none}
 .toast{background:var(--hud);border:1px solid var(--hud-line);border-radius:3px;padding:5px 10px;font-family:var(--f-display);font-size:12px;letter-spacing:.04em;color:#9fdc8a;animation:toast 2.4s ease-out forwards}
 .toast.bad{color:#ff8a9a}.toast.info{color:var(--ink);font-family:var(--f-body);font-size:14px;letter-spacing:0}
@@ -80,6 +82,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 #drive{left:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px));padding:8px 12px;display:grid;gap:2px;min-width:180px}
 #drive .spd{font-family:var(--f-display);font-size:30px;line-height:1;color:var(--limestone);font-variant-numeric:tabular-nums}#drive .spd small{font-size:12px;letter-spacing:.1em;margin-left:4px;color:var(--muted)}
 #dspd.over{color:#ff8a9a}#dinfo{font-size:13px;color:var(--ink)}#dkeys{font-size:12px;color:var(--muted)}#dkeys kbd{font-family:var(--f-mono);font-size:10px;border:1px solid var(--hud-line);border-radius:3px;padding:0 4px;margin:0 3px 0 6px}
+kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weight:700;color:#fff!important;border-color:rgba(255,255,255,.35)!important;background:#3a3f44!important}kbd.xb-a{background:#3f9b3a!important}kbd.xb-b{background:#c8312b!important}kbd.xb-x{background:#2a6fc9!important}kbd.xb-y{background:#d9a514!important;color:#1b1b1b!important}
 #goal{top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:8px 14px;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:2px 12px;max-width:min(440px,calc(100vw - 420px));border-color:rgba(224,86,107,.7)}
 #garrow{grid-row:span 2;font-size:26px;line-height:1;color:#ffcf3a;transition:transform .15s linear}#gmsg{font-size:13px;color:#ffb3bd;line-height:1.3}#gdist{font-family:var(--f-mono);font-size:11px;color:var(--ink)}
 #wanted{top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);padding:6px 16px;display:grid;grid-template-columns:auto auto;align-items:baseline;justify-content:center;gap:0 12px;border-color:#e0566b;animation:wanted 1s steps(1) infinite}
@@ -96,7 +99,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 @media (max-width:640px){#money{top:calc(140px + env(safe-area-inset-top,0px))}#toasts{top:calc(190px + env(safe-area-inset-top,0px))}#hint{bottom:calc(200px + env(safe-area-inset-bottom,0px));font-size:14px}}
 @media (prefers-reduced-motion: reduce){.toast{animation-duration:2.4s;animation-name:toastfade}}
 @keyframes toastfade{0%,80%{opacity:1}100%{opacity:0}}
-@media (max-width:640px){#mini{width:120px;height:120px}#keys{display:none}#where{max-width:calc(100vw - 160px)}#near{font-size:15px}}
+@media (max-width:640px){#mini{width:120px;height:120px}#keys{display:none}#where{max-width:calc(100vw - 160px)}#near{font-size:15px}#fsbtn{right:140px}}
 @media (prefers-reduced-motion: reduce){#bar i{transition:none}}
 </style>
 
@@ -108,6 +111,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 <div id="mode" class="chip" hidden>WALK</div>
 <div id="online" class="chip" hidden></div>
 <div id="money" class="chip" hidden aria-live="polite"><span id="cash">$0</span><span id="debt" hidden></span></div>
+<button id="fsbtn" class="chip" hidden aria-label="Toggle fullscreen" title="Fullscreen">⛶</button>
 <div id="toasts" aria-live="polite"></div>
 <div id="hint" class="chip" hidden></div>
 <div id="wanted" class="chip" hidden role="status"><b>WANTED</b><span id="wtime">2:00</span><small id="wcops"></small></div>
@@ -150,8 +154,8 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 </div>
 
 <div id="map" hidden>
-  <header><h2>CAMPUS MAP</h2><span>Click to teleport · M or Esc to close</span></header>
-  <div id="mapwrap"><canvas id="bigmap"></canvas></div>
+  <header><h2>CAMPUS MAP</h2><span id="maphelp">Click to teleport · M or Esc to close</span></header>
+  <div id="mapwrap"><canvas id="bigmap"></canvas><div id="padcur" hidden></div></div>
 </div>
 
 <script>/*__DATA__*/</script>
@@ -842,7 +846,20 @@ function breenInside(B, b) {
   const rect = (u0, u1, v0, v1) => [W(u0, v0), W(u1, v0), W(u1, v1), W(u0, v1)];
   const uv = (x, z) => { const ax = x - F.a[0], az = z - F.a[1]; return [ax * F.ux + az * F.uz, ax * F.vx + az * F.vz]; };
   capRings(B.plain, [insetRings([b.p], 0.1)[0]], fy, col3('#a77b4f'));   // oak boards
-  box(10, 11, fy + 0.01, 20, 0.02, 21, col3('#cfc6b4'));                  // tile at the servery end
+  // tile floor: beige ceramic on the diagonal with darker grout, 1 cm above the boards; texture and plane helpers for the servery below
+  const cfaTex = (w, h, draw) => { const cv = document.createElement('canvas'); cv.width = w; cv.height = h; draw(cv.getContext('2d')); const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t; };
+  const rep = (tex, rx, ry) => { const t = tex.clone(); t.repeat.set(rx, ry); return t; };
+  const region = (tex, x, y, w, h) => { const t = tex.clone(); t.repeat.set(w / 1024, h / 512); t.offset.set(x / 1024, 1 - (y + h) / 512); return t; };   // one part of the 1024x512 sign atlas
+  const plane = (w, h, mat, u, v, y, rot) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat), [x, z] = W(u, v); m.position.set(x, y, z); m.rotation.y = rot; scene.add(m); return m; };
+  const faceV = -th, faceNV = Math.PI - th, faceU = Math.PI / 2 - th;   // plane rotations facing +v, -v and +u
+  const floorTex = cfaTex(256, 256, g => {   // 0.848 m square holds one diagonal lattice of 0.6 m tiles
+    g.fillStyle = '#d9cdb8'; g.fillRect(0, 0, 256, 256); g.strokeStyle = '#a99b86'; g.lineWidth = 4;
+    for (const c of [-256, 0, 256, 512]) { g.beginPath(); g.moveTo(c, 0); g.lineTo(c + 256, 256); g.stroke(); }
+    for (const c of [0, 256, 512]) { g.beginPath(); g.moveTo(c, 0); g.lineTo(c - 256, 256); g.stroke(); }
+  });
+  floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(20 / 0.848, 21 / 0.848);
+  const floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, 21), new THREE.MeshLambertMaterial({ map: floorTex }));
+  const [fx, fz] = W(10, 11); floorMesh.position.set(fx, fy + 0.01, fz); floorMesh.rotation.set(-Math.PI / 2, -th, 0, 'YXZ'); scene.add(floorMesh);
   floors.push((x, z) => pip(x, z, b.p) ? fy : null);
   box(10, 11, fy + 3.8, 20.5, 0.15, 22, cream);                           // drop ceiling
   hipRoof(B.plaster, insetRings([b.p], 0.35), b.t - 0.15, b.pi || 45, cream, 0, 7);  // plaster roof underside
@@ -867,17 +884,142 @@ function breenInside(B, b) {
   for (let i = 0; i < 24; i++) box(s1 - (i + 0.5) * (7 / 24), 11, fy, 7 / 24 + 0.01, (i + 1) * 4.2 / 24, 2.8, col3('#5a3c26'));
   floors.push((x, z) => { const [u, v] = uv(x, z); return u >= s0 && u <= s1 && v > 9.6 && v < 12.4 ? fy + 4.2 * (s1 - u) / 7 : null; });
   for (const v of [9.5, 12.5]) for (let u = s0; u < s1; u += 0.5) box(u, v, fy + 4.2 * (s1 - u) / 7 + 0.1, 0.04, 1.0, 0.04, iron);
-  // Chick-fil-A
-  box(10, 17.2, fy, 12, 1.1, 1.0, wood); box(10, 17.2, fy + 1.1, 12.2, 0.06, 1.2, col3('#2a2a2a'));
-  addCollider([rect(4, 16, 16.7, 17.7)], fy + 1.1);
-  box(10, 20.6, fy, 12, 3.8, 0.3, col3('#8a5a36'));
-  const cv = document.createElement('canvas'); cv.width = 768; cv.height = 192; const g = cv.getContext('2d');
-  g.fillStyle = '#1b1b1b'; g.fillRect(0, 0, 768, 192);
-  for (let i = 0; i < 3; i++) { g.fillStyle = '#2d2d2d'; g.fillRect(268 + i * 166, 20, 150, 150); g.fillStyle = '#f2f2f2'; for (let k = 0; k < 6; k++) g.fillRect(280 + i * 166, 40 + k * 22, 90 + (k * 37 % 40), 6); }
-  g.fillStyle = '#dd0033'; g.fillRect(0, 0, 250, 192); g.fillStyle = '#fff'; g.font = 'italic 700 46px Georgia, serif'; g.textAlign = 'center'; g.fillText('Chick-fil-A', 125, 110);
-  const st = new THREE.CanvasTexture(cv); st.colorSpace = THREE.SRGBColorSpace;
-  const sm = new THREE.Mesh(new THREE.PlaneGeometry(10, 2.5), new THREE.MeshBasicMaterial({ map: st, side: THREE.DoubleSide }));
-  const [sx, sz] = W(10, 20.42); sm.position.set(sx, fy + 2.4, sz); sm.rotation.y = -th; scene.add(sm);
+  // Chick-fil-A servery (u 0..20, v 0..22). Counter, staff zone, door route and queue slots are fixed by the game logic.
+  {
+    const gl = new Buf(), ss = col3('#b9bec2'), blk = col3('#2b2e31'), red = col3('#c8102e'), wht = col3('#f2f2f2'), pcol = col3('#6f685f');
+    const pants = col3('#15171a'), polo = col3('#d0202e'), skin = col3('#e0b48c'), hair = col3('#2b1d14');
+    // the six new canvases: subway tile, stainless mosaic, menu boards, sign atlas, CFA logo and CARES plaques
+    const subway = cfaTex(256, 128, g => { g.fillStyle = '#cfcac0'; g.fillRect(0, 0, 256, 128); for (let r = 0; r < 4; r++) for (let c = -1; c < 4; c++) { g.fillStyle = (r + c) & 1 ? '#f4f2ec' : '#efede6'; g.fillRect(c * 64 + (r & 1) * 32 + 1.5, r * 32 + 1.5, 61, 29); } });
+    subway.wrapS = subway.wrapT = THREE.RepeatWrapping;
+    const mosaic = cfaTex(128, 128, g => { g.fillStyle = '#6d7478'; g.fillRect(0, 0, 128, 128); const C = ['#a8adb1', '#c4c8cb', '#9aa0a5', '#b9bec2']; for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { g.fillStyle = C[(x * 3 + y * 5 + x * y) % 4]; g.fillRect(x * 8 + 1, y * 8 + 1, 6, 6); } });
+    mosaic.wrapS = mosaic.wrapT = THREE.RepeatWrapping;
+    const menu = cfaTex(2140, 160, g => {   // four backlit boards, 2.6 m x 0.8 m each, 0.1 m black bezels between
+      g.fillStyle = '#0d0d0d'; g.fillRect(0, 0, 2140, 160); g.textBaseline = 'middle'; g.textAlign = 'left';
+      const titles = ['Meals & Entrées', 'Chicken', 'Salads', 'Drinks · Treats'], tints = ['#d7a86e', '#c98a4b', '#5f9e3c'], cups = ['#e77a9a', '#f3d24a', '#7a4a2a', '#8bc34a'];
+      titles.forEach((t, i) => {
+        const x0 = i * 540;
+        g.fillStyle = '#fbfbf8'; g.fillRect(x0, 0, 520, 160);
+        g.fillStyle = '#9e1b22'; g.font = 'bold 32px "Barlow Semi Condensed", Arial, sans-serif'; g.fillText(t, x0 + 18, 28, 484); g.fillRect(x0 + 18, 50, 484, 3);
+        for (let k = 0; k < 4; k++) {
+          const y = 74 + k * 24;
+          if (i === 3) { g.fillStyle = cups[k]; g.beginPath(); g.moveTo(x0 + 20, y - 9); g.lineTo(x0 + 40, y - 9); g.lineTo(x0 + 37, y + 9); g.lineTo(x0 + 23, y + 9); g.fill(); }
+          else if (i === 1) { g.fillStyle = tints[1]; g.fillRect(x0 + 22, y - 8, 16, 16); }
+          else { g.fillStyle = tints[i === 0 ? 0 : 2]; g.beginPath(); g.arc(x0 + 30, y, 9, 0, Math.PI * 2); g.fill(); }
+          g.fillStyle = '#8a9096'; g.fillRect(x0 + 54, y - 5, 150 + ((k * 61 + i * 37) % 120), 10);
+          g.fillStyle = '#b5bbc0'; g.fillRect(x0 + 452, y - 5, 40, 10);
+        }
+      });
+    });
+    const atlas = cfaTex(1024, 512, g => {   // Pick Up sign (0,0), temporary-hours sign (0,130), modified-hours card (320,130), script logo (610,0)
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = '#c8102e'; g.fillRect(0, 0, 520, 120); g.fillStyle = '#fff'; g.font = 'bold 84px Arial, sans-serif'; g.fillText('Pick Up', 260, 60, 480);
+      g.fillStyle = '#fff'; g.fillRect(0, 130, 300, 382); g.fillStyle = '#e51636'; g.fillRect(0, 262, 300, 250);
+      g.font = 'italic 700 46px Georgia, serif'; g.fillText('Chick-fil-A', 150, 196, 280);
+      g.fillStyle = '#fff'; g.font = 'bold 30px Arial, sans-serif'; g.fillText('TEMPORARY', 150, 300, 280); g.fillText('HOURS IN EFFECT', 150, 338, 280); g.fillRect(40, 354, 220, 3);
+      g.font = 'bold 44px Arial, sans-serif'; g.fillText('MON – SAT', 150, 406, 280); g.fillText('10 AM – 6 PM', 150, 462, 280);
+      g.fillStyle = '#fff'; g.fillRect(320, 130, 280, 200); g.strokeStyle = '#c8102e'; g.lineWidth = 6; g.strokeRect(326, 136, 268, 188);
+      g.fillStyle = '#c8102e'; g.font = 'bold 40px Arial, sans-serif'; g.fillText('Modified Hours', 460, 200, 260);
+      g.fillStyle = '#333'; g.font = 'bold 30px Arial, sans-serif'; g.fillText('Mon–Sat', 460, 256, 260); g.fillText('10 AM – 6 PM', 460, 294, 260);
+      g.fillStyle = '#e51636'; g.font = 'italic 700 70px Georgia, serif'; g.fillText('Chick-fil-A', 812, 65, 390);
+    });
+    const plaques = cfaTex(1024, 512, g => {   // CFA chicken-head C on dark (0,0); CARES plaque (512,0)
+      g.fillStyle = '#2b2b2b'; g.fillRect(0, 0, 512, 512);
+      g.strokeStyle = '#f3ead7'; g.fillStyle = '#f3ead7'; g.lineWidth = 58; g.lineCap = 'round';
+      g.beginPath(); g.arc(250, 290, 120, 0.8, Math.PI * 2 - 0.8); g.stroke();
+      for (const [x, y, r] of [[214, 136, 26], [250, 112, 28], [288, 132, 24]]) { g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill(); }
+      g.fillStyle = '#f5f1e6'; g.fillRect(512, 0, 512, 256); g.fillStyle = '#c8102e'; g.fillRect(512, 0, 512, 22); g.fillRect(512, 234, 512, 22);
+      g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = '#2b2b2b'; g.font = 'bold 120px Georgia, serif'; g.fillText('CARES', 768, 118, 460);
+      g.fillStyle = '#c8102e'; g.font = 'italic 600 40px Georgia, serif'; g.fillText('Chick-fil-A', 768, 196, 440);
+    });
+
+    // counter: plinth, taupe shaker cabinet with recessed panel outlines, white quartz top (top at fy + 1.1, 5 cm overhang)
+    box(10, 17.2, fy, 12, 0.12, 1.0, col3('#5d574f'));
+    box(10, 17.2, fy + 0.12, 12, 0.94, 1.0, col3('#8c8479'));
+    for (let k = 0; k < 8; k++) { const u0 = 4.1 + k * 1.5, u1 = u0 + 1.3, uc = (u0 + u1) / 2; box(u0, 16.68, fy + 0.25, 0.03, 0.66, 0.03, pcol); box(u1, 16.68, fy + 0.25, 0.03, 0.66, 0.03, pcol); box(uc, 16.68, fy + 0.25, 1.33, 0.03, 0.03, pcol); box(uc, 16.68, fy + 0.88, 1.33, 0.03, 0.03, pcol); }
+    box(10, 17.2, fy + 1.06, 12.1, 0.04, 1.1, col3('#f2f0ea'));
+    addCollider([rect(4, 16, 16.7, 17.7)], fy + 1.1);
+
+    // counter top: two stainless coffee urns, straw caddies, lemonade dispenser, Modified-hours card, three POS registers
+    for (const u of [5.3, 6.7]) { box(u, 17.15, fy + 1.1, 0.42, 0.75, 0.42, ss); box(u, 17.15, fy + 1.85, 0.44, 0.05, 0.44, blk); box(u, 16.9, fy + 1.2, 0.08, 0.08, 0.06, blk); }
+    for (const u of [4.5, 12.1]) { box(u, 16.95, fy + 1.1, 0.2, 0.16, 0.2, ss); for (let k = 0; k < 4; k++) box(u + (k & 1 ? 0.012 : -0.012), 16.95, fy + 1.26 + k * 0.045, 0.17, 0.045, 0.17, k & 1 ? wht : red); }
+    box(15, 17.1, fy + 1.1, 1.3, 0.2, 0.55, ss);
+    for (const u of [14.7, 15.3]) { box(u, 17.1, fy + 1.3, 0.5, 0.55, 0.45, col3('#f3d24a')); box(u, 17.1, fy + 1.85, 0.52, 0.04, 0.47, blk); }
+    plane(0.36, 0.26, new THREE.MeshLambertMaterial({ map: region(atlas, 320, 130, 280, 200) }), 9.55, 17.05, fy + 1.23, faceNV);
+    for (const u of [8.2, 10.9, 13.4]) {
+      box(u, 17.25, fy + 1.1, 0.4, 0.14, 0.3, blk);
+      const [x0, z0] = W(u - 0.17, 17.1), [x1, z1] = W(u + 0.17, 17.1), [x2, z2] = W(u + 0.17, 17.36), [x3, z3] = W(u - 0.17, 17.36);
+      gl.quad([x0, fy + 1.24, z0], [x1, fy + 1.24, z1], [x2, fy + 1.52, z2], [x3, fy + 1.52, z3], [0, 0], [1, 0], [1, 1], [0, 1], col3('#4fc9b8'));   // tilted screen, unlit
+    }
+
+    // back wall (v 20.6): taupe base, subway tile under the soffit, stainless mosaic band, kitchen pass-through with warmer rack and glow
+    box(10, 20.6, fy, 12, 3.8, 0.3, col3('#8c8479'));
+    plane(12, 0.65, new THREE.MeshLambertMaterial({ map: rep(subway, 20, 2.17) }), 10, 20.47, fy + 2.425, faceNV);
+    plane(12, 1.1, new THREE.MeshLambertMaterial({ map: rep(mosaic, 30, 2.75) }), 10, 20.47, fy + 1.55, faceNV);
+    box(10, 20.465, fy + 1.15, 2.8, 0.85, 0.05, col3('#1d1a18'));
+    box(10, 20.42, fy + 1.17, 2.5, 0.05, 0.02, col3('#ffb46b'), gl);
+    for (const y of [1.5, 1.85]) box(10, 20.36, fy + y, 2.5, 0.04, 0.14, ss);
+    for (const u of [8.9, 11.1]) box(u, 20.36, fy + 1.15, 0.05, 0.85, 0.05, ss);
+
+    // red soffit with four backlit menu boards on its front face
+    box(10, 20.25, fy + 2.75, 12, 1.05, 0.7, col3('#9e1b22'));
+    plane(10.7, 0.8, new THREE.MeshBasicMaterial({ map: menu }), 10, 19.87, fy + 2.85, faceNV);
+
+    // "Pick Up" sign: red box on a rod from the drop ceiling, text on both faces
+    box(14.5, 17.2, fy + 3.2, 0.03, 0.6, 0.03, iron);
+    box(14.5, 17.2, fy + 2.6, 2.6, 0.6, 0.12, red);
+    plane(2.5, 0.58, new THREE.MeshLambertMaterial({ map: region(atlas, 0, 0, 520, 120) }), 14.5, 17.13, fy + 2.9, faceNV);
+    plane(2.5, 0.58, new THREE.MeshLambertMaterial({ map: region(atlas, 0, 0, 520, 120) }), 14.5, 17.27, fy + 2.9, faceV);
+
+    // three static staff behind the counter (no colliders), facing the counter
+    for (const u of [7, 10.5, 13]) {
+      const v = 19.6;
+      box(u - 0.11, v, fy, 0.2, 0.8, 0.22, pants); box(u + 0.11, v, fy, 0.2, 0.8, 0.22, pants);
+      box(u, v, fy + 0.8, 0.5, 0.7, 0.3, polo);
+      box(u - 0.35, v, fy + 0.9, 0.14, 0.6, 0.14, polo); box(u + 0.35, v, fy + 0.9, 0.14, 0.6, 0.14, polo);
+      box(u, v, fy + 1.5, 0.26, 0.26, 0.26, skin);
+      box(u, v, fy + 1.73, 0.28, 0.06, 0.28, hair); box(u, v - 0.15, fy + 1.66, 0.26, 0.05, 0.1, hair);
+    }
+
+    // queue rails: two stanchion runs alongside the queue lane (u 10, slots v 12.6..15.9), 1 m posts, oak handrails, thin colliders
+    for (const u of [9.1, 10.9]) {
+      for (const v of [12, 13, 14, 15, 15.4]) box(u, v, fy, 0.05, 1.0, 0.05, iron);
+      box(u, 13.7, fy + 0.45, 0.04, 0.04, 3.4, iron);
+      box(u, 13.7, fy + 0.98, 0.09, 0.06, 3.4, col3('#b07a45'));
+      addCollider([rect(u - 0.06, u + 0.06, 12, 15.4)], fy + 1.05);
+    }
+
+    // solid bits by the open ends: trash bin at the east end, napkin and utensil station at the west end
+    box(17.1, 16.1, fy, 0.6, 1.0, 0.6, col3('#8d9296'));
+    box(17.1, 16.1, fy + 1.0, 0.64, 0.05, 0.64, col3('#3a3d40'));
+    addCollider([rect(16.8, 17.4, 15.8, 16.4)], fy + 1.05);
+    box(3, 14, fy, 0.6, 0.55, 0.45, blk); box(3, 14, fy + 0.55, 0.55, 0.3, 0.4, blk);
+    box(2.8, 14, fy + 0.85, 0.22, 0.2, 0.3, wht); box(3.2, 14, fy + 0.85, 0.22, 0.14, 0.3, col3('#e8e8e8'));
+    addCollider([rect(2.7, 3.3, 13.7, 14.3)], fy + 1.0);
+
+    // entrance (door at u 12, v 0): subway tile either side of the door, glowing script sign, temporary-hours sign on a black stand
+    plane(4.4, 3, new THREE.MeshLambertMaterial({ map: rep(subway, 4.4 / 0.6, 10) }), 8.4, 0.34, fy + 1.5, faceV);
+    plane(6.4, 3, new THREE.MeshLambertMaterial({ map: rep(subway, 6.4 / 0.6, 10) }), 16.6, 0.34, fy + 1.5, faceV);
+    plane(2, 0.65, new THREE.MeshBasicMaterial({ map: region(atlas, 610, 0, 404, 130), transparent: true }), 16, 0.42, fy + 2.5, faceV);
+    box(15.2, 1.26, fy, 0.9, 0.03, 0.5, blk); box(15.2, 1.26, fy + 0.03, 0.05, 0.77, 0.05, blk);
+    box(15.2, 1.26, fy + 0.8, 0.86, 1.06, 0.04, blk);
+    plane(0.8, 1.02, new THREE.MeshLambertMaterial({ map: region(atlas, 0, 130, 300, 382) }), 15.2, 1.22, fy + 1.31, faceNV);
+
+    // feature wall on the west end wall (u 0), v 9..17: reclaimed-wood planks, CFA logo plaque, framed CARES plaque, black award
+    const wood4 = [col3('#8a6440'), col3('#a27a4f'), col3('#6e4f33'), col3('#b88a5a')];
+    for (let i = 0; i < 33; i++) box(0.36, 9.12 + i * 0.24, fy, 0.14, 3.2, 0.235, wood4[(i * 3 + (i >> 2)) % 4]);
+    plane(1.1, 1.1, new THREE.MeshLambertMaterial({ map: region(plaques, 0, 0, 512, 512) }), 0.47, 13, fy + 2.1, faceU);
+    box(0.44, 10.2, fy + 1.3, 0.06, 0.5, 0.86, col3('#3d2a1b'));
+    plane(0.8, 0.4, new THREE.MeshLambertMaterial({ map: region(plaques, 512, 0, 512, 256) }), 0.48, 10.2, fy + 1.55, faceU);
+    box(0.44, 15.8, fy + 1.9, 0.06, 0.6, 0.46, col3('#111111'));
+    box(0.48, 15.8, fy + 2.0, 0.02, 0.4, 0.3, col3('#e9e2cf'));
+
+    // ceiling: eight glowing panels just under the drop ceiling, four small downlights; one extra light over the staff zone
+    for (const u of [4, 8.5, 13, 17.5]) for (const v of [5.5, 11.5]) box(u, v, fy + 3.77, 2.0, 0.02, 1.2, col3('#fffdf5'), gl);
+    for (const [u, v] of [[2.2, 8.5], [19, 8.5], [6.5, 2], [13.5, 2]]) box(u, v, fy + 3.77, 0.22, 0.02, 0.22, col3('#fffdf5'), gl);
+    const gm = gl.mesh(new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide })); gm.castShadow = gm.receiveShadow = false; scene.add(gm);
+    { const [x, z] = W(10, 19); const l = new THREE.PointLight(0xfff1dc, 3, 20, 1); l.position.set(x, fy + 3.1, z); scene.add(l); interiorLights.push(l); }
+  }
   for (let u = 29; u < L - 3; u += 3.4) for (let v = 3.5; v < 19; v += 3.6) {
     if (Math.abs(v - 11) < 2.4 && u < s1 + 1.5) continue;
     box(u, v, fy, 0.12, 0.74, 0.12, iron); box(u, v, fy + 0.74, 1.0, 0.05, 1.0, col3('#3a2a1e'));
@@ -2043,15 +2185,17 @@ canvas.addEventListener('click', () => {
   else if (!Vehicles.player) Vehicles.tryEnter();
 });
 let drag = null;
-canvas.addEventListener('mousedown', e => { if (!locked()) drag = [e.clientX, e.clientY]; });
+canvas.addEventListener('mousedown', e => { setPadMode(false); if (!locked()) drag = [e.clientX, e.clientY]; });
 addEventListener('mouseup', () => drag = null);
 addEventListener('mousemove', e => {
+  if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) setPadMode(false);
   if (!started || mapOpen || newsOpen) return;
   let dx = 0, dy = 0;
   if (locked()) { dx = e.movementX; dy = e.movementY; } else if (drag) { dx = e.clientX - drag[0]; dy = e.clientY - drag[1]; drag = [e.clientX, e.clientY]; } else return;
   yaw -= dx * 0.0022; pitch = Math.max(-1.55, Math.min(1.55, pitch - dy * 0.0022));
 });
 addEventListener('keydown', e => {
+  setPadMode(false);
   if (!started) return;
   if (newsOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeNews(); } return; }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
@@ -2084,16 +2228,35 @@ addEventListener('blur', () => keys.clear());
 function toggleFly() {
   if (!flying && Bank.wanted) { toast('No flying while the police are after you', 'bad'); return; }
   flying = !flying; V.set(0, 0, 0); $('mode').textContent = flying ? 'FLY' : 'WALK'; }
+// map cursor: fx/fz are 0..1 across the map (the same numbers a mouse click gives); the controller moves it
+const mapCur = { fx: 0.5, fz: 0.5 };
+function placePadCur() { const c = $('bigmap'), w = $('mapwrap'), r = c.getBoundingClientRect(), q = w.getBoundingClientRect(), el = $('padcur'); el.style.left = (r.left - q.left + mapCur.fx * r.width) + 'px'; el.style.top = (r.top - q.top + mapCur.fz * r.height) + 'px'; }
 function toggleMap(force) {
   mapOpen = force ?? !mapOpen; $('map').hidden = !mapOpen;
-  if (mapOpen) { if (locked()) document.exitPointerLock(); drawBigMap(); }
+  if (mapOpen) { if (locked()) document.exitPointerLock(); drawBigMap();
+    mapCur.fx = Math.max(0, Math.min(1, (P.x + W / 2) / W)); mapCur.fz = Math.max(0, Math.min(1, (P.z + H / 2) / H));
+    $('padcur').hidden = !usingPad; placePadCur(); }
 }
-$('bigmap').addEventListener('click', e => {
-  const r = e.target.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width * W - W / 2, z = (e.clientY - r.top) / r.height * H - H / 2;
+function mapTeleport(fx, fz) {
+  const x = fx * W - W / 2, z = fz * H - H / 2;
   if (Bank.wanted) { toast('No teleporting while the police are after you', 'bad'); return; }
   teleport(x, z); toggleMap(false);
-});
+}
+$('bigmap').addEventListener('click', e => { const r = e.target.getBoundingClientRect(); mapTeleport((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height); });
 $('map').addEventListener('click', e => { if (e.target.id === 'map' || e.target.id === 'mapwrap') toggleMap(false); });
+// fullscreen: the ⛶ chip, or the controller's Menu button (pad presses may be refused without a user gesture, so that case says so)
+function fsToggle(fromPad) {
+  const fail = () => { if (fromPad) toast('Press the ⛶ button for fullscreen', 'info'); };
+  try { const p = document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen({ navigationUI: 'hide' }); if (p && p.catch) p.catch(fail); }
+  catch (e) { fail(); }
+}
+function syncFsBtn() {
+  const el = $('fsbtn'), on = !!document.fullscreenElement;
+  el.hidden = !started || !document.fullscreenEnabled; el.textContent = on ? '⤡' : '⛶';
+  el.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Enter fullscreen'); el.title = on ? 'Exit fullscreen' : 'Fullscreen';
+}
+$('fsbtn').addEventListener('click', () => fsToggle(false));
+document.addEventListener('fullscreenchange', syncFsBtn);
 // touch
 const joy = { x: 0, y: 0 }; let touchUp = false, joyId = null, lookId = null, lookLast = null;
 const isTouch = matchMedia('(pointer: coarse)').matches;
@@ -2111,6 +2274,19 @@ $('tUse').addEventListener('click', () => { if (Vehicles.player) Vehicles.toggle
 $('tSiren').addEventListener('click', () => { Vehicles.siren = !Vehicles.siren; Vehicles.lights = Vehicles.siren; }); $('tMap').addEventListener('click', () => toggleMap());
 
 /* ---------------- Xbox / standard gamepad (Gamepad API) ---------------- */
+// which input the player used last: hints show Xbox buttons after a controller, keys after a keyboard or mouse
+let usingPad = false;
+const XB = n => `<kbd class="xb xb-${{ A: 'a', B: 'b', X: 'x', Y: 'y' }[n] || 'n'}">${n}</kbd>`;
+const KB = (key, pad) => usingPad ? XB(pad) : `<kbd>${key}</kbd>`;
+const USE = () => usingPad ? XB('X') : '<kbd>E</kbd> or click';   // the "use" action in hints
+const KEY_KEYS_HTML = $('keys').innerHTML;
+const PAD_KEYS_HTML = `<span>${XB('LS')}move</span><span>${XB('RS')}look</span><span>${XB('LB')}run</span><span>${XB('A')}jump (double-tap: fly)</span><span>${XB('Y')}fly</span><span>${XB('View')}map</span><span>${XB('↓')}time of day</span><span>${XB('↑')}labels</span><span>${XB('X')}serve / get in a car</span><span>${XB('Menu')}fullscreen</span>`;
+function setPadMode(on) {
+  if (on === usingPad) return; usingPad = on; document.body.classList.toggle('pad', on);
+  $('keys').innerHTML = on ? PAD_KEYS_HTML : KEY_KEYS_HTML;
+  $('maphelp').textContent = on ? 'Left stick to aim · A to teleport · B to close' : 'Click to teleport · M or Esc to close';
+  $('padcur').hidden = !(on && mapOpen); if (on && mapOpen) placePadCur();
+}
 const Pad = {
   x: 0, y: 0, lx: 0, ly: 0, held: new Set(), prev: [], connected: false,
   dz: v => Math.abs(v) < 0.15 ? 0 : Math.sign(v) * (Math.abs(v) - 0.15) / 0.85,
@@ -2118,18 +2294,28 @@ const Pad = {
   poll(dt) {
     const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g && g.connected);
     const b = i => !!(gp && gp.buttons[i] && gp.buttons[i].pressed), prev = this.prev, down = i => b(i) && !prev[i];
+    if (gp && (gp.buttons.some(x => x.pressed) || gp.axes.some(a => Math.abs(a) > 0.3))) setPadMode(true);
     this.prev = gp ? gp.buttons.map(x => x.pressed) : [];
     this.x = this.y = this.lx = this.ly = 0;
     if (!gp) { this.sync(new Set()); return; }
     if (!started) { if (down(0) || down(9)) $('go').click(); this.sync(new Set()); return; }
     if (newsOpen) { if (down(0) || down(1) || down(9)) closeNews(); this.sync(new Set()); return; }
-    if (mapOpen) { if (down(8) || down(1)) toggleMap(false); this.sync(new Set()); return; }
+    if (mapOpen) {
+      const mx = this.dz(gp.axes[0] || 0) + this.dz(gp.axes[2] || 0) + (b(15) ? 1 : 0) - (b(14) ? 1 : 0), mz = this.dz(gp.axes[1] || 0) + this.dz(gp.axes[3] || 0) + (b(13) ? 1 : 0) - (b(12) ? 1 : 0);
+      const sp = 0.45 * dt * (b(4) || b(5) ? 2.2 : 1);   // fraction of the map per second; hold LB/RB for faster
+      mapCur.fx = Math.max(0, Math.min(1, mapCur.fx + mx * sp)); mapCur.fz = Math.max(0, Math.min(1, mapCur.fz + mz * sp));
+      if (usingPad) { $('padcur').hidden = false; placePadCur(); }
+      if (down(0)) mapTeleport(mapCur.fx, mapCur.fz);
+      else if (down(8) || down(1)) toggleMap(false);
+      this.sync(new Set()); return;
+    }
+    if (down(9)) fsToggle(true);
     const ax = this.dz(gp.axes[0] || 0), ay = this.dz(gp.axes[1] || 0), rx = this.dz(gp.axes[2] || 0), ry = this.dz(gp.axes[3] || 0);
     this.lx = ax; this.ly = ay;
     yaw -= Math.sign(rx) * rx * rx * 3.0 * dt; pitch = Math.max(-1.55, Math.min(1.55, pitch - Math.sign(ry) * ry * ry * 2.2 * dt));
     const want = new Set();
     if (Vehicles.player) {   // driving: RT gas, LT brake/reverse, A handbrake
-      this.x = ax; this.y = (gp.buttons[7]?.value || 0) - (gp.buttons[6]?.value || 0);
+      this.lastA = 0; this.x = ax; this.y = (gp.buttons[7]?.value || 0) - (gp.buttons[6]?.value || 0);
       if (b(0)) want.add('Space');
       if (down(1) || down(2)) onKey('KeyE', false, true);
       if (down(3)) onKey('KeyV', false, true);
@@ -2143,6 +2329,7 @@ const Pad = {
       if (b(4) || b(10)) want.add('ShiftLeft');
       if (down(2)) onKey('KeyE', false, true);
       if (down(3)) onKey('KeyF', false, true);
+      if (down(0)) { const t = performance.now(); if (t - (this.lastA || 0) < 300) { onKey('KeyF', false, true); this.lastA = 0; } else this.lastA = t; }   // double-tap A flies (A still jumps)
       if (down(8)) onKey('KeyM', false, true);
       if (down(12)) onKey('KeyL', false, true);
       if (down(13)) onKey('KeyN', false, true);
@@ -2211,7 +2398,7 @@ function setHint(html) { if (html === hintText) return; hintText = html; $('hint
 const UPDATE_NOTES = {
   title: 'Jobs, cars, traffic & a bank job',
   items: [
-    ['🎮', 'Xbox controller support', 'Plug in or pair a controller. Left stick moves, right stick looks, A jumps, LB runs, X uses (serve, smash, get in), Y flies, View opens the map. Driving: RT gas, LT brake/reverse, A handbrake, Y camera, X exit, RB siren, LB lights.'],
+    ['🎮', 'Xbox controller support', 'Plug in or pair a controller. Left stick moves, right stick looks, A jumps (double-tap A to fly), LB runs, X uses (serve, smash, get in), Y flies, View opens the map, Menu goes fullscreen. Driving: RT gas, LT brake/reverse, A handbrake, Y camera, X exit, RB siren, LB lights.'],
     ['💵', 'Money & jobs', 'You now carry cash (top right). Earn it, spend it, and keep out of the red: ten minutes in debt and you start over.'],
     ['🥪', 'Work the Chick-fil-A counter', 'Step behind the counter in Breen Student Union to start a shift. Hand customers a sandwich with E or a click for $1 each. Make them wait too long and they leave unhappy.'],
     ['🚗', 'Rent any car', 'Look at a parked car and press E (or click) to rent it: $5 up front, then $5 for every started minute. W/S drive, A/D steer, Space brakes, V swaps the driver\'s seat for a top-down view, E gets you out and the car stays where you left it, for everyone.'],
@@ -2444,7 +2631,7 @@ function updateCFA(now) {
   if (CFA.onShift) {
     const pp = CFA.queue[0], ready = pp && pp.cfa.stage === 'queue' && pp.cfa.at;
     const wait = ready ? Math.max(0, Math.ceil(CFA.PATIENCE - (now / 1000 - pp.cfa.at))) : 0;
-    setHint(H ? 'Here you go!' : ready ? `Customer at the register · <kbd>E</kbd> or click to hand a sandwich · ${wait}s` : `On shift at Chick-fil-A · ${CFA.queue.length ? CFA.queue.length + ' on the way' : 'waiting for customers'} · ${money(CFA.PAY)} a sandwich`);
+    setHint(H ? 'Here you go!' : ready ? `Customer at the register · ${USE()} to hand a sandwich · ${wait}s` : `On shift at Chick-fil-A · ${CFA.queue.length ? CFA.queue.length + ' on the way' : 'waiting for customers'} · ${money(CFA.PAY)} a sandwich`);
     // keep a trickle coming: bring in a walker from out of sight, about one every 7 s, while the line is short
     if (now > CFA.nextPull && CFA.queue.length < 2 && CFA.nearStarts.length) {
       CFA.nextPull = now + 5000 + Math.random() * 4000;
@@ -2776,7 +2963,7 @@ const Vehicles = {
     if (this.rental) { const s = Math.floor((Date.now() - this.rental.t0) / 1000); line = `RENTAL ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} · ${money(this.rental.paid * 5)} · $5 per started minute`; }
     $('dspd').textContent = sp; $('dspd').classList.toggle('over', over && !c.cop);
     $('dinfo').textContent = this.frozen ? 'PULLED OVER · ' + this.frozen : line;
-    $('dkeys').innerHTML = isTouch ? '' : `<kbd>E</kbd>exit <kbd>V</kbd>${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ' <kbd>H</kbd>siren <kbd>L</kbd>lights' : ''} <kbd>Space</kbd>brake`;
+    $('dkeys').innerHTML = isTouch ? '' : `${KB('E', 'B')}exit ${KB('V', 'Y')}${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ` ${KB('H', 'RB')}siren ${KB('L', 'LB')}lights` : ''} ${KB('Space', 'A')}brake${usingPad ? ` ${XB('RT')}gas ${XB('LT')}brake/reverse` : ''}`;
   },
   toggleCam() { this.cam = this.cam === 'cab' ? 'chase' : 'cab'; pitch = this.cam === 'cab' ? -.05 : .1; },
   /* ---- per frame: NPCs, walkers in the way, prompts, pull-overs by a player cop ---- */
@@ -2807,7 +2994,7 @@ const Vehicles = {
     if (!this.player) this.pushPlayer();
     // prompt
     this.lookCar = started ? this.look() : null; const lc = this.lookCar;
-    carHint = lc ? (lc.cop ? `Police car · <kbd>E</kbd> or click to drive it on patrol (free)` : Profile.canAfford(5) ? `<kbd>E</kbd> or click: Rent for $5/min (charged per started minute)` : `Rent for $5/min · you need at least $5`) : '';
+    carHint = lc ? (lc.cop ? `Police car · ${USE()} to drive it on patrol (free)` : Profile.canAfford(5) ? `${USE()}: Rent for $5/min (charged per started minute)` : `Rent for $5/min · you need at least $5`) : '';
     if (this.player && this.player.cop) this.copWork(dt, now, t);
     else if (this.offenders.length) { for (const s of this.offenders) s.visible = false; }
     this.updateGoal();
@@ -2851,7 +3038,7 @@ const Vehicles = {
     const pl = this.pull;
     if (!pl) {
       if (cand && this.siren) { this.pullCand = this.pullCand === cand ? cand : (this.pullT = 0, cand); this.pullT += dt; carHint = `Stay behind them with the siren on… ${Math.max(0, 3 - this.pullT).toFixed(1)}s`; if (this.pullT >= 3) this.startPull(cand, true); }
-      else if (cand) { carHint = 'Offender ahead · turn on the siren (<kbd>H</kbd>) and stay behind them to pull them over'; this.pullT = 0; }
+      else if (cand) { carHint = `Offender ahead · turn on the siren (${KB('H', 'RB')}) and stay behind them to pull them over`; this.pullT = 0; }
       else this.pullT = 0;
     } else {
       const c = pl.car, d = Math.hypot(c.x - me.x, c.z - me.z);
@@ -3140,7 +3327,7 @@ const Bank = {
     if (this.near()) {
       if (this.broken()) { const s = Math.max(0, Math.ceil((this.until - netNow()) / 1000)); return `The vault has been cleaned out · restocked in ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
       if (this.pending) return 'Cracking the vault…';
-      return `${isTouch ? 'Tap <kbd>USE</kbd>' : '<kbd>E</kbd> or click'} to smash the vault door · ${this.hits}/${VAULT_HITS}`;
+      return `${isTouch ? 'Tap <kbd>USE</kbd>' : USE()} to smash the vault door · ${this.hits}/${VAULT_HITS}`;
     }
     if (!this.wanted && !this.broken() && Math.abs(P.y - bank.fy) < 1.5 && pip(P.x, P.z, bank.b.p)) return 'PNC Bank · the vault is past the teller counter, through the back office';
     return '';
@@ -3429,7 +3616,7 @@ async function boot() {
 }
 $('go').addEventListener('click', () => {
   started = true; $('intro').hidden = true; speechOK = true; Rail.initAudio();
-  for (const id of ['where', 'mini', 'mode', 'cross', 'money']) $(id).hidden = false;
+  for (const id of ['where', 'mini', 'mode', 'cross', 'money']) $(id).hidden = false; syncFsBtn();
   if (kicked) { kicked = false; netOff = false; netRetries = 0; }
   connectNet();
   if (isTouch) $('touch').hidden = false; else $('keys').hidden = false;
