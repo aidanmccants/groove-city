@@ -3,8 +3,8 @@
   "name": "groove-city-college",
   "main": "src/worker.js",
   "compatibility_date": "2025-09-01",
-  // src/page.html is the built map page; the Worker imports it as text
-  "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": true }],
+  // public/ (built by build.mjs) holds the page and maps/*.js map data, served as static assets
+  "assets": { "directory": "./public", "binding": "ASSETS" },
   // one Durable Object instance ("campus") holds every connected visitor
   "durable_objects": {
     "bindings": [{ "name": "ROOM", "class_name": "MapRoom" }]

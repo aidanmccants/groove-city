@@ -1,6 +1,5 @@
 // Groove City College, multiplayer. The Worker serves the map page and relays
 // each visitor's position to everyone else through one Durable Object (the "room").
-import PAGE from './page.html';
 
 const MAX_PLAYERS = 40;     // one room; keeps the fan-out of position updates small
 const MIN_MOVE_MS = 60;     // ignore position updates arriving faster than this from one visitor
@@ -202,9 +201,7 @@ export default {
     if (url.pathname === '/ws') {
       return env.ROOM.get(env.ROOM.idFromName('campus')).fetch(request);
     }
-    if (url.pathname === '/' || url.pathname === '/index.html') {
-      return new Response(PAGE, { headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-cache' } });
-    }
-    return new Response('Not found', { status: 404 });
+    // the page and map data are static assets (public/), served before the Worker runs; this is the fallback
+    return env.ASSETS.fetch(request);
   },
 };

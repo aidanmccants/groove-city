@@ -74,6 +74,24 @@ A building is an entity:
 - `kind: 'house'` buildings can be bought. The owner is stored in D1, and the price can float.
 - Style builders (`brick-campus`, `classical`, `storefront`, `house`, `casino`, `gas-station` and so on) are small functions that take the footprint and options and return geometry.
 
+## Nodes and components (the world model)
+
+Everything in a map is a **node** in one tree, `World`:
+
+```js
+node = { id: 'gc:pnc-bank', kind: 'building', parent: 'map', children: [], x, y, z, rot, c: { building: {...}, interior: {...}, ownable: {...} } }
+```
+
+- **`World` methods:** `add(node)`, `get(id)`, `byKind(kind)`, `remove(id)`, `near(x, z, r)` (backed by a coarse spatial hash) and `update(dt)`.
+- **Components:** a component is plain data under `node.c[name]`, plus an optional behaviour registered once with `Components.define(name, { init, update, interact, sync })`.
+  - **Adding behaviour:** a new kind of thing means a new component, never a new special case in the engine.
+  - **Server state:** `sync: true` components are part of the room's state.
+- **Ids are stable strings.**
+  - A named building gets a slug (`gc:pnc-bank`). Every other building gets a position code, `gc:b<x>_<z>`: its centroid rounded to whole metres. That stays stable as long as the map data doesn't change, and the data pipeline will later add OSM way ids.
+  - Cars are `car:<n>`, NPCs `npc:<n>`, doors `<buildingId>/door<n>`.
+- **Overrides:** `client/maps/grove-city/buildings.js` maps an id to a patch of components. That's how a building is renamed, restyled, given an interior or put up for sale.
+- **Migration:** existing systems (Vehicles, Cops, CFA, Bank) keep their own objects for now. They're registered as nodes that point at those objects, so the tree is complete before they're moved onto components one by one.
+
 ## Accounts and attributes
 
 - **Storage:** D1 (SQLite).
