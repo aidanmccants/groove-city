@@ -5,6 +5,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Barlow+Semi+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script>if (matchMedia('(pointer: coarse)').matches) document.documentElement.classList.add('touch');</script>
 <style>
 /* Layout: full-bleed 3D viewport; HUD chips pinned to corners; one centered title card at start. */
 :root{
@@ -104,6 +105,68 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
 @keyframes toastfade{0%,80%{opacity:1}100%{opacity:0}}
 @media (max-width:640px){#mini{width:120px;height:120px}#keys{display:none}#where{max-width:calc(100vw - 160px)}#near{font-size:15px}#fsbtn{right:140px}}
 @media (prefers-reduced-motion: reduce){#bar i{transition:none}}
+/* ---- touch (html.touch is set by the head script for coarse pointers): phones in portrait and landscape ---- */
+html.touch{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--mini:120px;--R:calc(10px + var(--sr));--B:calc(12px + var(--sb))}
+@media (max-height:500px){html.touch{--mini:104px}html.touch #coords{display:none}}
+html.touch .chip:not(#fsbtn){pointer-events:none}
+/* top-left stack: location card, then mode and online chips */
+html.touch #where{top:calc(10px + var(--st));left:calc(10px + var(--sl));max-width:min(230px,calc(100vw - var(--mini) - 104px));padding:6px 10px;gap:1px}
+html.touch #where .brand{font-size:10px;letter-spacing:.05em}
+html.touch #near{font-size:14px}
+html.touch #coords{font-size:10px}
+html.touch #mode{top:calc(62px + var(--st));left:calc(10px + var(--sl));right:auto;bottom:auto;padding:4px 8px;font-size:10px}
+html.touch #online{top:calc(90px + var(--st));left:calc(10px + var(--sl));right:auto;bottom:auto;padding:4px 8px;font-size:11px;max-width:min(230px,calc(100vw - var(--mini) - 36px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* top-right stack: minimap, fullscreen left of it, money under it, toasts below */
+html.touch #mini{top:calc(10px + var(--st));right:var(--R);width:var(--mini);height:var(--mini)}
+html.touch #fsbtn{top:calc(10px + var(--st));right:calc(var(--R) + var(--mini) + 10px);width:44px;height:44px;font-size:18px;line-height:42px}
+html.touch #money{top:calc(10px + var(--st) + var(--mini) + 8px);right:var(--R);min-width:56px;padding:4px 10px}
+html.touch #cash{font-size:15px}
+html.touch #debt{font-size:10px}
+/* top-centre (landscape): wanted, then the debt goal banner, then toasts */
+html.touch #wanted{top:calc(10px + var(--st))}
+html.touch #goal{top:calc(80px + var(--st));left:50%;right:auto;transform:translateX(-50%);max-width:min(360px,calc(100vw - 500px))}
+html.touch #toasts{top:calc(152px + var(--st));left:50%;right:auto;transform:translateX(-50%);max-width:50vw;justify-items:center}
+html.touch #hint{bottom:calc(92px + var(--sb));max-width:50vw;font-size:14px}
+/* driving HUD: bottom-centre, between the joystick and the buttons */
+html.touch #drive{left:50%;right:auto;bottom:calc(12px + var(--sb));transform:translateX(-50%);min-width:0;width:max-content;max-width:min(300px,40vw);padding:6px 12px;text-align:center}
+html.touch #drive .spd{font-size:24px}
+html.touch #dinfo{font-size:12px}
+/* joystick (120 px: input.js hard-codes its centre) and the thumb cluster, bottom-right */
+html.touch #joy{left:calc(20px + var(--sl));bottom:var(--B)}
+html.touch .tbtn{width:56px;height:56px;font-size:10px;letter-spacing:.04em}
+html.touch .tbtn:active{background:rgba(140,29,47,.85)}
+html.touch #tJump{width:76px;height:76px;font-size:12px;right:var(--R);bottom:var(--B)}
+html.touch #tUse{width:62px;height:62px;right:calc(var(--R) + 63px);bottom:calc(var(--B) + 81px)}
+html.touch #tFly{right:calc(var(--R) + 84px);bottom:calc(var(--B) + 10px)}
+html.touch #tSiren{right:calc(var(--R) + 133px);bottom:calc(var(--B) + 84px)}
+html.touch #tMap{width:44px;height:44px;font-size:9px;right:calc(var(--R) + 72px);bottom:calc(var(--B) + 151px)}
+/* safe areas for the full-screen overlays */
+html.touch #map{padding:calc(12px + var(--st)) calc(12px + var(--sr)) calc(12px + var(--sb)) calc(12px + var(--sl))}
+html.touch #intro{padding:12px calc(16px + var(--sr)) 12px calc(16px + var(--sl))}
+/* intro card: scrolls inside the screen; ENTER sits in a sticky footer */
+html.touch #intro .card{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;padding:20px 22px 0;gap:12px}
+html.touch #intro .foot{position:sticky;bottom:0;z-index:1;gap:10px;margin:0 -22px;padding:12px 22px calc(16px + var(--sb));background:rgba(24,21,19,.98);border-top:1px solid var(--hud-line)}
+html.touch #go,html.touch #newsOk{min-height:46px}
+html.touch .ctl-kbm{display:none}
+html.touch .ctl-touch{display:grid}
+.ctl-touch{display:none}
+.foot{display:grid;gap:14px}
+@media (max-height:500px) and (min-width:600px){
+  html.touch #intro .card{width:min(700px,100%);grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 24px;padding:14px 20px 0}
+  html.touch #intro h1{grid-column:1;grid-row:1;font-size:24px}
+  html.touch #intro .card > p{grid-column:1;grid-row:2;font-size:13px;line-height:1.4}
+  html.touch #intro .ctl-touch{grid-column:2;grid-row:1 / span 2;align-self:start;font-size:13px;gap:5px 10px}
+  html.touch #intro .foot{grid-column:1 / -1;grid-row:3;margin:0 -20px;padding:10px 20px calc(12px + var(--sb))}
+}
+@media (orientation:portrait){
+  html.touch #mode{top:calc(80px + var(--st))}
+  html.touch #online{top:calc(108px + var(--st))}
+  html.touch #wanted{top:calc(188px + var(--st))}
+  html.touch #goal{top:calc(250px + var(--st));left:10px;right:10px;transform:none;max-width:none}
+  html.touch #toasts{top:calc(326px + var(--st));left:auto;right:var(--R);transform:none;max-width:60vw;justify-items:end}
+  html.touch #hint{bottom:calc(270px + var(--sb));max-width:calc(100vw - 24px)}
+  html.touch #drive{left:10px;right:auto;bottom:calc(150px + var(--sb));transform:none;width:170px;max-width:none;text-align:left}
+}
 </style>
 
 </head><body>
@@ -111,7 +174,7 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
 <div id="cross" hidden></div>
 <div id="where" class="chip" hidden><div class="brand">GROOVE CITY <b>COLLEGE</b></div><div id="near">Upper campus</div><div id="coords">—</div></div>
 <div id="mini" class="chip" hidden><canvas id="minic" width="360" height="360"></canvas><div id="heading">N</div></div>
-<div id="keys" class="chip" hidden><span><kbd>WASD</kbd>walk</span><span><kbd>Shift</kbd>run</span><span><kbd>Space</kbd>jump</span><span><kbd>F</kbd>fly</span><span><kbd>M</kbd>map</span><span><kbd>N</kbd>time of day</span><span><kbd>L</kbd>labels</span><span><kbd>E</kbd>serve / get in a car</span><span><kbd>Esc</kbd>free mouse</span></div>
+<div id="keys" class="chip" hidden></div>
 <div id="mode" class="chip" hidden>WALK</div>
 <div id="online" class="chip" hidden></div>
 <div id="money" class="chip" hidden aria-live="polite"><span id="cash">$0</span><span id="debt" hidden></span></div>
@@ -123,17 +186,17 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
 <div id="drive" class="chip" hidden aria-live="off"><div class="spd"><span id="dspd">0</span><small>MPH</small></div><div id="dinfo"></div><div id="dkeys"></div></div>
 <div id="goal" class="chip" hidden role="status"><span id="garrow" aria-hidden="true">⬆</span><span id="gmsg">You have 10 minutes to earn money selling sandwiches at CFA or you'll be kicked</span><span id="gdist"></span></div>
 <div id="touch" hidden><div id="joy"><i></i></div>
-  <button class="tbtn" id="tJump" style="bottom:calc(150px + env(safe-area-inset-bottom,0px))">JUMP</button>
-  <button class="tbtn" id="tFly" style="bottom:calc(84px + env(safe-area-inset-bottom,0px))">FLY</button>
-  <button class="tbtn" id="tMap" style="bottom:calc(18px + env(safe-area-inset-bottom,0px))">MAP</button>
-  <button class="tbtn" id="tUse" style="bottom:calc(216px + env(safe-area-inset-bottom,0px))">USE</button>
-  <button class="tbtn" id="tSiren" hidden style="bottom:calc(282px + env(safe-area-inset-bottom,0px))">SIREN</button></div>
+  <button class="tbtn" id="tJump">JUMP</button>
+  <button class="tbtn" id="tFly">FLY</button>
+  <button class="tbtn" id="tMap">MAP</button>
+  <button class="tbtn" id="tUse">USE</button>
+  <button class="tbtn" id="tSiren" hidden>SIREN</button></div>
 
 <div id="intro">
   <div class="card">
     <h1>GROOVE CITY COLLEGE<span>WALKABLE 1:1 CAMPUS</span></h1>
     <p>Every building footprint, path, field and the Wolf Creek valley come from real map data, set on real terrain. One block of ground texture is 40&nbsp;cm; a dorm floor is 3.8&nbsp;m. Start on the Quad below Harbison Chapel.</p>
-    <div class="ctl">
+    <div class="ctl ctl-kbm">
       <kbd>W A S D</kbd><span>Walk (arrow keys work too)</span>
       <kbd>Mouse</kbd><span>Look around (click the view to capture the mouse)</span>
       <kbd>Shift</kbd><span>Run</span>
@@ -143,9 +206,19 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
       <kbd>E</kbd><span>Get in a parked car (or serve at Chick-fil-A); in a car: W/S drive, A/D steer, V view, E exit</span>
       <kbd>🎮</kbd><span>Xbox controller works too: sticks move and look, X use, A jump, Y fly</span>
     </div>
-    <div id="bar"><i></i></div>
-    <div class="meta" id="status">Laying out campus…</div>
-    <button id="go" disabled>Loading…</button>
+    <div class="ctl ctl-touch">
+      <kbd>Left stick</kbd><span>walk</span>
+      <kbd>Drag</kbd><span>the right side of the screen: look around</span>
+      <kbd>JUMP</kbd><span>jump; hold it to rise while flying</span>
+      <kbd>FLY</kbd><span>toggle flying (in a car: get out)</span>
+      <kbd>USE</kbd><span>serve / get in a car / smash; in a car, change camera</span>
+      <kbd>MAP</kbd><span>campus map; tap it to teleport</span>
+    </div>
+    <div class="foot">
+      <div id="bar"><i></i></div>
+      <div class="meta" id="status">Laying out campus…</div>
+      <button id="go" disabled>Loading…</button>
+    </div>
   </div>
 </div>
 
@@ -2279,19 +2352,17 @@ function teleport(x, z) {
 }
 function update(dt) {
   if (Vehicles.player) return Vehicles.updatePlayer(dt);
-  const f = Math.max(-1, Math.min(1, (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + joy.y + Pad.y));
-  const s = Math.max(-1, Math.min(1, (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + joy.x + Pad.x));
-  const run = keys.has('ShiftLeft') || keys.has('ShiftRight');
+  const ax = Input.axis(), f = ax.y, s = ax.x, run = Input.held('run');
   const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
   let mx = fx * f + rx * s, mz = fz * f + rz * s; const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
   if (flying) {
     const sp = run ? 70 : 22; P.x += mx * sp * dt; P.z += mz * sp * dt;
-    const up = (keys.has('Space') || touchUp ? 1 : 0) - (keys.has('KeyC') || keys.has('ControlLeft') ? 1 : 0); P.y += up * sp * dt;
+    const up = (Input.held('jump') ? 1 : 0) - (Input.held('down') ? 1 : 0); P.y += up * sp * dt;
     P.y = Math.max(P.y, groundAt(P.x, P.z) + 0.05); P.y = Math.min(P.y, 600);
   } else {
     const sp = run ? 9.5 : 4.4; const accel = onGround ? 14 : 3;
     V.x += (mx * sp - V.x) * Math.min(1, accel * dt); V.z += (mz * sp - V.z) * Math.min(1, accel * dt);
-    if ((keys.has('Space') || touchUp) && onGround) { V.y = 6.2; onGround = false; }
+    if (Input.held('jump') && onGround) { V.y = 6.2; onGround = false; }
     V.y -= 22 * dt; P.x += V.x * dt; P.z += V.z * dt; P.y += V.y * dt;
     const g = groundAt(P.x, P.z, P.y);
     if (P.y <= g) { P.y = g; V.y = 0; onGround = true; } else if (P.y - g < 0.25 && V.y <= 0) { P.y = g; V.y = 0; onGround = true; } else onGround = false;
@@ -2300,6 +2371,81 @@ function update(dt) {
   camera.position.set(P.x, P.y + EYE, P.z); camera.rotation.set(pitch, yaw, 0);
 }
 
+/* ---------------- input actions: keyboard+mouse, touch and gamepad all drive the same actions ---------------- */
+// device: 'kbm' | 'pad' | 'touch' (the last one used); hints call Input.glyph(action) so they always show the right button
+const BIND = {
+  // action:   keyboard codes                 pad buttons (standard mapping)   label shown on touch
+  forward:  { key: ['KeyW', 'ArrowUp'] },                                      // pad: the left stick (Input.axis)
+  back:     { key: ['KeyS', 'ArrowDown'] },
+  left:     { key: ['KeyA', 'ArrowLeft'] },
+  right:    { key: ['KeyD', 'ArrowRight'] },
+  jump:     { key: ['Space'], pad: [0], touch: '▲' },                          // jump / rise while flying
+  down:     { key: ['KeyC', 'ControlLeft'], pad: [1] },                        // descend while flying (on foot)
+  run:      { key: ['ShiftLeft', 'ShiftRight'], pad: [4, 10] },
+  use:      { key: ['KeyE'], pad: [2], touch: 'USE', mouse: 'click' },
+  fly:      { key: ['KeyF'], pad: [3], touch: 'FLY' },                         // pad: double-tap A also flies (gamepad.js)
+  map:      { key: ['KeyM'], pad: [8], touch: 'MAP' },
+  labels:   { key: ['KeyL'], pad: [12] },
+  time:     { key: ['KeyN'], pad: [13] },
+  exit:     { key: ['KeyE', 'KeyF'], pad: [1, 2], touch: 'EXIT' },             // in a car
+  camera:   { key: ['KeyV', 'KeyC'], pad: [3], touch: 'USE' },                 // in a car
+  siren:    { key: ['KeyH'], pad: [5], touch: 'SIREN' },                       // in a police car
+  lights:   { key: ['KeyL'], pad: [4] },                                       // in a police car (L is labels otherwise)
+  handbrake: { key: ['Space'], pad: [0] },                                     // in a car
+  gas:      { pad: [7] }, brake: { pad: [6] },                                 // in a car: RT / LT
+  fullscreen: { pad: [9] },
+  back_ui:  { key: ['Escape', 'Enter'], pad: [1] },                            // close the map or the news
+};
+const PADNAME = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'LS', 'RS', '↑', '↓', '←', '→'];   // by button index
+const KEYNAME = { Space: 'Space', ShiftLeft: 'Shift', ShiftRight: 'Shift', ControlLeft: 'Ctrl', Escape: 'Esc', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' };
+const keyName = c => KEYNAME[c] || c.replace(/^Key/, '');
+// the #keys chip: keyboard and pad share this list (keysChipHTML adds each device's own extras)
+const KEYS_CHIP = [['forward', 'walk'], ['run', 'run'], ['jump', 'jump'], ['fly', 'fly'], ['map', 'map'], ['time', 'time of day'], ['labels', 'labels'], ['use', 'serve / get in a car']];
+const Input = {
+  device: 'kbm',
+  // a bound key is down, or the pad holds a bound button (Pad.btn is empty outside the game), or for jump the on-screen ▲
+  held(a) {
+    const b = BIND[a];
+    return (b.key || []).some(c => keys.has(c)) || (b.pad || []).some(i => !!Pad.btn[i]) || (a === 'jump' && touchUp);
+  },
+  // on foot or in a car: keys, the on-screen stick and the gamepad stick, clamped to [-1, 1]
+  axis() {
+    const h = a => this.held(a) ? 1 : 0, c = v => Math.max(-1, Math.min(1, v));
+    return { x: c(h('right') - h('left') + joy.x + Pad.x), y: c(h('forward') - h('back') + joy.y + Pad.y) };
+  },
+  // the button for an action on a device (default: the one in use); 'bare' is just the first key or button, for chips and car hints
+  glyph(a, ctx, dev = this.device) {
+    const b = BIND[a], ks = b.key || [];
+    if (dev === 'touch' && b.touch) return a === 'use' ? 'Tap' : `<kbd>${b.touch}</kbd>`;
+    if (dev === 'pad' && b.pad) return XB(PADNAME[b.pad[0]]);
+    if (!ks.length) return '';
+    const names = [...new Set((ctx === 'bare' ? ks.slice(0, 1) : ks).map(keyName))].join('/');
+    return `<kbd>${names}</kbd>` + (b.mouse && ctx !== 'bare' ? ` or ${b.mouse}` : '');
+  },
+  setDevice(d) { if (d !== this.device) { this.device = d; this.sync(); } },
+  // the page follows the device: body classes, the #keys chip, the map's help line and the pad cursor
+  sync() {
+    const pad = this.device === 'pad';
+    document.body.classList.toggle('pad', pad); document.body.classList.toggle('touch', this.device === 'touch');
+    $('keys').innerHTML = keysChipHTML();
+    $('maphelp').textContent = pad ? 'Left stick to aim · A to teleport · B to close' : 'Click to teleport · M or Esc to close';
+    $('padcur').hidden = !(pad && mapOpen); if (pad && mapOpen) placePadCur();
+  },
+};
+// one list, two devices: the keyboard shows WASD and Esc, the pad shows its sticks and Menu
+function keysChipHTML() {
+  const pad = Input.device === 'pad', dev = pad ? 'pad' : 'kbm', items = [];
+  for (const [a, label] of KEYS_CHIP) {
+    if (a !== 'forward') items.push(Input.glyph(a, 'bare', dev) + (pad && a === 'jump' ? 'jump (double-tap: fly)' : label));
+    else if (pad) items.push(`${XB('LS')}move`, `${XB('RS')}look`); else items.push('<kbd>WASD</kbd>walk');
+  }
+  items.push(pad ? `${Input.glyph('fullscreen', 'bare', dev)}fullscreen` : `${Input.glyph('back_ui', 'bare', dev)}free mouse`);
+  return items.map(t => `<span>${t}</span>`).join('');
+}
+// a touch sets the 'touch' device; the mouse events a tap fires after it must not switch back to kbm
+let touchAt = -1e9;
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { touchAt = performance.now(); Input.setDevice('touch'); } }, true);
+function kbmInput() { if (performance.now() - touchAt > 1000) Input.setDevice('kbm'); }   // a real mouse move or click
 /* ---------------- input ---------------- */
 let started = false, mapOpen = false;
 const locked = () => document.pointerLockElement === canvas;
@@ -2312,23 +2458,23 @@ canvas.addEventListener('click', () => {
   else if (!Vehicles.player) Vehicles.tryEnter();
 });
 let drag = null;
-canvas.addEventListener('mousedown', e => { setPadMode(false); if (!locked()) drag = [e.clientX, e.clientY]; });
+canvas.addEventListener('mousedown', e => { kbmInput(); if (!locked()) drag = [e.clientX, e.clientY]; });
 addEventListener('mouseup', () => drag = null);
 addEventListener('mousemove', e => {
-  if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) setPadMode(false);
+  if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) kbmInput();
   if (!started || mapOpen || newsOpen) return;
   let dx = 0, dy = 0;
   if (locked()) { dx = e.movementX; dy = e.movementY; } else if (drag) { dx = e.clientX - drag[0]; dy = e.clientY - drag[1]; drag = [e.clientX, e.clientY]; } else return;
   yaw -= dx * 0.0022; pitch = Math.max(-1.55, Math.min(1.55, pitch - dy * 0.0022));
 });
 addEventListener('keydown', e => {
-  setPadMode(false);
+  Input.setDevice('kbm');
   if (!started) return;
   if (newsOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeNews(); } return; }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   onKey(e.code, e.repeat);
 });
-// every key action lives here; the gamepad calls it too with fromPad set (the pad keeps its own held keys)
+// every key press lives here; the gamepad calls it too with fromPad set (its held buttons reach Input.held instead)
 function onKey(code, repeat, fromPad) {
   if (!fromPad) keys.add(code);
   if (Vehicles.player) {   // driving: E/F get out, C/V camera, H siren and L lights in a police car
@@ -2362,7 +2508,7 @@ function toggleMap(force) {
   mapOpen = force ?? !mapOpen; $('map').hidden = !mapOpen;
   if (mapOpen) { if (locked()) document.exitPointerLock(); drawBigMap();
     mapCur.fx = Math.max(0, Math.min(1, (P.x + W / 2) / W)); mapCur.fz = Math.max(0, Math.min(1, (P.z + H / 2) / H));
-    $('padcur').hidden = !usingPad; placePadCur(); }
+    $('padcur').hidden = Input.device !== 'pad'; placePadCur(); }
   else { const fx = $('bigmapfx'); fx.getContext('2d').clearRect(0, 0, fx.width, fx.height); }
 }
 function mapTeleport(fx, fz) {
@@ -2402,59 +2548,44 @@ $('tUse').addEventListener('click', () => { if (Vehicles.player) Vehicles.toggle
 $('tSiren').addEventListener('click', () => { Vehicles.siren = !Vehicles.siren; Vehicles.lights = Vehicles.siren; }); $('tMap').addEventListener('click', () => toggleMap());
 
 /* ---------------- Xbox / standard gamepad (Gamepad API) ---------------- */
-// which input the player used last: hints show Xbox buttons after a controller, keys after a keyboard or mouse
-let usingPad = false;
+// the Xbox badge for a button name; hints get their glyphs from Input.glyph (actions.js)
 const XB = n => `<kbd class="xb xb-${{ A: 'a', B: 'b', X: 'x', Y: 'y' }[n] || 'n'}">${n}</kbd>`;
-const KB = (key, pad) => usingPad ? XB(pad) : `<kbd>${key}</kbd>`;
-const USE = () => usingPad ? XB('X') : '<kbd>E</kbd> or click';   // the "use" action in hints
-const KEY_KEYS_HTML = $('keys').innerHTML;
-const PAD_KEYS_HTML = `<span>${XB('LS')}move</span><span>${XB('RS')}look</span><span>${XB('LB')}run</span><span>${XB('A')}jump (double-tap: fly)</span><span>${XB('Y')}fly</span><span>${XB('View')}map</span><span>${XB('↓')}time of day</span><span>${XB('↑')}labels</span><span>${XB('X')}serve / get in a car</span><span>${XB('Menu')}fullscreen</span>`;
-function setPadMode(on) {
-  if (on === usingPad) return; usingPad = on; document.body.classList.toggle('pad', on);
-  $('keys').innerHTML = on ? PAD_KEYS_HTML : KEY_KEYS_HTML;
-  $('maphelp').textContent = on ? 'Left stick to aim · A to teleport · B to close' : 'Click to teleport · M or Esc to close';
-  $('padcur').hidden = !(on && mapOpen); if (on && mapOpen) placePadCur();
-}
+const setPadMode = on => Input.setDevice(on ? 'pad' : 'kbm');
 const Pad = {
-  x: 0, y: 0, lx: 0, ly: 0, held: new Set(), prev: [], connected: false,
+  x: 0, y: 0, lx: 0, ly: 0, btn: [], prev: [], connected: false,   // btn: the buttons held this frame, read by Input.held
   dz: v => Math.abs(v) < 0.15 ? 0 : Math.sign(v) * (Math.abs(v) - 0.15) / 0.85,
-  sync(want) { for (const c of want) keys.add(c); for (const c of this.held) if (!want.has(c)) keys.delete(c); this.held = want; },   // keys the pad holds this frame
   poll(dt) {
     const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g && g.connected);
-    const b = i => !!(gp && gp.buttons[i] && gp.buttons[i].pressed), prev = this.prev, down = i => b(i) && !prev[i];
+    const cur = gp ? gp.buttons.map(x => x.pressed) : [], prev = this.prev, b = i => !!cur[i], down = i => b(i) && !prev[i];
     if (gp && (gp.buttons.some(x => x.pressed) || gp.axes.some(a => Math.abs(a) > 0.3))) setPadMode(true);
-    this.prev = gp ? gp.buttons.map(x => x.pressed) : [];
+    this.prev = cur; this.btn = [];
     this.x = this.y = this.lx = this.ly = 0;
-    if (!gp) { this.sync(new Set()); return; }
-    if (!started) { if (down(0) || down(9)) $('go').click(); this.sync(new Set()); return; }
-    if (newsOpen) { if (down(0) || down(1) || down(9)) closeNews(); this.sync(new Set()); return; }
+    if (!gp) return;
+    if (!started) { if (down(0) || down(9)) $('go').click(); return; }
+    if (newsOpen) { if (down(0) || down(1) || down(9)) closeNews(); return; }
     if (mapOpen) {
       const mx = this.dz(gp.axes[0] || 0) + this.dz(gp.axes[2] || 0) + (b(15) ? 1 : 0) - (b(14) ? 1 : 0), mz = this.dz(gp.axes[1] || 0) + this.dz(gp.axes[3] || 0) + (b(13) ? 1 : 0) - (b(12) ? 1 : 0);
       const sp = 0.45 * dt * (b(4) || b(5) ? 2.2 : 1);   // fraction of the map per second; hold LB/RB for faster
       mapCur.fx = Math.max(0, Math.min(1, mapCur.fx + mx * sp)); mapCur.fz = Math.max(0, Math.min(1, mapCur.fz + mz * sp));
-      if (usingPad) { $('padcur').hidden = false; placePadCur(); }
+      if (Input.device === 'pad') { $('padcur').hidden = false; placePadCur(); }
       if (down(0)) mapTeleport(mapCur.fx, mapCur.fz);
       else if (down(8) || down(1)) toggleMap(false);
-      this.sync(new Set()); return;
+      return;
     }
+    this.btn = cur;   // the game is running: held buttons drive the player through Input.held
     if (down(9)) fsToggle(true);
     const ax = this.dz(gp.axes[0] || 0), ay = this.dz(gp.axes[1] || 0), rx = this.dz(gp.axes[2] || 0), ry = this.dz(gp.axes[3] || 0);
     this.lx = ax; this.ly = ay;
     yaw -= Math.sign(rx) * rx * rx * 3.0 * dt; pitch = Math.max(-1.55, Math.min(1.55, pitch - Math.sign(ry) * ry * ry * 2.2 * dt));
-    const want = new Set();
-    if (Vehicles.player) {   // driving: RT gas, LT brake/reverse, A handbrake
+    if (Vehicles.player) {   // driving: RT gas, LT brake/reverse, A handbrake (Input.held('handbrake'))
       this.lastA = 0; this.x = ax; this.y = (gp.buttons[7]?.value || 0) - (gp.buttons[6]?.value || 0);
-      if (b(0)) want.add('Space');
       if (down(1) || down(2)) onKey('KeyE', false, true);
       if (down(3)) onKey('KeyV', false, true);
       if (down(5)) onKey('KeyH', false, true);
       if (down(4)) onKey('KeyL', false, true);
       if (down(8)) onKey('KeyM', false, true);
-    } else {                 // on foot
+    } else {                 // on foot: A jump, B descend, LB/LS run (held through Input.held)
       this.x = ax; this.y = -ay;
-      if (b(0)) want.add('Space');
-      if (b(1)) want.add('KeyC');
-      if (b(4) || b(10)) want.add('ShiftLeft');
       if (down(2)) onKey('KeyE', false, true);
       if (down(3)) onKey('KeyF', false, true);
       if (down(0)) { const t = performance.now(); if (t - (this.lastA || 0) < 300) { onKey('KeyF', false, true); this.lastA = 0; } else this.lastA = t; }   // double-tap A flies (A still jumps)
@@ -2462,13 +2593,13 @@ const Pad = {
       if (down(12)) onKey('KeyL', false, true);
       if (down(13)) onKey('KeyN', false, true);
     }
-    this.sync(want);
   },
   rumble(ms, strong) { try { const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g && g.connected); const p = gp?.vibrationActuator?.playEffect('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: strong / 2 }); if (p && p.catch) p.catch(() => { }); } catch (e) { } },
 };
 addEventListener('gamepadconnected', () => { Pad.connected = true; toast('🎮 Controller connected: X use · Y fly · A jump · LB run · View map'); });
 addEventListener('gamepaddisconnected', () => { Pad.connected = false; toast('🎮 Controller disconnected'); });
-
+// the starting device: a touch screen starts on touch, anything else on keyboard and mouse
+Input.device = isTouch ? 'touch' : 'kbm'; Input.sync();
 /* ---------------- time of day ---------------- */
 const TIMES = [
   { name: 'Afternoon', sun: [-0.45, 0.72, 0.52], sc: 0xfff1dc, si: 2.4, hs: 0xcfe3ff, hg: 0x5d6b45, hi: 1.0, top: 0x4a86cf, hor: 0xcfe0ee, lamp: 0x000000, exp: 1.05, cloud: 0x777777 },
@@ -2759,7 +2890,7 @@ function updateCFA(now) {
   if (CFA.onShift) {
     const pp = CFA.queue[0], ready = pp && pp.cfa.stage === 'queue' && pp.cfa.at;
     const wait = ready ? Math.max(0, Math.ceil(CFA.PATIENCE - (now / 1000 - pp.cfa.at))) : 0;
-    setHint(H ? 'Here you go!' : ready ? `Customer at the register · ${USE()} to hand a sandwich · ${wait}s` : `On shift at Chick-fil-A · ${CFA.queue.length ? CFA.queue.length + ' on the way' : 'waiting for customers'} · ${money(CFA.PAY)} a sandwich`);
+    setHint(H ? 'Here you go!' : ready ? `Customer at the register · ${Input.glyph('use')} to hand a sandwich · ${wait}s` : `On shift at Chick-fil-A · ${CFA.queue.length ? CFA.queue.length + ' on the way' : 'waiting for customers'} · ${money(CFA.PAY)} a sandwich`);
     // keep a trickle coming: bring in a walker from out of sight, about one every 7 s, while the line is short
     if (now > CFA.nextPull && CFA.queue.length < 2 && CFA.nearStarts.length) {
       CFA.nextPull = now + 5000 + Math.random() * 4000;
@@ -3076,9 +3207,8 @@ const Vehicles = {
   /* ---- the player's car ---- */
   updatePlayer(dt) {
     const c = this.player, frozen = !!this.frozen;
-    const f = frozen ? 0 : Math.max(-1, Math.min(1, (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + joy.y + Pad.y));
-    const s = frozen ? 0 : Math.max(-1, Math.min(1, (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + joy.x + Pad.x));
-    const vmax = c.cop ? 36 : 30, brake = frozen || keys.has('Space');
+    const ax = Input.axis(), f = frozen ? 0 : ax.y, s = frozen ? 0 : ax.x;
+    const vmax = c.cop ? 36 : 30, brake = frozen || Input.held('handbrake');
     if (brake) c.v -= Math.sign(c.v) * Math.min(Math.abs(c.v), 14 * dt);
     else if (f > 0.1) c.v += c.v < -.2 ? 12 * dt * f : 6.5 * f * (1 - Math.max(0, c.v) / vmax) * dt;
     else if (f < -0.1) c.v += c.v > .2 ? 11 * dt * f : 4 * f * (1 + Math.min(0, c.v) / 7) * dt;
@@ -3115,7 +3245,8 @@ const Vehicles = {
     if (this.rental) { const s = Math.floor((Date.now() - this.rental.t0) / 1000); line = `RENTAL ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} · ${money(this.rental.paid * 5)} · $5 per started minute`; }
     $('dspd').textContent = sp; $('dspd').classList.toggle('over', over && !c.cop);
     $('dinfo').textContent = this.frozen ? 'PULLED OVER · ' + this.frozen : line;
-    $('dkeys').innerHTML = isTouch ? '' : `${KB('E', 'B')}exit ${KB('V', 'Y')}${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ` ${KB('H', 'RB')}siren ${KB('L', 'LB')}lights` : ''} ${KB('Space', 'A')}brake${usingPad ? ` ${XB('RT')}gas ${XB('LT')}brake/reverse` : ''}`;
+    const kg = (a, ctx) => Input.glyph(a, ctx, Input.device === 'pad' ? 'pad' : 'kbm');   // keyboard or pad hints (a touch screen has its own)
+    $('dkeys').innerHTML = isTouch ? '' : `${kg('exit', 'bare')}exit ${kg('camera', 'bare')}${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ` ${kg('siren')}siren ${kg('lights')}lights` : ''} ${kg('handbrake')}brake${Input.device === 'pad' ? ` ${XB('RT')}gas ${XB('LT')}brake/reverse` : ''}`;
   },
   toggleCam() { this.cam = this.cam === 'cab' ? 'chase' : 'cab'; pitch = this.cam === 'cab' ? -.05 : .1; },
   /* ---- per frame: NPCs, walkers in the way, prompts, pull-overs by a player cop ---- */
@@ -3147,7 +3278,7 @@ const Vehicles = {
     if (!this.player) this.pushPlayer();
     // prompt
     this.lookCar = started ? this.look() : null; const lc = this.lookCar;
-    carHint = lc ? (lc.cop ? `Police car · ${USE()} to drive it on patrol (free)` : Profile.canAfford(5) ? `${USE()}: Rent for $5/min (charged per started minute)` : `Rent for $5/min · you need at least $5`) : '';
+    carHint = lc ? (lc.cop ? `Police car · ${Input.glyph('use')} to drive it on patrol (free)` : Profile.canAfford(5) ? `${Input.glyph('use')}: Rent for $5/min (charged per started minute)` : `Rent for $5/min · you need at least $5`) : '';
     if (this.player && this.player.cop) this.copWork(dt, now, t);
     else if (this.offenders.length) { for (const s of this.offenders) s.visible = false; }
     this.updateGoal();
@@ -3191,7 +3322,7 @@ const Vehicles = {
     const pl = this.pull;
     if (!pl) {
       if (cand && this.siren) { this.pullCand = this.pullCand === cand ? cand : (this.pullT = 0, cand); this.pullT += dt; carHint = `Stay behind them with the siren on… ${Math.max(0, 3 - this.pullT).toFixed(1)}s`; if (this.pullT >= 3) this.startPull(cand, true); }
-      else if (cand) { carHint = `Offender ahead · turn on the siren (${KB('H', 'RB')}) and stay behind them to pull them over`; this.pullT = 0; }
+      else if (cand) { carHint = `Offender ahead · turn on the siren (${Input.glyph('siren')}) and stay behind them to pull them over`; this.pullT = 0; }
       else this.pullT = 0;
     } else {
       const c = pl.car, d = Math.hypot(c.x - me.x, c.z - me.z);
@@ -3480,7 +3611,7 @@ const Bank = {
     if (this.near()) {
       if (this.broken()) { const s = Math.max(0, Math.ceil((this.until - netNow()) / 1000)); return `The vault has been cleaned out · restocked in ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
       if (this.pending) return 'Cracking the vault…';
-      return `${isTouch ? 'Tap <kbd>USE</kbd>' : USE()} to smash the vault door · ${this.hits}/${VAULT_HITS}`;
+      return `${Input.glyph('use')} to smash the vault door · ${this.hits}/${VAULT_HITS}`;
     }
     if (!this.wanted && !this.broken() && Math.abs(P.y - bank.fy) < 1.5 && pip(P.x, P.z, bank.b.p)) return 'PNC Bank · the vault is past the teller counter, through the back office';
     return '';

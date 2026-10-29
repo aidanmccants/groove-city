@@ -2,6 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Barlow+Semi+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script>if (matchMedia('(pointer: coarse)').matches) document.documentElement.classList.add('touch');</script>
 <style>
 /* Layout: full-bleed 3D viewport; HUD chips pinned to corners; one centered title card at start. */
 :root{
@@ -101,13 +102,75 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
 @keyframes toastfade{0%,80%{opacity:1}100%{opacity:0}}
 @media (max-width:640px){#mini{width:120px;height:120px}#keys{display:none}#where{max-width:calc(100vw - 160px)}#near{font-size:15px}#fsbtn{right:140px}}
 @media (prefers-reduced-motion: reduce){#bar i{transition:none}}
+/* ---- touch (html.touch is set by the head script for coarse pointers): phones in portrait and landscape ---- */
+html.touch{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--mini:120px;--R:calc(10px + var(--sr));--B:calc(12px + var(--sb))}
+@media (max-height:500px){html.touch{--mini:104px}html.touch #coords{display:none}}
+html.touch .chip:not(#fsbtn){pointer-events:none}
+/* top-left stack: location card, then mode and online chips */
+html.touch #where{top:calc(10px + var(--st));left:calc(10px + var(--sl));max-width:min(230px,calc(100vw - var(--mini) - 104px));padding:6px 10px;gap:1px}
+html.touch #where .brand{font-size:10px;letter-spacing:.05em}
+html.touch #near{font-size:14px}
+html.touch #coords{font-size:10px}
+html.touch #mode{top:calc(62px + var(--st));left:calc(10px + var(--sl));right:auto;bottom:auto;padding:4px 8px;font-size:10px}
+html.touch #online{top:calc(90px + var(--st));left:calc(10px + var(--sl));right:auto;bottom:auto;padding:4px 8px;font-size:11px;max-width:min(230px,calc(100vw - var(--mini) - 36px));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* top-right stack: minimap, fullscreen left of it, money under it, toasts below */
+html.touch #mini{top:calc(10px + var(--st));right:var(--R);width:var(--mini);height:var(--mini)}
+html.touch #fsbtn{top:calc(10px + var(--st));right:calc(var(--R) + var(--mini) + 10px);width:44px;height:44px;font-size:18px;line-height:42px}
+html.touch #money{top:calc(10px + var(--st) + var(--mini) + 8px);right:var(--R);min-width:56px;padding:4px 10px}
+html.touch #cash{font-size:15px}
+html.touch #debt{font-size:10px}
+/* top-centre (landscape): wanted, then the debt goal banner, then toasts */
+html.touch #wanted{top:calc(10px + var(--st))}
+html.touch #goal{top:calc(80px + var(--st));left:50%;right:auto;transform:translateX(-50%);max-width:min(360px,calc(100vw - 500px))}
+html.touch #toasts{top:calc(152px + var(--st));left:50%;right:auto;transform:translateX(-50%);max-width:50vw;justify-items:center}
+html.touch #hint{bottom:calc(92px + var(--sb));max-width:50vw;font-size:14px}
+/* driving HUD: bottom-centre, between the joystick and the buttons */
+html.touch #drive{left:50%;right:auto;bottom:calc(12px + var(--sb));transform:translateX(-50%);min-width:0;width:max-content;max-width:min(300px,40vw);padding:6px 12px;text-align:center}
+html.touch #drive .spd{font-size:24px}
+html.touch #dinfo{font-size:12px}
+/* joystick (120 px: input.js hard-codes its centre) and the thumb cluster, bottom-right */
+html.touch #joy{left:calc(20px + var(--sl));bottom:var(--B)}
+html.touch .tbtn{width:56px;height:56px;font-size:10px;letter-spacing:.04em}
+html.touch .tbtn:active{background:rgba(140,29,47,.85)}
+html.touch #tJump{width:76px;height:76px;font-size:12px;right:var(--R);bottom:var(--B)}
+html.touch #tUse{width:62px;height:62px;right:calc(var(--R) + 63px);bottom:calc(var(--B) + 81px)}
+html.touch #tFly{right:calc(var(--R) + 84px);bottom:calc(var(--B) + 10px)}
+html.touch #tSiren{right:calc(var(--R) + 133px);bottom:calc(var(--B) + 84px)}
+html.touch #tMap{width:44px;height:44px;font-size:9px;right:calc(var(--R) + 72px);bottom:calc(var(--B) + 151px)}
+/* safe areas for the full-screen overlays */
+html.touch #map{padding:calc(12px + var(--st)) calc(12px + var(--sr)) calc(12px + var(--sb)) calc(12px + var(--sl))}
+html.touch #intro{padding:12px calc(16px + var(--sr)) 12px calc(16px + var(--sl))}
+/* intro card: scrolls inside the screen; ENTER sits in a sticky footer */
+html.touch #intro .card{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;padding:20px 22px 0;gap:12px}
+html.touch #intro .foot{position:sticky;bottom:0;z-index:1;gap:10px;margin:0 -22px;padding:12px 22px calc(16px + var(--sb));background:rgba(24,21,19,.98);border-top:1px solid var(--hud-line)}
+html.touch #go,html.touch #newsOk{min-height:46px}
+html.touch .ctl-kbm{display:none}
+html.touch .ctl-touch{display:grid}
+.ctl-touch{display:none}
+.foot{display:grid;gap:14px}
+@media (max-height:500px) and (min-width:600px){
+  html.touch #intro .card{width:min(700px,100%);grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 24px;padding:14px 20px 0}
+  html.touch #intro h1{grid-column:1;grid-row:1;font-size:24px}
+  html.touch #intro .card > p{grid-column:1;grid-row:2;font-size:13px;line-height:1.4}
+  html.touch #intro .ctl-touch{grid-column:2;grid-row:1 / span 2;align-self:start;font-size:13px;gap:5px 10px}
+  html.touch #intro .foot{grid-column:1 / -1;grid-row:3;margin:0 -20px;padding:10px 20px calc(12px + var(--sb))}
+}
+@media (orientation:portrait){
+  html.touch #mode{top:calc(80px + var(--st))}
+  html.touch #online{top:calc(108px + var(--st))}
+  html.touch #wanted{top:calc(188px + var(--st))}
+  html.touch #goal{top:calc(250px + var(--st));left:10px;right:10px;transform:none;max-width:none}
+  html.touch #toasts{top:calc(326px + var(--st));left:auto;right:var(--R);transform:none;max-width:60vw;justify-items:end}
+  html.touch #hint{bottom:calc(270px + var(--sb));max-width:calc(100vw - 24px)}
+  html.touch #drive{left:10px;right:auto;bottom:calc(150px + var(--sb));transform:none;width:170px;max-width:none;text-align:left}
+}
 </style>
 
 <canvas id="view"></canvas>
 <div id="cross" hidden></div>
 <div id="where" class="chip" hidden><div class="brand">GROOVE CITY <b>COLLEGE</b></div><div id="near">Upper campus</div><div id="coords">—</div></div>
 <div id="mini" class="chip" hidden><canvas id="minic" width="360" height="360"></canvas><div id="heading">N</div></div>
-<div id="keys" class="chip" hidden><span><kbd>WASD</kbd>walk</span><span><kbd>Shift</kbd>run</span><span><kbd>Space</kbd>jump</span><span><kbd>F</kbd>fly</span><span><kbd>M</kbd>map</span><span><kbd>N</kbd>time of day</span><span><kbd>L</kbd>labels</span><span><kbd>E</kbd>serve / get in a car</span><span><kbd>Esc</kbd>free mouse</span></div>
+<div id="keys" class="chip" hidden></div>
 <div id="mode" class="chip" hidden>WALK</div>
 <div id="online" class="chip" hidden></div>
 <div id="money" class="chip" hidden aria-live="polite"><span id="cash">$0</span><span id="debt" hidden></span></div>
@@ -119,17 +182,17 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
 <div id="drive" class="chip" hidden aria-live="off"><div class="spd"><span id="dspd">0</span><small>MPH</small></div><div id="dinfo"></div><div id="dkeys"></div></div>
 <div id="goal" class="chip" hidden role="status"><span id="garrow" aria-hidden="true">⬆</span><span id="gmsg">You have 10 minutes to earn money selling sandwiches at CFA or you'll be kicked</span><span id="gdist"></span></div>
 <div id="touch" hidden><div id="joy"><i></i></div>
-  <button class="tbtn" id="tJump" style="bottom:calc(150px + env(safe-area-inset-bottom,0px))">JUMP</button>
-  <button class="tbtn" id="tFly" style="bottom:calc(84px + env(safe-area-inset-bottom,0px))">FLY</button>
-  <button class="tbtn" id="tMap" style="bottom:calc(18px + env(safe-area-inset-bottom,0px))">MAP</button>
-  <button class="tbtn" id="tUse" style="bottom:calc(216px + env(safe-area-inset-bottom,0px))">USE</button>
-  <button class="tbtn" id="tSiren" hidden style="bottom:calc(282px + env(safe-area-inset-bottom,0px))">SIREN</button></div>
+  <button class="tbtn" id="tJump">JUMP</button>
+  <button class="tbtn" id="tFly">FLY</button>
+  <button class="tbtn" id="tMap">MAP</button>
+  <button class="tbtn" id="tUse">USE</button>
+  <button class="tbtn" id="tSiren" hidden>SIREN</button></div>
 
 <div id="intro">
   <div class="card">
     <h1>GROOVE CITY COLLEGE<span>WALKABLE 1:1 CAMPUS</span></h1>
     <p>Every building footprint, path, field and the Wolf Creek valley come from real map data, set on real terrain. One block of ground texture is 40&nbsp;cm; a dorm floor is 3.8&nbsp;m. Start on the Quad below Harbison Chapel.</p>
-    <div class="ctl">
+    <div class="ctl ctl-kbm">
       <kbd>W A S D</kbd><span>Walk (arrow keys work too)</span>
       <kbd>Mouse</kbd><span>Look around (click the view to capture the mouse)</span>
       <kbd>Shift</kbd><span>Run</span>
@@ -139,9 +202,19 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
       <kbd>E</kbd><span>Get in a parked car (or serve at Chick-fil-A); in a car: W/S drive, A/D steer, V view, E exit</span>
       <kbd>🎮</kbd><span>Xbox controller works too: sticks move and look, X use, A jump, Y fly</span>
     </div>
-    <div id="bar"><i></i></div>
-    <div class="meta" id="status">Laying out campus…</div>
-    <button id="go" disabled>Loading…</button>
+    <div class="ctl ctl-touch">
+      <kbd>Left stick</kbd><span>walk</span>
+      <kbd>Drag</kbd><span>the right side of the screen: look around</span>
+      <kbd>JUMP</kbd><span>jump; hold it to rise while flying</span>
+      <kbd>FLY</kbd><span>toggle flying (in a car: get out)</span>
+      <kbd>USE</kbd><span>serve / get in a car / smash; in a car, change camera</span>
+      <kbd>MAP</kbd><span>campus map; tap it to teleport</span>
+    </div>
+    <div class="foot">
+      <div id="bar"><i></i></div>
+      <div class="meta" id="status">Laying out campus…</div>
+      <button id="go" disabled>Loading…</button>
+    </div>
   </div>
 </div>
 

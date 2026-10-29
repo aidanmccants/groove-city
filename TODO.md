@@ -29,14 +29,14 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [x] Chick-fil-A redesigned to look like the real one in the photos
 
 ## In progress
-- [ ] Phase 1 restructure (below)
+- [x] Mobile layout: touch buttons overlap the minimap, money and status chips; the start screen is cut off in landscape and lists keyboard controls
 
 ## Up next: restructure (Phase 1)
 - [x] Split the single game file into modules (no gameplay change)
 - [x] Map data as a separate file, so the Worker stays small
 - [ ] Map system: the game loads one map at a time, with a loading screen between maps *(manifest done; the loader comes with interiors in Phase 4, when there is a second map to load)*
 - [x] Every building is its own entity with an ID, easy to edit, expand or restyle (node tree: `client/world/nodes.js`, overrides in `client/maps/grove-city/buildings.js`)
-- [ ] One input system for keyboard and mouse, touch and controller
+- [x] One input system for keyboard and mouse, touch and controller
 
 ## Accounts and players
 - [ ] Accounts with a username and password (password hashed and stored in a database, hash checked at login)
