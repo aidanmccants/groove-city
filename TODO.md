@@ -32,10 +32,10 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [ ] Phase 1 restructure (below)
 
 ## Up next: restructure (Phase 1)
-- [ ] Split the single game file into modules (no gameplay change)
-- [ ] Map data as a separate file, so the Worker stays small
-- [ ] Map system: the game loads one map at a time, with a loading screen between maps
-- [ ] Every building is its own entity with an ID, easy to edit, expand or restyle
+- [x] Split the single game file into modules (no gameplay change)
+- [x] Map data as a separate file, so the Worker stays small
+- [ ] Map system: the game loads one map at a time, with a loading screen between maps *(manifest done; the loader comes with interiors in Phase 4, when there is a second map to load)*
+- [x] Every building is its own entity with an ID, easy to edit, expand or restyle (node tree: `client/world/nodes.js`, overrides in `client/maps/grove-city/buildings.js`)
 - [ ] One input system for keyboard and mouse, touch and controller
 
 ## Accounts and players

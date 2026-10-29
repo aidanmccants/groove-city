@@ -1,5 +1,8 @@
 [
  "main/boot.js",
+ "world/nodes.js",
+ "maps/grove-city/manifest.js",
+ "maps/grove-city/buildings.js",
  "systems/profile.js",
  "engine/heightmap.js",
  "engine/geom.js",

@@ -52,6 +52,7 @@ $('go').addEventListener('click', () => {
   if (Profile.state.seenUpdate !== CURRENT_UPDATE_ID) openNews(); else lockPointer();
 });
 window.__gcc = {
+  World, Components, MAP,
   net: () => ({ me: myName, others: [...remotes.values()].filter(r => r.seen).map(r => r.name) }),
   Profile, CFA, Bank, bank: () => bank, Rail, Traffic, people, Vehicles, Cops, Roads, netNow, Siren, npcAt, walkGraph: () => updatePeople.ctx, doors: () => doorList, kickAndReset,
   P, view(x, y, z, yw, pt) { flying = true; P.set(x, y, z); yaw = yw; pitch = pt; update(0); },

@@ -28,6 +28,7 @@ const Vehicles = {
       let b = null, bd = 1e9; for (const c of this.list) { const d = Math.hypot(c.x - q[0], c.z - q[1]); if (!c.cop && d < bd) { bd = d; b = c; } }
       if (b) { b.cop = true; b.col = '#141619'; b.roof = '#f2f2f2'; }
     }
+    for (const c of this.list) if (c.cop) World.setKind(World.get('car:' + c.id), 'copcar');   // the cops above were picked after they were registered
     this.parked = this.list.length;
     Roads.build();
     if (Roads.main.length) for (let i = 0; i < 19; i++) {
@@ -39,7 +40,8 @@ const Vehicles = {
     for (const c of this.list) { if (c.kind !== 'npc') this.pose(c, true); this.place(c); }
     for (const c of cops) Cops.add(c);
   },
-  add(o) { const c = Object.assign({ id: this.list.length, y: 0, v: 0, pt: 0, rl: 0, kind: 'parked', roof: null, flash: false, steer: 0 }, o); if (!c.roof) c.roof = c.col; this.list.push(c); return c; },
+  // each car is also a node. vehicle.ref is the live car, so its position is not copied into the node every frame
+  add(o) { const c = Object.assign({ id: this.list.length, y: 0, v: 0, pt: 0, rl: 0, kind: 'parked', roof: null, flash: false, steer: 0 }, o); if (!c.roof) c.roof = c.col; this.list.push(c); World.add({ id: 'car:' + c.id, kind: c.cop ? 'copcar' : 'car', x: c.x, z: c.z, c: { vehicle: { ref: c } } }); return c; },
   addDecals(car) {   // GROOVE CITY POLICE on both front doors (the white door panel); placed in place()
     if (!this._decalMat) {
       const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96; const g = cv.getContext('2d');

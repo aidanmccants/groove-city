@@ -44,6 +44,14 @@ function buildBuildings() {
   }
   const pnc = (D.pois || []).find(p => p.n === 'PNC Bank'), pb = pnc && D.buildings.find(b => pip(pnc.x, pnc.z, b.p));
   if (pb) { Object.assign(pb, { bank: true, n: pb.n || 'PNC Bank', k: 'stone', r: 'flat', c: '#8f8a80' }); pb.t = Math.max(pb.t, bankFrame(pb).fy + 7.2); }
+  // every building is a node: id from makeId, type (bank, church, union, house or building) and footprint area; houses can be bought
+  for (const b of D.buildings) {
+    const cx = b.p.reduce((t, q) => t + q[0], 0) / b.p.length, cz = b.p.reduce((t, q) => t + q[1], 0) / b.p.length, sqm = Math.abs(area(b.p));
+    const type = b.bank ? 'bank' : b.church ? 'church' : /Breen/.test(b.n || '') ? 'union' : b.k === 'siding' && sqm < 400 ? 'house' : 'building';
+    b.id = World.makeId(b);
+    World.add({ id: b.id, kind: 'building', x: cx, y: b.b, z: cz, c: { building: { name: b.n || '', type, mat: b.k, base: b.b, top: b.t, area: sqm, ref: b }, ...(type === 'house' ? { ownable: { price: Math.round(sqm * 900) * 100, owner: null } } : {}) } });
+  }
+  for (const id in BUILDING_OVERRIDES) if (World.get(id)) World.patch(id, BUILDING_OVERRIDES[id]); else console.warn('override for unknown building', id);
   for (const b of D.buildings) {
     const fix = NAME_FIX[b.n]; if (fix) Object.assign(b, fix);
     const rings = [b.p, ...(b.h || [])];

@@ -83,7 +83,16 @@ function planDoors() {
   }
   for (const g of (breen && breen.gaps) || []) out.push({ ...g, spec: { trim: '#efe9dc' } });
   for (const g of (bank && bank.gaps) || []) out.push({ ...g, spec: { trim: '#2b2f36' } });
-  return doorList = out;
+  doorList = out;
+  // each doorway is a child node of its building, id '<building id>/door<n>', standing at the ground in front of it
+  const perBuilding = new Map(); let skipped = 0;
+  for (const d of out) {
+    if (!d.b || !d.b.id) { skipped++; continue; }
+    const n = perBuilding.get(d.b.id) || 0; perBuilding.set(d.b.id, n + 1);
+    World.add({ id: d.b.id + '/door' + n, kind: 'door', parent: d.b.id, x: d.x, y: d.base, z: d.z, c: { door: { ref: d } } });
+  }
+  if (skipped) console.info(`${skipped} doorways have no building reference, so they are not nodes`);
+  return doorList;
 }
 // stoop flush with the wall and as wide as the frame; steps down to the ground where it falls away in front
 function doorSteps(d, put) {
