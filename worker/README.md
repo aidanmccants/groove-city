@@ -46,16 +46,22 @@ Wrangler prints the public URL when it finishes, in the form `https://groove-cit
 2. The Worker sends the connection to one Durable Object named `campus`, which holds the room.
 3. The room gives the visitor an id and a random name, and sends a `welcome` message listing the visitors who have a position.
 4. The room announces the newcomer with `join`. The newcomer's avatar appears once their first position arrives.
-5. Each visitor sends `{t: 'move', x, y, z, yaw}`. The room clamps the values and relays them to everyone else as `move`.
+5. Each visitor sends `{t: 'move', x, y, z, yaw}`, plus `v` (car id), `cy` (car heading) and `f` (bit 1 lights, bit 2 siren) while driving. The room clamps the values and relays them to everyone else as `move`. A car id only counts if the room gave that car to the sender.
+   - **Clock:** `welcome` carries the server's `now`, and the page sends `{t: 'ping', c}` every 30 s and gets `{t: 'pong', c, now}` back. The page uses the offset for trains, traffic lights and NPC traffic, which all run off the shared clock, so every browser sees the same train and the same NPC cars without more messages.
+   - **Cars:** `{t: 'take', id}` asks for a parked car. The room answers `took` or `deny` (someone else is driving it) and tells everyone `{t: 'car', id, d}`. `{t: 'park', id, x, z, h}` leaves it there, and everyone gets `{t: 'car', id, x, z, h, d: null}`. If a driver disconnects, the car is parked where they last were. `welcome` lists every moved car as `cars: [[id, x, z, h, driver]]`.
+   - **Events:** `{t: 'evt', k, a}` relays short gameplay events with up to six numbers, so others see a walker knocked over (`knock`), a cop's pull-over (`po`, `pulled`, `free`) or a police chase after a bank robbery: `chase` (`a` = the NPC cop ids now chasing the sender; other browsers run the same chase against the sender's avatar), `caught` (the sender was busted) and `calm` (the sender got away). The chasing cops go back to patrol on `caught`, `calm` or when the sender leaves.
+   - **Bank vault:** `{t: 'rob'}` asks to crack the PNC Bank vault. If it is closed, the room opens it for `VAULT_MS` (5 minutes) and tells everyone, the sender included, `{t: 'vault', until, by}` (`until` on the server clock, `by` the robber's id); only the robber gets the $100. If it is already open, only the sender gets the current `vault` back. The vault is saved in Durable Object storage (`vault`), and `welcome` carries `vault: {until, by}` while it is open, so newcomers see it open.
+   - Messages are capped at 512 characters. Moves are limited by `MIN_MOVE_MS`; everything else goes through a per-visitor token bucket (`RATE`, 8 a second with bursts of 16).
 6. When a visitor disconnects, the room sends `leave`. If the connection drops, the page retries up to five times, with increasing delays.
 
-Positions are not saved. The room is empty when the last visitor leaves, and nobody keeps their name between visits.
+Player positions are not saved, and nobody keeps their name between visits. The bank vault's state is saved too (`vault`). Moved cars are saved in Durable Object storage (`cars`), so a car stays where it was left; a car nobody touches for six hours (`CAR_TTL`) goes back to its stall.
 
 ## Limits and things to know
 
 - **No accounts, chat or moderation.** Anyone who can reach the URL can join and appears with a random name.
 - **Positions are not checked against the map.** Each browser moves its own visitor, so someone can walk through walls in their own copy. The Worker only checks that values are numbers within the campus bounds.
-- **Background people are not shared.** The walkers heading to Breen and Hicks run in each browser separately, and they still use the browser's built-in text-to-speech.
+- **Background people are not shared.** The walkers heading to Breen and Hicks run in each browser separately (a car knocking one over is relayed as an event, matched to the nearest walker), and they still use the browser's built-in text-to-speech.
+- **NPC traffic is scheduled, not simulated.** NPC cars follow seeded routes on the shared clock and do not react to each other; a pull-over takes one off its schedule in that browser (and in others through `evt`) until it rejoins.
 - **One room.** It suits dozens of visitors at once. It is not designed for hundreds.
 - **Cost.** Cloudflare bills Durable Object requests and WebSocket messages. Check current pricing before you share the link widely.
 - **Artifact preview.** Claude's artifact preview cannot open the WebSocket, so the map runs there as single-player.
