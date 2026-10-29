@@ -90,7 +90,7 @@ function updateCFA(now) {
   if (CFA.onShift) {
     const pp = CFA.queue[0], ready = pp && pp.cfa.stage === 'queue' && pp.cfa.at;
     const wait = ready ? Math.max(0, Math.ceil(CFA.PATIENCE - (now / 1000 - pp.cfa.at))) : 0;
-    setHint(H ? 'Here you go!' : ready ? `Customer at the register · ${USE()} to hand a sandwich · ${wait}s` : `On shift at Chick-fil-A · ${CFA.queue.length ? CFA.queue.length + ' on the way' : 'waiting for customers'} · ${money(CFA.PAY)} a sandwich`);
+    setHint(H ? 'Here you go!' : ready ? `Customer at the register · ${Input.glyph('use')} to hand a sandwich · ${wait}s` : `On shift at Chick-fil-A · ${CFA.queue.length ? CFA.queue.length + ' on the way' : 'waiting for customers'} · ${money(CFA.PAY)} a sandwich`);
     // keep a trickle coming: bring in a walker from out of sight, about one every 7 s, while the line is short
     if (now > CFA.nextPull && CFA.queue.length < 2 && CFA.nearStarts.length) {
       CFA.nextPull = now + 5000 + Math.random() * 4000;

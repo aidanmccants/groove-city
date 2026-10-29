@@ -74,7 +74,7 @@ const Bank = {
     if (this.near()) {
       if (this.broken()) { const s = Math.max(0, Math.ceil((this.until - netNow()) / 1000)); return `The vault has been cleaned out · restocked in ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; }
       if (this.pending) return 'Cracking the vault…';
-      return `${isTouch ? 'Tap <kbd>USE</kbd>' : USE()} to smash the vault door · ${this.hits}/${VAULT_HITS}`;
+      return `${Input.glyph('use')} to smash the vault door · ${this.hits}/${VAULT_HITS}`;
     }
     if (!this.wanted && !this.broken() && Math.abs(P.y - bank.fy) < 1.5 && pip(P.x, P.z, bank.b.p)) return 'PNC Bank · the vault is past the teller counter, through the back office';
     return '';

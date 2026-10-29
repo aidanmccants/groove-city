@@ -39,19 +39,17 @@ function teleport(x, z) {
 }
 function update(dt) {
   if (Vehicles.player) return Vehicles.updatePlayer(dt);
-  const f = Math.max(-1, Math.min(1, (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + joy.y + Pad.y));
-  const s = Math.max(-1, Math.min(1, (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + joy.x + Pad.x));
-  const run = keys.has('ShiftLeft') || keys.has('ShiftRight');
+  const ax = Input.axis(), f = ax.y, s = ax.x, run = Input.held('run');
   const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
   let mx = fx * f + rx * s, mz = fz * f + rz * s; const ml = Math.hypot(mx, mz); if (ml > 1) { mx /= ml; mz /= ml; }
   if (flying) {
     const sp = run ? 70 : 22; P.x += mx * sp * dt; P.z += mz * sp * dt;
-    const up = (keys.has('Space') || touchUp ? 1 : 0) - (keys.has('KeyC') || keys.has('ControlLeft') ? 1 : 0); P.y += up * sp * dt;
+    const up = (Input.held('jump') ? 1 : 0) - (Input.held('down') ? 1 : 0); P.y += up * sp * dt;
     P.y = Math.max(P.y, groundAt(P.x, P.z) + 0.05); P.y = Math.min(P.y, 600);
   } else {
     const sp = run ? 9.5 : 4.4; const accel = onGround ? 14 : 3;
     V.x += (mx * sp - V.x) * Math.min(1, accel * dt); V.z += (mz * sp - V.z) * Math.min(1, accel * dt);
-    if ((keys.has('Space') || touchUp) && onGround) { V.y = 6.2; onGround = false; }
+    if (Input.held('jump') && onGround) { V.y = 6.2; onGround = false; }
     V.y -= 22 * dt; P.x += V.x * dt; P.z += V.z * dt; P.y += V.y * dt;
     const g = groundAt(P.x, P.z, P.y);
     if (P.y <= g) { P.y = g; V.y = 0; onGround = true; } else if (P.y - g < 0.25 && V.y <= 0) { P.y = g; V.y = 0; onGround = true; } else onGround = false;

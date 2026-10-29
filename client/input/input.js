@@ -10,23 +10,23 @@ canvas.addEventListener('click', () => {
   else if (!Vehicles.player) Vehicles.tryEnter();
 });
 let drag = null;
-canvas.addEventListener('mousedown', e => { setPadMode(false); if (!locked()) drag = [e.clientX, e.clientY]; });
+canvas.addEventListener('mousedown', e => { kbmInput(); if (!locked()) drag = [e.clientX, e.clientY]; });
 addEventListener('mouseup', () => drag = null);
 addEventListener('mousemove', e => {
-  if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) setPadMode(false);
+  if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) kbmInput();
   if (!started || mapOpen || newsOpen) return;
   let dx = 0, dy = 0;
   if (locked()) { dx = e.movementX; dy = e.movementY; } else if (drag) { dx = e.clientX - drag[0]; dy = e.clientY - drag[1]; drag = [e.clientX, e.clientY]; } else return;
   yaw -= dx * 0.0022; pitch = Math.max(-1.55, Math.min(1.55, pitch - dy * 0.0022));
 });
 addEventListener('keydown', e => {
-  setPadMode(false);
+  Input.setDevice('kbm');
   if (!started) return;
   if (newsOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeNews(); } return; }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   onKey(e.code, e.repeat);
 });
-// every key action lives here; the gamepad calls it too with fromPad set (the pad keeps its own held keys)
+// every key press lives here; the gamepad calls it too with fromPad set (its held buttons reach Input.held instead)
 function onKey(code, repeat, fromPad) {
   if (!fromPad) keys.add(code);
   if (Vehicles.player) {   // driving: E/F get out, C/V camera, H siren and L lights in a police car
@@ -60,7 +60,7 @@ function toggleMap(force) {
   mapOpen = force ?? !mapOpen; $('map').hidden = !mapOpen;
   if (mapOpen) { if (locked()) document.exitPointerLock(); drawBigMap();
     mapCur.fx = Math.max(0, Math.min(1, (P.x + W / 2) / W)); mapCur.fz = Math.max(0, Math.min(1, (P.z + H / 2) / H));
-    $('padcur').hidden = !usingPad; placePadCur(); }
+    $('padcur').hidden = Input.device !== 'pad'; placePadCur(); }
   else { const fx = $('bigmapfx'); fx.getContext('2d').clearRect(0, 0, fx.width, fx.height); }
 }
 function mapTeleport(fx, fz) {

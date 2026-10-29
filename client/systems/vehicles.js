@@ -193,9 +193,8 @@ const Vehicles = {
   /* ---- the player's car ---- */
   updatePlayer(dt) {
     const c = this.player, frozen = !!this.frozen;
-    const f = frozen ? 0 : Math.max(-1, Math.min(1, (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + joy.y + Pad.y));
-    const s = frozen ? 0 : Math.max(-1, Math.min(1, (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + joy.x + Pad.x));
-    const vmax = c.cop ? 36 : 30, brake = frozen || keys.has('Space');
+    const ax = Input.axis(), f = frozen ? 0 : ax.y, s = frozen ? 0 : ax.x;
+    const vmax = c.cop ? 36 : 30, brake = frozen || Input.held('handbrake');
     if (brake) c.v -= Math.sign(c.v) * Math.min(Math.abs(c.v), 14 * dt);
     else if (f > 0.1) c.v += c.v < -.2 ? 12 * dt * f : 6.5 * f * (1 - Math.max(0, c.v) / vmax) * dt;
     else if (f < -0.1) c.v += c.v > .2 ? 11 * dt * f : 4 * f * (1 + Math.min(0, c.v) / 7) * dt;
@@ -232,7 +231,8 @@ const Vehicles = {
     if (this.rental) { const s = Math.floor((Date.now() - this.rental.t0) / 1000); line = `RENTAL ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} · ${money(this.rental.paid * 5)} · $5 per started minute`; }
     $('dspd').textContent = sp; $('dspd').classList.toggle('over', over && !c.cop);
     $('dinfo').textContent = this.frozen ? 'PULLED OVER · ' + this.frozen : line;
-    $('dkeys').innerHTML = isTouch ? '' : `${KB('E', 'B')}exit ${KB('V', 'Y')}${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ` ${KB('H', 'RB')}siren ${KB('L', 'LB')}lights` : ''} ${KB('Space', 'A')}brake${usingPad ? ` ${XB('RT')}gas ${XB('LT')}brake/reverse` : ''}`;
+    const kg = (a, ctx) => Input.glyph(a, ctx, Input.device === 'pad' ? 'pad' : 'kbm');   // keyboard or pad hints (a touch screen has its own)
+    $('dkeys').innerHTML = isTouch ? '' : `${kg('exit', 'bare')}exit ${kg('camera', 'bare')}${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ` ${kg('siren')}siren ${kg('lights')}lights` : ''} ${kg('handbrake')}brake${Input.device === 'pad' ? ` ${XB('RT')}gas ${XB('LT')}brake/reverse` : ''}`;
   },
   toggleCam() { this.cam = this.cam === 'cab' ? 'chase' : 'cab'; pitch = this.cam === 'cab' ? -.05 : .1; },
   /* ---- per frame: NPCs, walkers in the way, prompts, pull-overs by a player cop ---- */
@@ -264,7 +264,7 @@ const Vehicles = {
     if (!this.player) this.pushPlayer();
     // prompt
     this.lookCar = started ? this.look() : null; const lc = this.lookCar;
-    carHint = lc ? (lc.cop ? `Police car · ${USE()} to drive it on patrol (free)` : Profile.canAfford(5) ? `${USE()}: Rent for $5/min (charged per started minute)` : `Rent for $5/min · you need at least $5`) : '';
+    carHint = lc ? (lc.cop ? `Police car · ${Input.glyph('use')} to drive it on patrol (free)` : Profile.canAfford(5) ? `${Input.glyph('use')}: Rent for $5/min (charged per started minute)` : `Rent for $5/min · you need at least $5`) : '';
     if (this.player && this.player.cop) this.copWork(dt, now, t);
     else if (this.offenders.length) { for (const s of this.offenders) s.visible = false; }
     this.updateGoal();
@@ -308,7 +308,7 @@ const Vehicles = {
     const pl = this.pull;
     if (!pl) {
       if (cand && this.siren) { this.pullCand = this.pullCand === cand ? cand : (this.pullT = 0, cand); this.pullT += dt; carHint = `Stay behind them with the siren on… ${Math.max(0, 3 - this.pullT).toFixed(1)}s`; if (this.pullT >= 3) this.startPull(cand, true); }
-      else if (cand) { carHint = `Offender ahead · turn on the siren (${KB('H', 'RB')}) and stay behind them to pull them over`; this.pullT = 0; }
+      else if (cand) { carHint = `Offender ahead · turn on the siren (${Input.glyph('siren')}) and stay behind them to pull them over`; this.pullT = 0; }
       else this.pullT = 0;
     } else {
       const c = pl.car, d = Math.hypot(c.x - me.x, c.z - me.z);

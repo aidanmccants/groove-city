@@ -22,6 +22,7 @@
  "ui/maps.js",
  "ui/labels.js",
  "engine/player.js",
+ "input/actions.js",
  "input/input.js",
  "input/gamepad.js",
  "engine/time.js",
