@@ -12,6 +12,8 @@
   "durable_objects": {
     "bindings": [{ "name": "ROOM", "class_name": "MapRoom" }]
   },
+  // accounts, sessions and (later) property; the Worker creates its tables on first use (src/schema.js)
+  "d1_databases": [{ "binding": "DB", "database_name": "groove-city", "database_id": "7ddee53a-fc73-4ead-ae74-5ee168c9ac8e" }],
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["MapRoom"] }],
   "observability": { "enabled": true }
 }

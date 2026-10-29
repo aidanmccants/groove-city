@@ -101,6 +101,25 @@ node = { id: 'gc:pnc-bank', kind: 'building', parent: 'map', children: [], x, y,
   - `inventory(user_id, item_id, qty)`
   - Furniture lives in each house DO's own SQLite storage.
 - **Passwords:** PBKDF2-SHA256 through WebCrypto, 100k iterations, a per-user 16-byte salt and a constant-time compare. Session: a random 32-byte token in an HttpOnly, Secure, SameSite=Lax cookie. Login is rate-limited per IP and per username.
+- **Guest accounts (the user's design):**
+  - A guest is a real server-side account with no username or password.
+  - The browser keeps a random 32-byte guest secret in localStorage (`gcc.guest`), and the server stores only its SHA-256 (`users.guest_hash`). Reopening the browser resumes the guest; wiping the browser loses it.
+  - Guests show a random display name, such as `SwiftOtter42`.
+  - At any time a guest can **save** the account: choose a username and password, and the same row gets `username`/`pass_hash` and loses `guest_hash`. Money and stats carry over.
+  - Guests unseen for 60 days can be pruned later.
+- **Starting money:** $10, which is `cash: 1000` cents.
+- **Endpoints** (JSON bodies; the session lives in an HttpOnly cookie `gcs`, which gets `Secure` on https):
+  - `POST /api/guest` creates a guest and returns `{ secret }`.
+  - `POST /api/guest/resume {secret}` resumes a guest.
+  - `POST /api/signup {username, password}` and `POST /api/login {username, password}`.
+  - `POST /api/convert {username, password}` saves a guest (guest sessions only).
+  - `POST /api/logout`.
+  - `GET /api/me` returns `{ id, name, guest, attrs }`.
+  - `/ws` requires a valid session. The Worker resolves the user, then passes `X-User-Id` / `X-User-Name` / `X-Guest` to the room DO, which never trusts client-sent names.
+- **Rules:**
+  - Usernames are 3–20 characters of `[A-Za-z0-9_]`, unique case-insensitively, and can't start with "guest".
+  - Passwords are 8–128 characters.
+  - A `throttle` table rate-limits sign-ups, logins and guest creation per IP and per username: 10 tries per 15 minutes.
 - **The attribute registry is the scaling point.** Adding an attribute is one line:
 
 ```js

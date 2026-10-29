@@ -1,5 +1,9 @@
 // Groove City College, multiplayer. The Worker serves the map page and relays
 // each visitor's position to everyone else through one Durable Object (the "room").
+// Visitors sign in first (auth.js); the room shows each one under the account's name.
+
+import { ensureSchema } from './schema.js';
+import { handleApi, sessionUser } from './auth.js';
 
 const MAX_PLAYERS = 40;     // one room; keeps the fan-out of position updates small
 const MIN_MOVE_MS = 60;     // ignore position updates arriving faster than this from one visitor
@@ -13,15 +17,6 @@ const EVENTS = new Set(['knock', 'po', 'pulled', 'free', 'chase', 'caught', 'cal
 const VAULT_MS = 5 * 60 * 1000;   // a robbed bank vault stays open (and empty) this long, for everyone
 const RATE = { burst: 16, perSec: 8 };   // token bucket for everything except moves
 
-const ADJECTIVES = ['Brisk', 'Calm', 'Dapper', 'Eager', 'Fuzzy', 'Gentle', 'Hasty', 'Jolly', 'Keen', 'Lucky',
-  'Merry', 'Nimble', 'Plucky', 'Quiet', 'Rapid', 'Sunny', 'Swift', 'Tidy', 'Vivid', 'Witty', 'Zesty',
-  'Bold', 'Brave', 'Chill', 'Cosmic', 'Dizzy', 'Golden', 'Happy', 'Lively', 'Mellow', 'Peppy', 'Rustic',
-  'Silly', 'Sleepy', 'Stout', 'Wacky'];
-const NOUNS = ['Otter', 'Badger', 'Falcon', 'Beaver', 'Heron', 'Walrus', 'Panda', 'Lynx', 'Moose', 'Penguin',
-  'Tiger', 'Koala', 'Gopher', 'Raven', 'Wombat', 'Pelican', 'Bison', 'Ferret', 'Hedgehog', 'Narwhal',
-  'Quokka', 'Sloth', 'Yak', 'Owl', 'Fox', 'Hippo', 'Lemur', 'Gecko'];
-
-const pick = list => list[Math.floor(Math.random() * list.length)];
 // a number from the client, or null if it is missing or not finite; clamped to the allowed range
 const num = (v, lo, hi) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : null);
 const int = (v, lo, hi) => (Number.isInteger(v) && v >= lo && v <= hi ? v : null);
@@ -67,8 +62,18 @@ export class MapRoom {
     if (request.headers.get('Upgrade') !== 'websocket') {
       return new Response('Expected a WebSocket upgrade', { status: 426 });
     }
+    // the Worker checked the session and sends the account's id and name; the browser's own name is ignored
+    const userId = request.headers.get('X-User-Id');
+    if (!userId) return new Response('Sign in first', { status: 401 });
+    const id = 'u' + userId;
     const [client, server] = Object.values(new WebSocketPair());
     const sockets = this.ctx.getWebSockets();
+
+    // one connection per account: an older tab for the same account is closed before this one is accepted
+    for (const s of sockets) {
+      if (s.deserializeAttachment()?.id !== id) continue;
+      try { s.close(4000, 'signed in elsewhere'); } catch { /* already closing */ }
+    }
     this.ctx.acceptWebSocket(server);
 
     if (sockets.length >= MAX_PLAYERS) {
@@ -77,14 +82,13 @@ export class MapRoom {
       return new Response(null, { status: 101, webSocket: client });
     }
 
-    const taken = new Set(sockets.map(s => s.deserializeAttachment()?.name));
-    const me = { id: crypto.randomUUID().slice(0, 8), name: this.pickName(taken), x: null, y: null, z: null, yaw: 0, last: 0, v: -1, cy: 0, f: 0, car: null, tk: RATE.burst, tt: Date.now() };
+    const me = { id, name: request.headers.get('X-User-Name'), x: null, y: null, z: null, yaw: 0, last: 0, v: -1, cy: 0, f: 0, car: null, tk: RATE.burst, tt: Date.now() };
     server.serializeAttachment(me);
 
-    // players who have sent at least one position; the others appear once they move
+    // players who have sent at least one position; the others appear once they move (the replaced tab is left out)
     const players = sockets
       .map(s => s.deserializeAttachment())
-      .filter(p => p && p.x !== null)
+      .filter(p => p && p.x !== null && p.id !== id)
       .map(({ id, name, x, y, z, yaw, v, cy, f }) => ({ id, name, x, y, z, yaw, v, cy, f }));
     const live = new Set(players.map(p => p.id)), cars = [...(await this.loadCars())].map(([id, c]) => [id, c.x, c.z, c.h, c.d && live.has(c.d) ? c.d : null]);
     const vault = await this.loadVault();
@@ -166,7 +170,9 @@ export class MapRoom {
   async webSocketClose(ws, code, reason) {
     const me = ws.deserializeAttachment();
     if (me) {
-      this.broadcast(JSON.stringify({ t: 'leave', id: me.id }), ws);
+      // a tab replaced by a newer one for the same account: the account is still here, so nobody hears a leave
+      const replaced = this.ctx.getWebSockets().some(s => s !== ws && s.deserializeAttachment()?.id === me.id);
+      if (!replaced) this.broadcast(JSON.stringify({ t: 'leave', id: me.id }), ws);
       if (me.car !== null && me.car !== undefined) {   // they drove off and left: the car stays where they were
         await this.loadCars();
         if (this.cars.get(me.car)?.d === me.id) this.park(me.car, me.x ?? 0, me.z ?? 0, me.cy ?? 0);
@@ -185,21 +191,23 @@ export class MapRoom {
       try { s.send(msg); } catch { /* socket is closing; its close handler will tell the room */ }
     }
   }
-
-  pickName(taken) {
-    for (let i = 0; i < 50; i++) {
-      const name = pick(ADJECTIVES) + pick(NOUNS) + (10 + Math.floor(Math.random() * 90));
-      if (!taken.has(name)) return name;
-    }
-    return pick(ADJECTIVES) + pick(NOUNS) + crypto.randomUUID().slice(0, 4);
-  }
 }
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    await ensureSchema(env.DB);   // creates the account tables on first use
+    const api = await handleApi(request, env, url);
+    if (api) return api;
     if (url.pathname === '/ws') {
-      return env.ROOM.get(env.ROOM.idFromName('campus')).fetch(request);
+      const user = await sessionUser(request, env);
+      if (!user) return new Response('Sign in first', { status: 401 });
+      // the room trusts these headers, not the browser's; the name is the account's
+      const req = new Request(request, { headers: new Headers(request.headers) });
+      req.headers.set('X-User-Id', String(user.id));
+      req.headers.set('X-User-Name', user.name);
+      req.headers.set('X-Guest', user.guest ? '1' : '0');
+      return env.ROOM.get(env.ROOM.idFromName('campus')).fetch(req);
     }
     // the page and map data are static assets (public/), served before the Worker runs; this is the fallback
     return env.ASSETS.fetch(request);

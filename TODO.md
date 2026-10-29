@@ -41,6 +41,7 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 ## Accounts and players
 - [ ] Accounts with a username and password (password hashed and stored in a database, hash checked at login)
 - [ ] Users pick their own username
+- [ ] Guest accounts: kept in the browser, lost if the browser is wiped, can be saved as a real account at any time
 - [ ] Chat between players
 - [ ] Account attributes that are easy to add and scale (money, score, age, name, statuses, …)
 - [ ] Money handled by the server, so it can't be cheated
@@ -95,7 +96,7 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [ ] Front wheels don't turn when steering
 - [ ] Measure frame rate in a normal browser window
 - [ ] $1 showed up twice with no sandwich served (seen once in testing)
-- [ ] Decide the starting money ($10 was a placeholder)
+- [x] Decide the starting money: $10
 - [ ] Deploy to the live site (`npm run deploy` in `worker/`)
 
 ## Your ideas
