@@ -88,8 +88,7 @@ Cops.states.pull = (cop, dt) => {
     cop.officer.armR.rotation.x = -1.2;
     if (cop.st > 2.2) {
       if (D2.ticket) {
-        Profile.charge(10, 'ticket');
-        if (Profile.inDebt()) toast("You have 10 minutes to earn money selling sandwiches at CFA or you'll be kicked. Follow the yellow beam.", 'bad');
+        Econ.act('ticket', { done: r => { if (r.ok && Profile.inDebt()) toast("You have 10 minutes to earn money selling sandwiches at CFA or you'll be kicked. Follow the yellow beam.", 'bad'); } });
       }
       D2.step = 'back'; cop.st = 0;
     }

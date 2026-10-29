@@ -167,7 +167,7 @@ export const ATTRS = {
 | **4: Interiors as maps** | Loader and transitions; move CFA and the bank into interiors; standard house interior; buying and selling houses |
 | **5: Death and money** | "Unalived" screen + Respawn (cash → 0, bank kept); ATM with animations to deposit and withdraw; rentals billed every 10 s at $5/min (83¢ per 10 s, the user's choice); animated ticket cutscene with goofy characters |
 | **6: Jobs and casino** | Jobs at Little Caesars, the Marathon gas station and other shops; Broad Street Gambling House (where Crimson Vapes is) with roulette, blackjack and slots, in-game currency only, server RNG |
-| **7: Competitive** | Leaderboards (net worth, top cop, most wanted, sandwich streak); daily and weekly challenges; seasons |
+| **7: Competitive** | Leaderboards (net worth, top cop, most wanted, sandwich streak); daily and weekly challenges; seasons; first-time fly-by intro (a skippable camera tour of everything to do, shown once per account) |
 | **Later** | Item shop + house decorating; bus to Slippery Rock map (context only for now) |
 
 ## Ideas to make it worth coming back to

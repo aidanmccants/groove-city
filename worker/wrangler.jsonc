@@ -7,7 +7,7 @@
   "assets": { "directory": "./public", "binding": "ASSETS" },
   // runs before every `wrangler dev` and `wrangler deploy` (also in Cloudflare's Git builds, which skip npm scripts);
   // dev rebuilds when the game code or page shell changes
-  "build": { "command": "node build.mjs", "watch_dir": ["../client", "../src"] },
+  "build": { "command": "node build.mjs", "watch_dir": ["../client", "../shared", "../src"] },
   // one Durable Object instance ("campus") holds every connected visitor
   "durable_objects": {
     "bindings": [{ "name": "ROOM", "class_name": "MapRoom" }]

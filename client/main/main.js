@@ -49,7 +49,8 @@ $('go').addEventListener('click', () => {
   connectNet();
   if (isTouch) $('touch').hidden = false; else $('keys').hidden = false;
   Account.paintChip();
-  if (Profile.inDebt() && Profile.debtLeft() === 0) { Profile.reset(); toast('Your ten minutes in debt ran out, so you start over', 'info'); }
+  // signed in, the server's money is not known yet: checkDebt starts the fresh start once it is (see debt.js)
+  if (!Account.me && Profile.inDebt() && Profile.debtLeft() === 0) { Profile.reset(); toast('Your ten minutes in debt ran out, so you start over', 'info'); }
   updateMoney();
   if (Profile.state.seenUpdate !== CURRENT_UPDATE_ID) openNews(); else lockPointer();
 });

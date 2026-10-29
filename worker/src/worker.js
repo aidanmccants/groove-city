@@ -4,6 +4,8 @@
 
 import { ensureSchema } from './schema.js';
 import { handleApi, sessionUser } from './auth.js';
+import { defaults, clean } from '../../shared/attrs.js';
+import { RULES, apply } from '../../shared/economy.js';
 
 const MAX_PLAYERS = 40;     // one room; keeps the fan-out of position updates small
 const MIN_MOVE_MS = 60;     // ignore position updates arriving faster than this from one visitor
@@ -15,6 +17,7 @@ const MAX_CARS = 600;       // most moved cars remembered
 const CAR_TTL = 6 * 3600 * 1000;   // a car nobody has touched for this long goes back to its stall
 const EVENTS = new Set(['knock', 'po', 'pulled', 'free', 'chase', 'caught', 'calm']);   // short gameplay events relayed as-is (see the page's Vehicles.onEvt and Bank.onEvt)
 const VAULT_MS = 5 * 60 * 1000;   // a robbed bank vault stays open (and empty) this long, for everyone
+const SAVE_MS = 10 * 1000;       // a changed account's money is written to D1 this soon after the change (die is written at once)
 const RATE = { burst: 16, perSec: 8 };   // token bucket for everything except moves
 const CHAT_MS = 1000;       // one chat message a second from each browser; the rest are dropped
 const CHAT_MAX = 200;       // characters in one chat message (the page's input has the same limit)
@@ -41,6 +44,7 @@ export class MapRoom {
     this.env = env;
     this.cars = null;
     this.vault = null;
+    this.saving = Promise.resolve();   // the queue of account saves, one after another (see persist)
   }
 
   // the PNC Bank vault: { until (ms, server clock), by (who cracked it) }
@@ -58,6 +62,67 @@ export class MapRoom {
   }
 
   saveCars() { this.ctx.storage.put('cars', Object.fromEntries(this.cars)); }
+
+  // the account's saved attributes, merged over the defaults (a new attribute gets its default at once). Throws when the row is
+  // missing or corrupt: a made-up balance must never be saved over a real one
+  async loadAttrs(userId) {
+    await this.saving;   // a save still in flight (a tab just replaced by this one) lands first
+    const row = await this.env.DB.prepare('SELECT attrs FROM users WHERE id = ?').bind(Number(userId)).first();
+    if (!row) throw new Error('no account ' + userId);
+    return clean({ ...defaults(), ...JSON.parse(row.attrs) });
+  }
+
+  // one money rule for this socket (shared/economy.js): the cooldown here, the arithmetic in apply(). Always answers with the attributes.
+  applyRule(ws, me, name, now) {
+    if (typeof name !== 'string' || !Object.hasOwn(RULES, name) || !me.attrs || me.gone) return;   // unknown action, not loaded, or a replaced tab
+    const rule = RULES[name];
+    me.cool = me.cool || {};
+    const answer = extra => ws.send(JSON.stringify({ t: 'attrs', a: me.attrs, act: name, ...extra }));
+    if (rule.cool && now - (me.cool[name] || 0) < rule.cool) return answer({ ok: false, reason: 'cooldown' });
+    const r = apply(me.attrs, rule, now);
+    if (!r.ok) return answer({ ok: false, reason: r.reason });
+    me.attrs = r.attrs; me.dirty = true; me.cool[name] = now;
+    ws.serializeAttachment(me);   // before any await: the attachment is what gets saved
+    this.scheduleSave();
+    answer({ ok: true });
+  }
+
+  // a changed account is saved within SAVE_MS: one alarm per room, set by the first change (an alarm also wakes a hibernating room)
+  scheduleSave() {
+    this.ctx.storage.getAlarm()
+      .then(t => { if (!t) return this.ctx.storage.setAlarm(Date.now() + SAVE_MS); })
+      .catch(err => console.error('alarm', err));
+  }
+
+  // queues a save of every dirty account. Saves run one after another, so an older one never lands after a newer one.
+  // extra: a socket that is closing and may already be missing from getWebSockets()
+  persist(extra) {
+    this.saving = this.saving.then(() => this.writeDirty(extra)).catch(err => console.error('save failed; retried on the next alarm', err));
+    return this.saving;
+  }
+
+  async writeDirty(extra) {
+    const socks = this.ctx.getWebSockets();
+    if (extra && !socks.includes(extra)) socks.push(extra);
+    const jobs = [];
+    for (const s of socks) {
+      const me = s.deserializeAttachment();
+      if (me?.dirty && !me.gone) jobs.push({ s, json: JSON.stringify(me.attrs), uid: Number(me.id.slice(1)) });
+    }
+    if (!jobs.length) return;
+    await this.env.DB.batch(jobs.map(j => this.env.DB.prepare('UPDATE users SET attrs = ?, ver = ver + 1 WHERE id = ?').bind(j.json, j.uid)));
+    for (const j of jobs) {
+      const me = j.s.deserializeAttachment();
+      // clean only if nothing changed while the write ran; otherwise the next alarm writes the newer state
+      if (me && JSON.stringify(me.attrs) === j.json) { me.dirty = false; j.s.serializeAttachment(me); }
+    }
+  }
+
+  // the alarm: save what is dirty; a change that landed during the save sets another alarm
+  async alarm() {
+    await this.persist();
+    if (this.ctx.getWebSockets().some(s => s.deserializeAttachment()?.dirty)) this.scheduleSave();
+  }
 
   liveIds() { return new Set(this.ctx.getWebSockets().map(s => s.deserializeAttachment()?.id).filter(Boolean)); }
 
@@ -79,9 +144,14 @@ export class MapRoom {
     const [client, server] = Object.values(new WebSocketPair());
     const sockets = this.ctx.getWebSockets();
 
-    // one connection per account: an older tab for the same account is closed before this one is accepted
+    // one connection per account: an older tab for the same account is closed before this one is accepted. This tab takes over
+    // that tab's attributes (they may not be saved yet); the older tab is marked gone, so it saves nothing more and takes no more money
+    let carried = null;
     for (const s of sockets) {
-      if (s.deserializeAttachment()?.id !== id) continue;
+      const old = s.deserializeAttachment();
+      if (old?.id !== id) continue;
+      if (old.attrs) carried = { attrs: old.attrs, dirty: !!old.dirty };
+      s.serializeAttachment({ ...old, gone: true, dirty: false });
       try { s.close(4000, 'signed in elsewhere'); } catch { /* already closing */ }
     }
     this.ctx.acceptWebSocket(server);
@@ -92,7 +162,16 @@ export class MapRoom {
       return new Response(null, { status: 101, webSocket: client });
     }
 
-    const me = { id, name: request.headers.get('X-User-Name'), x: null, y: null, z: null, yaw: 0, last: 0, v: -1, cy: 0, f: 0, car: null, tk: RATE.burst, tt: Date.now() };
+    // the money and stats: from the tab this one replaces, else from D1. If that fails the socket is closed (the client retries)
+    let attrs;
+    try {
+      attrs = carried ? carried.attrs : await this.loadAttrs(userId);
+    } catch (err) {
+      console.error('account load failed', err);
+      server.close(1011, 'accounts unavailable');
+      return new Response(null, { status: 101, webSocket: client });
+    }
+    const me = { id, name: request.headers.get('X-User-Name'), x: null, y: null, z: null, yaw: 0, last: 0, v: -1, cy: 0, f: 0, car: null, tk: RATE.burst, tt: Date.now(), attrs, dirty: carried ? carried.dirty : false, cool: {} };
     server.serializeAttachment(me);
 
     // players who have sent at least one position; the others appear once they move (the replaced tab is left out)
@@ -103,6 +182,7 @@ export class MapRoom {
     const live = new Set(players.map(p => p.id)), cars = [...(await this.loadCars())].map(([id, c]) => [id, c.x, c.z, c.h, c.d && live.has(c.d) ? c.d : null]);
     const vault = await this.loadVault();
     server.send(JSON.stringify({ t: 'welcome', id: me.id, name: me.name, now: Date.now(), players, cars, vault: vault.until > Date.now() ? vault : null }));
+    server.send(JSON.stringify({ t: 'attrs', a: attrs }));   // the account's money, right after the welcome
     this.broadcast(JSON.stringify({ t: 'join', id: me.id, name: me.name }), server);
 
     return new Response(null, { status: 101, webSocket: client });
@@ -169,7 +249,11 @@ export class MapRoom {
         this.vault = { until: now + VAULT_MS, by: me.id };
         this.ctx.storage.put('vault', this.vault);
         this.broadcast(JSON.stringify({ t: 'vault', ...this.vault }));
+        this.applyRule(ws, me, 'bank.rob', now);   // only the one who cracks it is paid, and only here
       }
+    } else if (m.t === 'act') {
+      this.applyRule(ws, me, m.a, now);
+      if (m.a === 'die') this.persist(ws);   // saved now, not on the timer: the socket closes right after this
     } else if (m.t === 'evt') {
       const a = Array.isArray(m.a) && m.a.length <= 6 && m.a.every(n => typeof n === 'number' && Number.isFinite(n) && Math.abs(n) < 1e5) ? m.a.map(n => Math.round(n * 100) / 100) : null;
       if (EVENTS.has(m.k) && a) this.broadcast(JSON.stringify({ t: 'evt', id: me.id, k: m.k, a }), ws);
@@ -194,6 +278,7 @@ export class MapRoom {
         if (this.cars.get(me.car)?.d === me.id) this.park(me.car, me.x ?? 0, me.z ?? 0, me.cy ?? 0);
       }
     }
+    if (me?.dirty) await this.persist(ws);   // the money is saved before the socket is gone
     try { ws.close(code, reason); } catch { /* already closed */ }
   }
 

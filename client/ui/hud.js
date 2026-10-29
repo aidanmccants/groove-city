@@ -29,10 +29,8 @@ function toast(text, kind = '') {
   const box = $('toasts'); box.appendChild(el); while (box.children.length > 4) box.firstChild.remove();
   setTimeout(() => el.remove(), 2500);
 }
-Profile.onChange((s, tx) => {
-  updateMoney();
-  if (tx && tx.amount && !tx.quiet && started) toast(`${tx.amount > 0 ? '+' : '-'}${money(Math.abs(tx.amount))}${tx.reason ? ' ' + tx.reason : ''}`, tx.amount > 0 ? '' : 'bad');
-});
+// money toasts come from Econ, when the server (or the offline rule) confirms a change
+Profile.onChange(() => updateMoney());
 let hintText = '';
 function setHint(html) { if (html === hintText) return; hintText = html; $('hint').hidden = !html; $('hint').innerHTML = html; }
 

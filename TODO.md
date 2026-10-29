@@ -43,8 +43,8 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [x] Users pick their own username
 - [x] Guest accounts: kept in the browser, lost if the browser is wiped, can be saved as a real account at any time
 - [x] Chat between players
-- [ ] Account attributes that are easy to add and scale (money, score, age, name, statuses, …)
-- [ ] Money handled by the server, so it can't be cheated
+- [x] Account attributes that are easy to add and scale (money, score, age, name, statuses, …)
+- [x] Money handled by the server, so it can't be cheated
 
 ## Maps and buildings
 - [ ] Each map is separate; the server holds the map's objects and the browser draws them, so everyone sees the same thing
@@ -61,7 +61,7 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [ ] More jobs at the shops: gas stations, Little Caesars, etc.
 - [ ] ATM: talk to it to deposit and withdraw, with ATM animations
 - [ ] Money in the bank is kept when you die; money you're carrying is lost
-- [ ] Car rentals deduct money as you drive, every 10 s at $5/min (83¢ per 10 s)
+- [x] Car rentals deduct money as you drive, every 10 s at $5/min (83¢ per 10 s)
 - [ ] Cars need gas; fill up at the Marathon, with a gas-pump animation
 
 ## Feel and presentation
@@ -81,6 +81,7 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [ ] Daily jobs board and streaks
 - [ ] Cops vs robbers bounties; co-op heists
 - [ ] Property market, races, events (see the idea list in ARCHITECTURE.md)
+- [ ] First-time fly-by intro: a camera tour over the map showing everything you can do (CFA, car rentals, cops, bank, train, houses, casino…), skippable, shown once per account (Phase 7)
 
 ## Scale
 - [ ] Keep everything ultra compact and lightweight; make sure the Worker and database won't run out of space

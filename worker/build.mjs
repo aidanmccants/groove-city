@@ -13,7 +13,12 @@ const root = join(worker, '..'), pub = join(worker, 'public');
 const read = p => readFileSync(join(root, p), 'utf8').replace(/\r\n/g, '\n');   // Windows checkouts may have CRLF
 
 const order = JSON.parse(read('client/order.json'));
-const code = order.map(p => read('client/' + p)).join('').slice(0, -1);
+// "../shared/x.js" entries come from the repo's shared/ folder (the Worker imports the same files). The client is one script,
+// so their `export` keywords go, and an import line (a shared file using another) goes too.
+const part = p => p.startsWith('../shared/')
+  ? read(p.slice(3)).replace(/^export /gm, '').replace(/^import .*\n/gm, '')
+  : read('client/' + p);
+const code = order.map(part).join('').slice(0, -1);
 const tpl = read('src/template.html').replace('/*__CLIENT__*/', () => code);
 const data = read('tools/data.js');
 const page = tpl.replace('/*__DATA__*/', () => data);

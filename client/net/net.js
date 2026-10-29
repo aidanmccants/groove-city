@@ -92,6 +92,7 @@ function onNet(m) {
   else if (m.t === 'took' || m.t === 'deny') { Vehicles.onTake(m); return; }
   else if (m.t === 'evt') { Vehicles.onEvt(m); return; }
   else if (m.t === 'vault') { Bank.onVault(m); return; }
+  else if (m.t === 'attrs') { Profile.server(m.a); if (m.act) Econ.answered(m); return; }   // the account's money; after an act, its answer
   else if (m.t === 'join') { const r = remoteFor(m); if (r.name !== m.name) renameRemote(r, m.name); }   // a renamed account reconnects with its new name
   else if (m.t === 'move') { applyMove(m); return; }
   else if (m.t === 'leave') dropRemote(m.id);
@@ -102,6 +103,7 @@ function onNet(m) {
 function connectNet() {
   if (netSock || netOff) return;
   if (!/^https?:$/.test(location.protocol)) { netOff = true; return updateOnline('Single player: open the Worker URL to meet others'); }
+  Econ.dropPending();   // answers to acts on an earlier socket never come
   let sock;
   try { sock = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws'); }
   catch (e) { netOff = true; return updateOnline('Single player: multiplayer is unavailable here'); }
@@ -111,7 +113,7 @@ function connectNet() {
   sock.onmessage = e => { try { onNet(JSON.parse(e.data)); } catch (err) { console.error(err); } };
   sock.onclose = async e => {
     if (netSock !== sock) return;   // dropped on purpose (kickAndReset, reconnectNet) or replaced
-    netSock = null; netSent = null; for (const id of [...remotes.keys()]) dropRemote(id); Chat.sync();
+    netSock = null; netSent = null; for (const id of [...remotes.keys()]) dropRemote(id); Chat.sync(); Econ.dropPending();
     if (e.code === 4000) {   // the same account opened another tab: this one stays disconnected
       netOff = true; const msg = 'Signed in in another tab — this one is disconnected';
       toast(msg, 'bad'); return updateOnline(msg);

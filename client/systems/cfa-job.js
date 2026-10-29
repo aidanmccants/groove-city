@@ -3,7 +3,7 @@
    other systems can point players to. Customers are ordinary walkers (people[]) with pp.cfa set while they are inside. */
 const CFA = {
   zone: null, counter: null, door: null, route: [], queue: [], onShift: false, served: 0, nearStarts: [],
-  PAY: 1, PATIENCE: 18, MAXQ: 4, nextPull: 0, HAND_MS: 650, handing: null, fly: null,
+  PAY: RULES['cfa.serve'].cash / 100, PATIENCE: 18, MAXQ: 4, nextPull: 0, HAND_MS: 650, handing: null, fly: null,
   slot(i) { return breen.W(10, 15.9 - i * 1.1); },   // queue runs back from the register toward the hall
   join(pp) {
     if (!this.zone || this.queue.length >= this.MAXQ) return false;
@@ -82,7 +82,7 @@ function updateCFA(now) {
   if (H) {   // sandwich in flight: ease across, with a little hop over the counter
     const k = Math.min(1, (now - H.t0) / CFA.HAND_MS), e = k * k * (3 - 2 * k), to = H.pp.bag.getWorldPosition(new THREE.Vector3());
     CFA.fly.position.lerpVectors(H.from, to, e); CFA.fly.position.y += Math.sin(Math.PI * k) * 0.35; CFA.fly.rotation.y = k * Math.PI * 2;
-    if (k >= 1) { CFA.fly.visible = false; CFA.handing = null; H.pp.cfa.handing = false; CFA.served++; CFA.leave(H.pp, true); Profile.earn(CFA.PAY, 'sandwich'); }
+    if (k >= 1) { CFA.fly.visible = false; CFA.handing = null; H.pp.cfa.handing = false; CFA.served++; CFA.leave(H.pp, true); Econ.act('cfa.serve'); }
   }
   const inside = started && !flying && Math.abs(P.y - F.fy) < 1.5;
   CFA.onShift = inside && pip(P.x, P.z, z.poly);

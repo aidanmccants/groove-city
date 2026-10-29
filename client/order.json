@@ -1,4 +1,6 @@
 [
+ "../shared/attrs.js",
+ "../shared/economy.js",
  "main/boot.js",
  "world/nodes.js",
  "maps/grove-city/manifest.js",

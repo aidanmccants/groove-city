@@ -20,7 +20,7 @@ const Bank = {
   },
   rob() {
     if (netSock && netSock.readyState === 1) { this.pending = performance.now(); netSock.send(JSON.stringify({ t: 'rob' })); }
-    else this.cracked(netNow() + VAULT_MS);
+    else { Econ.act('bank.rob'); this.cracked(netNow() + VAULT_MS); }
   },
   onVault(m) {   // the Worker: open until m.until (shared clock), cracked by m.by
     const was = this.broken(); this.until = +m.until || 0;
@@ -30,7 +30,7 @@ const Bank = {
   },
   cracked(until) {
     this.until = until; this.hits = 0; this.burst(40);
-    Profile.earn(100, 'bank robbery'); Pad.rumble(250, 0.6);
+    Pad.rumble(250, 0.6);   // the money: the server's answer to 'rob' (or Econ offline), not this line
     banner('VAULT CRACKED · +$100', 'The alarm is ringing. Stay away from the police for 2:00 and the cash is yours.');
     if (flying) toggleFly();
     this.wanted = { end: performance.now() + WANTED_MS, cops: new Set() }; $('wanted').hidden = false;
@@ -61,7 +61,7 @@ const Bank = {
   },
   bust() {
     sendEvt('caught', []); this.endWanted(false);
-    kickAndReset('Busted! A Grove City officer caught you after the PNC Bank robbery. All your money is gone, so you start over with ' + money(START_MONEY) + '.');
+    kickAndReset('Busted! A Grove City officer caught you after the PNC Bank robbery. All your money is gone, so you start over with ' + money(startMoney()) + '.');
   },
   reset() { this.endWanted(false); this.hits = 0; this.pending = 0; this.clearCracks(); },
   onEvt(m) {   // another player's chase: 'chase' [cop ids], 'caught', 'calm'

@@ -18,6 +18,8 @@ const CAR_PARTS = [
 ];
 const RED_PART = 12, BLUE_PART = 13, LIGHT_ON = [new THREE.Color(0xff2020), new THREE.Color(0x2a5bff)], LIGHT_OFF = [new THREE.Color(0x5a1010), new THREE.Color(0x10205a)];
 const TAIL_PART = 7, TAIL_ON = new THREE.Color(0xff2a1a), TAIL_OFF = new THREE.Color(0x5e0a0c);
+// car rental: $5/min, billed every 10 s at 83 cents a block (shared/economy.js: rent.start pays the first block, rent.tick each later one)
+const RENT_EVERY = 10000, RENT_BLOCK = -RULES['rent.start'].cash / 100;
 const Vehicles = {
   list: [], parked: 0, player: null, parts: [], frozen: null, cam: 'cab', lookCar: null, pending: null, rental: null,
   lights: false, siren: false, pull: null, offenders: [], camBase: 0, prevPos: null,
@@ -162,7 +164,7 @@ const Vehicles = {
   },
   tryEnter() {
     const c = this.lookCar; if (!c || this.pending) return false;
-    if (!c.cop && !Profile.canAfford(5)) { toast('Renting costs $5 a minute. Earn some at the Chick-fil-A counter first.', 'bad'); return true; }
+    if (!c.cop && !Profile.canAfford(RENT_BLOCK)) { toast('Renting costs $5/min, billed every 10 s. Earn some at the Chick-fil-A counter first.', 'bad'); return true; }
     if (netSock && netSock.readyState === 1) { this.pending = { car: c, t: performance.now() }; netSock.send(JSON.stringify({ t: 'take', id: c.id })); }
     else this.enter(c);
     return true;
@@ -175,15 +177,21 @@ const Vehicles = {
     if (flying) toggleFly();
     c.kind = 'player'; c.v = 0; this.player = c; this.frozen = null; this.prevPos = [c.x, c.z]; this.cam = 'cab';
     yaw = c.h + Math.PI; pitch = -.05; this.camBase = yaw; this.lights = this.siren = false;
-    if (c.cop) { this.rental = null; toast('🚓 On patrol. You are a cop now: H siren, L lights. Pull speeders over for $5.', 'info'); }
-    else { Profile.charge(5, 'car rental', { quiet: true }); this.rental = { t0: Date.now(), paid: 1 }; toast('Car rented: $5 now, then $5 for every started minute', 'info'); }
     $('drive').hidden = false; $('mode').textContent = c.cop ? 'POLICE' : 'DRIVE'; $('tFly').textContent = 'EXIT';
+    if (c.cop) { this.rental = null; toast('🚓 On patrol. You are a cop now: H siren, L lights. Pull speeders over for $5.', 'info'); }
+    else { this.rental = { t0: Date.now(), paid: 1 }; Econ.act('rent.start', { quiet: true, done: r => this.rentAnswer(c, r) }); }
+  },
+  // the server's answer to the first block of a rental: refused for money, the car is handed back
+  rentAnswer(c, r) {
+    if (this.player !== c) return;
+    if (r.reason === 'not enough money') { toast('Not enough money to rent this car', 'bad'); this.exit(true); }
+    else toast('Car rented: $5/min, billed every 10 s', 'info');
   },
   exit(quiet) {
     const c = this.player; if (!c) return;
     if (this.frozen && !quiet) { toast('Wait for the officer to finish', 'info'); return; }
     this.player = null; this.frozen = null; c.kind = 'parked'; c.v = 0; this.setFlash(c, false); this.setBrake(c, false); Siren.stop(); this.lights = this.siren = false; this.pull = null;
-    if (this.rental) { const mins = this.rental.paid; if (!quiet) toast(`Rental ended: ${mins} min, ${money(mins * 5)}`, 'info'); this.rental = null; }
+    if (this.rental) { if (!quiet) toast(`Rental ended: ${money(this.rental.paid * RENT_BLOCK)} for ${this.rental.paid * 10} s`, 'info'); this.rental = null; }
     if (netSock && netSock.readyState === 1) netSock.send(JSON.stringify({ t: 'park', id: c.id, x: +c.x.toFixed(2), z: +c.z.toFixed(2), h: +c.h.toFixed(3) }));
     // step out of the driver's door
     const lx = Math.cos(c.h), lz = -Math.sin(c.h); P.set(c.x + lx * 1.9, 0, c.z + lz * 1.9); P.y = groundAt(P.x, P.z, c.y + 1) + .05; V.set(0, 0, 0);
@@ -205,9 +213,9 @@ const Vehicles = {
     const heading = Math.atan2(c.x - px, c.z - pz), moved = Math.hypot(c.x - px, c.z - pz) > 1e-3;
     this.ranRed = moved && c.v > 1 ? Traffic.ranRed([px, pz], [c.x, c.z], heading) : null;
     if (this.ranRed) this.redT = performance.now();
-    if (this.rental) {   // $5 for every started minute
-      const due = Math.floor((Date.now() - this.rental.t0) / 60000) + 1;
-      if (due > this.rental.paid) { this.rental.paid = due; Profile.charge(5, 'car rental', { quiet: true }); }
+    if (this.rental) {   // billed every 10 s: the first block was paid at the start (rent.start), each later one as it begins
+      const due = Math.floor((Date.now() - this.rental.t0) / RENT_EVERY) + 1;
+      if (due > this.rental.paid) { this.rental.paid = due; Econ.act('rent.tick', { quiet: true }); }
     }
     this.braking = brake || (f * c.v < 0 && Math.abs(c.v) > .5); this.setBrake(c, this.braking);
     this.place(c); c.flash = c.cop && this.lights; if (c.cop) this.setFlash(c, this.lights, Math.floor(performance.now() / 180) % 2);
@@ -228,7 +236,7 @@ const Vehicles = {
     const c = this.player; if (!c) return;
     const sp = mph(c.v), over = sp > 25;
     let line = c.cop ? `🚓 POLICE · lights ${this.lights ? 'ON' : 'off'} · siren ${this.siren ? 'ON' : 'off'}` : '';
-    if (this.rental) { const s = Math.floor((Date.now() - this.rental.t0) / 1000); line = `RENTAL ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} · ${money(this.rental.paid * 5)} · $5 per started minute`; }
+    if (this.rental) { const s = Math.floor((Date.now() - this.rental.t0) / 1000); line = `RENTAL ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} · ${money(this.rental.paid * RENT_BLOCK)} · $5/min · billed every 10 s`; }
     $('dspd').textContent = sp; $('dspd').classList.toggle('over', over && !c.cop);
     $('dinfo').textContent = this.frozen ? 'PULLED OVER · ' + this.frozen : line;
     const kg = (a, ctx) => Input.glyph(a, ctx, Input.device === 'pad' ? 'pad' : 'kbm');   // keyboard or pad hints (a touch screen has its own)
@@ -264,7 +272,7 @@ const Vehicles = {
     if (!this.player) this.pushPlayer();
     // prompt
     this.lookCar = started ? this.look() : null; const lc = this.lookCar;
-    carHint = lc ? (lc.cop ? `Police car · ${Input.glyph('use')} to drive it on patrol (free)` : Profile.canAfford(5) ? `${Input.glyph('use')}: Rent for $5/min (charged per started minute)` : `Rent for $5/min · you need at least $5`) : '';
+    carHint = lc ? (lc.cop ? `Police car · ${Input.glyph('use')} to drive it on patrol (free)` : Profile.canAfford(RENT_BLOCK) ? `${Input.glyph('use')}: Rent for $5/min · billed every 10 s` : `Rent for $5/min · you need ${money(RENT_BLOCK)} to start`) : '';
     if (this.player && this.player.cop) this.copWork(dt, now, t);
     else if (this.offenders.length) { for (const s of this.offenders) s.visible = false; }
     this.updateGoal();
@@ -313,7 +321,7 @@ const Vehicles = {
     } else {
       const c = pl.car, d = Math.hypot(c.x - me.x, c.z - me.z);
       if (c.npc.ov && c.npc.ov.s === 'pulled' && c.v < .3) {
-        if (d < 12) { pl.t += dt; carHint = `Writing the ticket… ${Math.max(0, 2 - pl.t).toFixed(1)}s`; if (pl.t >= 2) { Profile.earn(5, 'pull-over'); toast('Ticket issued. Nice police work!', ''); this.releasePull(c, true); this.pull = null; } }
+        if (d < 12) { pl.t += dt; carHint = `Writing the ticket… ${Math.max(0, 2 - pl.t).toFixed(1)}s`; if (pl.t >= 2) { Econ.act('cop.pullover', { done: r => { if (r.ok) toast('Ticket issued. Nice police work!', ''); } }); this.releasePull(c, true); this.pull = null; } }
         else carHint = 'Pull up behind the stopped car to write the ticket';
       }
     }
