@@ -4,7 +4,7 @@ function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   Rail.update(now); Traffic.update();
   Pad.poll(dt);
-  if (started && !mapOpen && !newsOpen) update(dt);
+  if (started && !gamePaused()) update(dt);
   Cops.update(dt, now); updateRemotes(dt); Vehicles.update(dt, now); Bank.update(dt, now);
   updatePeople(dt, now); updateCFA(now);
   checkDebt();
@@ -38,15 +38,17 @@ async function boot() {
   if (D.specials.harbisonTower) { const t = D.specials.harbisonTower; yaw = Math.atan2(-(t[0] - P.x), -(t[1] - P.z)); pitch = 0.12; }
   camera.position.set(P.x, P.y + EYE, P.z); camera.rotation.set(pitch, yaw, 0);
   status(`${D.buildings.length} buildings · ${D.lines.length} roads and paths · ${D.trees.length.toLocaleString()} trees · map data © OpenStreetMap contributors`, 1);
-  $('go').disabled = false; $('go').textContent = 'ENTER CAMPUS';
+  Account.campusReady();   // ENTER waits for an account (or for it to be known there is no server)
   requestAnimationFrame(frame);
 }
 $('go').addEventListener('click', () => {
+  if ($('go').getAttribute('aria-disabled') === 'true') return;
   started = true; $('intro').hidden = true; speechOK = true; Rail.initAudio();
   for (const id of ['where', 'mini', 'mode', 'cross', 'money']) $(id).hidden = false; syncFsBtn();
   if (kicked) { kicked = false; netOff = false; netRetries = 0; }
   connectNet();
   if (isTouch) $('touch').hidden = false; else $('keys').hidden = false;
+  Account.paintChip();
   if (Profile.inDebt() && Profile.debtLeft() === 0) { Profile.reset(); toast('Your ten minutes in debt ran out, so you start over', 'info'); }
   updateMoney();
   if (Profile.state.seenUpdate !== CURRENT_UPDATE_ID) openNews(); else lockPointer();

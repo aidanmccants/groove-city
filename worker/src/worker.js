@@ -16,10 +16,20 @@ const CAR_TTL = 6 * 3600 * 1000;   // a car nobody has touched for this long goe
 const EVENTS = new Set(['knock', 'po', 'pulled', 'free', 'chase', 'caught', 'calm']);   // short gameplay events relayed as-is (see the page's Vehicles.onEvt and Bank.onEvt)
 const VAULT_MS = 5 * 60 * 1000;   // a robbed bank vault stays open (and empty) this long, for everyone
 const RATE = { burst: 16, perSec: 8 };   // token bucket for everything except moves
+const CHAT_MS = 1000;       // one chat message a second from each browser; the rest are dropped
+const CHAT_MAX = 200;       // characters in one chat message (the page's input has the same limit)
+const BLOCK = ['fuck', 'shit', 'bitch', 'bastard', 'asshole', 'dick', 'crap', 'piss'];   // a short word filter: whole words, any case
+const BLOCK_RE = new RegExp(`\\b(?:${BLOCK.join('|')})(?:s|es|ed|er|ing)?\\b`, 'gi');
 
 // a number from the client, or null if it is missing or not finite; clamped to the allowed range
 const num = (v, lo, hi) => (typeof v === 'number' && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : null);
 const int = (v, lo, hi) => (Number.isInteger(v) && v >= lo && v <= hi ? v : null);
+// a chat line from a browser: no control characters, trimmed, at most 200 characters, blocked words starred out; '' if nothing is left
+function chatText(v) {
+  if (typeof v !== 'string') return '';
+  const clean = v.replace(/[\u0000-\u001f\u007f]/g, '').trim();
+  return Array.from(clean).slice(0, CHAT_MAX).join('').replace(BLOCK_RE, w => '*'.repeat(w.length));
+}
 
 // Hibernating WebSocket room. Each socket's state (id, name, last position) lives in its
 // attachment, so the room keeps working while Durable Object memory is evicted between messages.
@@ -163,6 +173,12 @@ export class MapRoom {
     } else if (m.t === 'evt') {
       const a = Array.isArray(m.a) && m.a.length <= 6 && m.a.every(n => typeof n === 'number' && Number.isFinite(n) && Math.abs(n) < 1e5) ? m.a.map(n => Math.round(n * 100) / 100) : null;
       if (EVENTS.has(m.k) && a) this.broadcast(JSON.stringify({ t: 'evt', id: me.id, k: m.k, a }), ws);
+    } else if (m.t === 'chat') {
+      const text = chatText(m.text);
+      if (text && now - (me.lastChat || 0) >= CHAT_MS) {
+        me.lastChat = now;
+        this.broadcast(JSON.stringify({ t: 'chat', id: me.id, name: me.name, text, at: now }));   // everyone, the sender included
+      }
     }
     ws.serializeAttachment(me);
   }

@@ -12,8 +12,17 @@ const Pad = {
     this.prev = cur; this.btn = [];
     this.x = this.y = this.lx = this.ly = 0;
     if (!gp) return;
-    if (!started) { if (down(0) || down(9)) $('go').click(); return; }
+    if (!started) {   // the intro card: A presses the focused button (ENTER when none is focused), B backs out of a sign-in form
+      if (down(1) && !$('authForm').hidden) $('authBack').click();
+      else if (down(0) || down(9)) { const a = document.activeElement; (a && a.tagName === 'BUTTON' && a.closest('#intro') ? a : $('go')).click(); }
+      return;
+    }
     if (newsOpen) { if (down(0) || down(1) || down(9)) closeNews(); return; }
+    // the account panel or the chat box is open, or a text box has focus: B closes the panel, and the pad does not drive the player
+    if (acctOpen || chatOpen || document.activeElement?.matches?.('input,textarea,[contenteditable]')) {
+      if (down(1)) { if (acctOpen) Account.closePanel(); else if (chatOpen) Chat.close(); }
+      return;
+    }
     if (mapOpen) {
       const mx = this.dz(gp.axes[0] || 0) + this.dz(gp.axes[2] || 0) + (b(15) ? 1 : 0) - (b(14) ? 1 : 0), mz = this.dz(gp.axes[1] || 0) + this.dz(gp.axes[3] || 0) + (b(13) ? 1 : 0) - (b(12) ? 1 : 0);
       const sp = 0.45 * dt * (b(4) || b(5) ? 2.2 : 1);   // fraction of the map per second; hold LB/RB for faster
@@ -25,6 +34,7 @@ const Pad = {
     }
     this.btn = cur;   // the game is running: held buttons drive the player through Input.held
     if (down(9)) fsToggle(true);
+    if (down(14)) Chat.open();   // D-pad left opens the chat box
     const ax = this.dz(gp.axes[0] || 0), ay = this.dz(gp.axes[1] || 0), rx = this.dz(gp.axes[2] || 0), ry = this.dz(gp.axes[3] || 0);
     this.lx = ax; this.ly = ay;
     yaw -= Math.sign(rx) * rx * rx * 3.0 * dt; pitch = Math.max(-1.55, Math.min(1.55, pitch - Math.sign(ry) * ry * ry * 2.2 * dt));

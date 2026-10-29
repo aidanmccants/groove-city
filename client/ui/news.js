@@ -1,7 +1,9 @@
 /* ---------------- what's new: shown once per profile per update; edit UPDATE_NOTES for the next one ---------------- */
 const UPDATE_NOTES = {
-  title: 'Jobs, cars, traffic & a bank job',
+  title: 'Accounts & chat',
   items: [
+    ['👤', 'Accounts', 'Play as a guest or sign up. Guests can save their account any time from the 👤 button.'],
+    ['💬', 'Chat', 'Press T or Enter (💬 on phones) to chat with everyone on the map.'],
     ['🎮', 'Xbox controller support', 'Plug in or pair a controller. Left stick moves, right stick looks, A jumps (double-tap A to fly), LB runs, X uses (serve, smash, get in), Y flies, View opens the map, Menu goes fullscreen. Driving: RT gas, LT brake/reverse, A handbrake, Y camera, X exit, RB siren, LB lights.'],
     ['💵', 'Money & jobs', 'You now carry cash (top right). Earn it, spend it, and keep out of the red: ten minutes in debt and you start over.'],
     ['🥪', 'Work the Chick-fil-A counter', 'Step behind the counter in Breen Student Union to start a shift. Hand customers a sandwich with E or a click for $1 each. Make them wait too long and they leave unhappy.'],

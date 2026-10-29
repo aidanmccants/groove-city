@@ -92,9 +92,10 @@ function onNet(m) {
   else if (m.t === 'took' || m.t === 'deny') { Vehicles.onTake(m); return; }
   else if (m.t === 'evt') { Vehicles.onEvt(m); return; }
   else if (m.t === 'vault') { Bank.onVault(m); return; }
-  else if (m.t === 'join') remoteFor(m);
+  else if (m.t === 'join') { const r = remoteFor(m); if (r.name !== m.name) renameRemote(r, m.name); }   // a renamed account reconnects with its new name
   else if (m.t === 'move') { applyMove(m); return; }
   else if (m.t === 'leave') dropRemote(m.id);
+  else if (m.t === 'chat') { Chat.onMsg(m); return; }
   else if (m.t === 'full') { netOff = true; return updateOnline('The campus is full right now. Try again in a bit.'); }
   updateOnline();
 }
@@ -105,17 +106,35 @@ function connectNet() {
   try { sock = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws'); }
   catch (e) { netOff = true; return updateOnline('Single player: multiplayer is unavailable here'); }
   netSock = sock; updateOnline('Connecting to campus…');
-  sock.onopen = () => { netRetries = 0; updateOnline(); };
+  let opened = false;
+  sock.onopen = () => { opened = true; netRetries = 0; updateOnline(); };
   sock.onmessage = e => { try { onNet(JSON.parse(e.data)); } catch (err) { console.error(err); } };
-  sock.onclose = () => {
-    if (netSock !== sock) return;   // dropped on purpose (kickAndReset) or replaced
-    netSock = null; netSent = null; for (const id of [...remotes.keys()]) dropRemote(id);
+  sock.onclose = async e => {
+    if (netSock !== sock) return;   // dropped on purpose (kickAndReset, reconnectNet) or replaced
+    netSock = null; netSent = null; for (const id of [...remotes.keys()]) dropRemote(id); Chat.sync();
+    if (e.code === 4000) {   // the same account opened another tab: this one stays disconnected
+      netOff = true; const msg = 'Signed in in another tab — this one is disconnected';
+      toast(msg, 'bad'); return updateOnline(msg);
+    }
     if (netOff) return;
+    if (!opened && await Account.sessionEnded()) { netOff = true; return updateOnline('Session expired — reload to sign in'); }
     if (++netRetries > 5) { netOff = true; return updateOnline('Offline: could not reach the campus server'); }
     updateOnline('Reconnecting…'); setTimeout(connectNet, Math.min(15000, 1000 * 2 ** netRetries));
   };
 }
+// closes this browser's connection and opens a new one, so the room shows the account's current name (after a save)
+function reconnectNet() {
+  const s = netSock; netSock = null; netSent = null;
+  if (s) { try { s.close(1000, 'renamed'); } catch (e) { } }
+  connectNet();
+}
+// a remote player's name tag, when the room gives them a new name
+function renameRemote(r, name) {
+  r.g.remove(r.tag); r.tag.material.map?.dispose(); r.tag.material.dispose();
+  r.tag = nameTag(name); r.g.add(r.tag); r.name = name;
+}
 function updateOnline(note) {
+  Chat.sync();
   const el = $('online'); if (!el) return;
   el.hidden = false;
   const others = [...remotes.values()].filter(r => r.seen).length;

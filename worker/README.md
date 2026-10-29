@@ -73,7 +73,7 @@ The account code is in `src/auth.js`. Its tables (`users`, `sessions`, `throttle
 
 ## Limits and things to know
 
-- **No chat or moderation.** Anyone who can reach the URL can sign in or play as a guest.
+- **Light moderation only.** Anyone who can reach the URL can sign in or play as a guest. Chat (`{t: 'chat', text}`) is capped at 200 characters and 1 message a second per player, with a small word filter (`BLOCK` in `src/worker.js`); messages are relayed, not stored.
 - **Positions are not checked against the map.** Each browser moves its own visitor, so someone can walk through walls in their own copy. The Worker only checks that values are numbers within the campus bounds.
 - **Background people are not shared.** The walkers heading to Breen and Hicks run in each browser separately (a car knocking one over is relayed as an event, matched to the nearest walker), and they still use the browser's built-in text-to-speech.
 - **NPC traffic is scheduled, not simulated.** NPC cars follow seeded routes on the shared clock and do not react to each other; a pull-over takes one off its schedule in that browser (and in others through `evt`) until it rejoins.

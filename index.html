@@ -51,7 +51,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 .ctl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;color:var(--ink)}
 .ctl kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--hud-line);border-bottom-width:2px;border-radius:3px;padding:1px 6px;justify-self:start;white-space:nowrap}
 #go{font-family:var(--f-display);font-size:16px;letter-spacing:.1em;padding:14px 18px;background:var(--crimson);color:#fff;border:0;border-radius:2px;cursor:pointer;justify-self:start}
-#go:disabled{opacity:.55;cursor:progress}
+#go[aria-disabled="true"]{opacity:.55;cursor:progress}
 #go:focus-visible,button:focus-visible{outline:2px solid var(--limestone);outline-offset:3px}
 #bar{height:4px;background:rgba(255,255,255,.08)}#bar i{display:block;height:100%;width:0;background:#e0566b;transition:width .2s}
 
@@ -77,8 +77,8 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 @keyframes toast{0%{opacity:0;transform:translateY(6px)}10%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
 #hint{left:50%;transform:translateX(-50%);bottom:calc(62px + env(safe-area-inset-bottom,0px));padding:8px 14px;font-size:15px;text-align:center;max-width:calc(100vw - 48px)}
 #hint kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--hud-line);border-bottom-width:2px;border-radius:3px;padding:0 5px;margin:0 2px;background:rgba(255,255,255,.04)}
-#news{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgba(10,9,8,.72);z-index:5}
-#news .card{width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto}
+#news,#acctPanel{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgba(10,9,8,.72);z-index:5}
+#news .card,#acctPanel .card{width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto}
 #news ul{margin:0;padding:0;list-style:none;display:grid;gap:9px}
 #news li{display:grid;grid-template-columns:22px 1fr;gap:2px 10px;font-size:15px;line-height:1.35;color:var(--muted)}
 #news li b{color:var(--ink);font-weight:600}#news li i{font-style:normal;grid-row:span 2;font-size:17px;line-height:1.2}
@@ -105,6 +105,33 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
 @keyframes toastfade{0%,80%{opacity:1}100%{opacity:0}}
 @media (max-width:640px){#mini{width:120px;height:120px}#keys{display:none}#where{max-width:calc(100vw - 160px)}#near{font-size:15px}#fsbtn{right:140px}}
 @media (prefers-reduced-motion: reduce){#bar i{transition:none}}
+/* ---- accounts and chat ---- */
+#intro .card{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto}
+.btn{font-family:var(--f-display);font-size:13px;letter-spacing:.08em;min-height:44px;padding:10px 16px;background:transparent;color:var(--ink);border:1px solid var(--hud-line);border-radius:2px;cursor:pointer}
+.btn.primary{background:var(--crimson);border-color:var(--crimson);color:#fff}
+.btn:disabled{opacity:.55;cursor:progress}
+.btnrow,.auth-choices{display:flex;flex-wrap:wrap;gap:8px}
+.auth{display:grid;gap:10px}
+.authform{display:grid;gap:10px;margin:0}
+.authform h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:15px;letter-spacing:.08em;color:var(--limestone)}
+.field{display:grid;gap:4px;font-size:14px;color:var(--muted)}
+.field input,#chatIn{font:16px var(--f-body);color:var(--ink);background:rgba(0,0,0,.35);border:1px solid var(--hud-line);border-radius:2px;padding:9px 11px;min-height:44px;width:100%;min-width:0;box-sizing:border-box}
+input:focus-visible{outline:2px solid var(--limestone);outline-offset:2px}
+.card .who{margin:0;font-size:16px;color:var(--ink)}.card .who b{color:#ffcf3a;font-weight:600}
+.card .hint{margin:0;font-size:13px;color:var(--muted)}
+.card .err{margin:0;min-height:1.3em;font-size:14px;color:#ff8a9a}
+#goNote{margin:0;font-size:14px;color:var(--muted)}
+#acct{right:12px;bottom:calc(82px + env(safe-area-inset-bottom,0px));padding:6px 10px;font-family:var(--f-body);font-size:13px;color:var(--ink);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:min(260px,calc(100vw - 24px));cursor:pointer}
+#chat{position:fixed;left:12px;bottom:58px;width:min(420px,calc(100vw - 24px));display:grid;gap:6px;pointer-events:none}
+#chatLog{display:flex;flex-direction:column;justify-content:flex-end;gap:4px;max-height:40vh;overflow:hidden}
+#chatLog .msg{padding:3px 8px;border-radius:3px;background:rgba(22,20,19,.6);font-size:14px;line-height:1.3;color:var(--ink);text-shadow:0 1px 2px #000;overflow-wrap:anywhere;transition:opacity .6s}
+#chatLog .msg b{font-weight:600}
+#chatLog .msg.old{opacity:0}
+#chat.open .msg.old{opacity:1}
+#chatForm{display:flex;gap:6px;pointer-events:auto}
+#chatForm input{flex:1}
+#chatForm .btn{padding:8px 12px}
+
 /* ---- touch (html.touch is set by the head script for coarse pointers): phones in portrait and landscape ---- */
 html.touch{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--mini:120px;--R:calc(10px + var(--sr));--B:calc(12px + var(--sb))}
 @media (max-height:500px){html.touch{--mini:104px}html.touch #coords{display:none}}
@@ -131,6 +158,10 @@ html.touch #hint{bottom:calc(92px + var(--sb));max-width:50vw;font-size:14px}
 html.touch #drive{left:50%;right:auto;bottom:calc(12px + var(--sb));transform:translateX(-50%);min-width:0;width:max-content;max-width:min(300px,40vw);padding:6px 12px;text-align:center}
 html.touch #drive .spd{font-size:24px}
 html.touch #dinfo{font-size:12px}
+/* the account chip (a button, so it takes taps) under the online chip; the chat button beside the MAP button */
+html.touch #acct.chip{pointer-events:auto;top:calc(122px + var(--st));left:calc(10px + var(--sl));right:auto;bottom:auto;min-height:44px;max-width:min(230px,calc(100vw - var(--mini) - 36px));font-size:12px;padding:4px 10px}
+html.touch #tChat{width:44px;height:44px;font-size:18px;right:calc(var(--R) + 124px);bottom:calc(var(--B) + 151px)}
+html.touch #chat{left:calc(10px + var(--sl));width:min(360px,calc(100vw - 20px))}
 /* joystick (120 px: input.js hard-codes its centre) and the thumb cluster, bottom-right */
 html.touch #joy{left:calc(20px + var(--sl));bottom:var(--B)}
 html.touch .tbtn{width:56px;height:56px;font-size:10px;letter-spacing:.04em}
@@ -156,11 +187,13 @@ html.touch .ctl-touch{display:grid}
   html.touch #intro h1{grid-column:1;grid-row:1;font-size:24px}
   html.touch #intro .card > p{grid-column:1;grid-row:2;font-size:13px;line-height:1.4}
   html.touch #intro .ctl-touch{grid-column:2;grid-row:1 / span 2;align-self:start;font-size:13px;gap:5px 10px}
-  html.touch #intro .foot{grid-column:1 / -1;grid-row:3;margin:0 -20px;padding:10px 20px calc(12px + var(--sb))}
+  html.touch #intro .auth{grid-column:1 / -1;grid-row:3}
+  html.touch #intro .foot{grid-column:1 / -1;grid-row:4;margin:0 -20px;padding:10px 20px calc(12px + var(--sb))}
 }
 @media (orientation:portrait){
   html.touch #mode{top:calc(80px + var(--st))}
   html.touch #online{top:calc(108px + var(--st))}
+  html.touch #acct.chip{top:calc(140px + var(--st))}
   html.touch #wanted{top:calc(188px + var(--st))}
   html.touch #goal{top:calc(250px + var(--st));left:10px;right:10px;transform:none;max-width:none}
   html.touch #toasts{top:calc(326px + var(--st));left:auto;right:var(--R);transform:none;max-width:60vw;justify-items:end}
@@ -177,6 +210,7 @@ html.touch .ctl-touch{display:grid}
 <div id="keys" class="chip" hidden></div>
 <div id="mode" class="chip" hidden>WALK</div>
 <div id="online" class="chip" hidden></div>
+<button id="acct" class="chip" type="button" title="Your account" hidden></button>
 <div id="money" class="chip" hidden aria-live="polite"><span id="cash">$0</span><span id="debt" hidden></span></div>
 <button id="fsbtn" class="chip" hidden aria-label="Toggle fullscreen" title="Fullscreen">⛶</button>
 <div id="toasts" aria-live="polite"></div>
@@ -184,11 +218,20 @@ html.touch .ctl-touch{display:grid}
 <div id="wanted" class="chip" hidden role="status"><b>WANTED</b><span id="wtime">2:00</span><small id="wcops"></small></div>
 <div id="heist" hidden aria-live="assertive"><b id="heistT"></b><span id="heistS"></span></div>
 <div id="drive" class="chip" hidden aria-live="off"><div class="spd"><span id="dspd">0</span><small>MPH</small></div><div id="dinfo"></div><div id="dkeys"></div></div>
+<div id="chat" hidden>
+  <div id="chatLog" role="log" aria-label="Chat"></div>
+  <form id="chatForm" hidden>
+    <input id="chatIn" type="text" maxlength="200" aria-label="Chat message" autocomplete="off">
+    <button type="submit" class="btn primary">Send</button>
+    <button type="button" class="btn" id="chatClose" aria-label="Close chat">✕</button>
+  </form>
+</div>
 <div id="goal" class="chip" hidden role="status"><span id="garrow" aria-hidden="true">⬆</span><span id="gmsg">You have 10 minutes to earn money selling sandwiches at CFA or you'll be kicked</span><span id="gdist"></span></div>
 <div id="touch" hidden><div id="joy"><i></i></div>
   <button class="tbtn" id="tJump">JUMP</button>
   <button class="tbtn" id="tFly">FLY</button>
   <button class="tbtn" id="tMap">MAP</button>
+  <button class="tbtn" id="tChat" aria-label="Open chat" hidden>💬</button>
   <button class="tbtn" id="tUse">USE</button>
   <button class="tbtn" id="tSiren" hidden>SIREN</button></div>
 
@@ -214,10 +257,27 @@ html.touch .ctl-touch{display:grid}
       <kbd>USE</kbd><span>serve / get in a car / smash; in a car, change camera</span>
       <kbd>MAP</kbd><span>campus map; tap it to teleport</span>
     </div>
+    <div class="auth" id="auth">
+      <p class="who" id="authWho">Checking sign-in…</p>
+      <div class="auth-choices" id="authChoices" hidden>
+        <button type="button" class="btn primary" id="authGuest">Play as guest</button>
+        <button type="button" class="btn" id="authLogin">Log in</button>
+        <button type="button" class="btn" id="authSignup">Sign up</button>
+      </div>
+      <form class="authform" id="authForm" hidden>
+        <h2 id="authFormH">Log in</h2>
+        <label class="field">Username<input id="authUser" name="username" autocomplete="username" required maxlength="20"></label>
+        <label class="field">Password<input id="authPass" name="password" type="password" autocomplete="current-password" required maxlength="128" aria-describedby="authRules"></label>
+        <p class="hint" id="authRules" hidden>3–20 letters, numbers or _. Password 8 or more characters.</p>
+        <div class="btnrow"><button type="submit" class="btn primary" id="authSubmit">Log in</button><button type="button" class="btn" id="authBack">Back</button></div>
+      </form>
+      <p class="err" id="authErr" aria-live="polite"></p>
+    </div>
     <div class="foot">
       <div id="bar"><i></i></div>
       <div class="meta" id="status">Laying out campus…</div>
-      <button id="go" disabled>Loading…</button>
+      <p id="goNote" hidden></p>
+      <button id="go" aria-disabled="true">Loading…</button>
     </div>
   </div>
 </div>
@@ -227,6 +287,26 @@ html.touch .ctl-touch{display:grid}
     <h1 id="newsH">WHAT'S NEW<span id="newsSub">UPDATE</span></h1>
     <ul id="newsList"></ul>
     <button id="newsOk">GOT IT</button>
+  </div>
+</div>
+
+<div id="acctPanel" hidden role="dialog" aria-modal="true" aria-labelledby="acctH">
+  <div class="card">
+    <h1 id="acctH">YOUR ACCOUNT</h1>
+    <p class="who" id="acctWho"></p>
+    <div id="acctGuest" hidden>
+      <p>You're playing as a guest. Your guest account lives in this browser — if the browser data is cleared, it's gone. Save it to keep your money and stats.</p>
+      <form class="authform" id="saveForm">
+        <h2>Save account</h2>
+        <label class="field">Username<input id="saveUser" name="username" autocomplete="username" required maxlength="20"></label>
+        <label class="field">New password<input id="savePass" name="new-password" type="password" autocomplete="new-password" required maxlength="128" aria-describedby="saveRules"></label>
+        <p class="hint" id="saveRules">3–20 letters, numbers or _. Password 8 or more characters.</p>
+        <div class="btnrow"><button type="submit" class="btn primary">Save account</button></div>
+      </form>
+    </div>
+    <p class="err" id="acctErr" aria-live="polite"></p>
+    <p class="hint" id="logoutWarn" hidden>Your guest is kept in this browser and resumes next time you open the game.</p>
+    <div class="btnrow"><button type="button" class="btn" id="logoutBtn">Log out</button><button type="button" class="btn" id="acctClose">Close</button></div>
   </div>
 </div>
 
@@ -330,7 +410,7 @@ const BUILDING_OVERRIDES = {
    Today that is LocalStore: localStorage keyed by a profile id made up in this browser (memory only if storage is blocked).
    When accounts arrive, a server-backed adapter with the same shape goes in through Profile.useStore(adapter) and no game
    code changes. Money may go negative; debtSince marks when, and after DEBT_GRACE the player is kicked and reset. */
-const CURRENT_UPDATE_ID = '2026-11-jobs-cars-trains';
+const CURRENT_UPDATE_ID = '2026-11-accounts';
 // shared clock: the Worker's time (welcome / pong) minus ours; trains, lights and NPC traffic all run on netNow()
 let clockOffset = 0, clockRtt = 1e9;
 const netNow = () => Date.now() + clockOffset;
@@ -2385,6 +2465,7 @@ const BIND = {
   use:      { key: ['KeyE'], pad: [2], touch: 'USE', mouse: 'click' },
   fly:      { key: ['KeyF'], pad: [3], touch: 'FLY' },                         // pad: double-tap A also flies (gamepad.js)
   map:      { key: ['KeyM'], pad: [8], touch: 'MAP' },
+  chat:     { key: ['KeyT', 'Enter'], pad: [14], touch: '💬' },                  // opens the chat box (typing uses the on-screen or OS keyboard)
   labels:   { key: ['KeyL'], pad: [12] },
   time:     { key: ['KeyN'], pad: [13] },
   exit:     { key: ['KeyE', 'KeyF'], pad: [1, 2], touch: 'EXIT' },             // in a car
@@ -2400,7 +2481,7 @@ const PADNAME = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'LS
 const KEYNAME = { Space: 'Space', ShiftLeft: 'Shift', ShiftRight: 'Shift', ControlLeft: 'Ctrl', Escape: 'Esc', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' };
 const keyName = c => KEYNAME[c] || c.replace(/^Key/, '');
 // the #keys chip: keyboard and pad share this list (keysChipHTML adds each device's own extras)
-const KEYS_CHIP = [['forward', 'walk'], ['run', 'run'], ['jump', 'jump'], ['fly', 'fly'], ['map', 'map'], ['time', 'time of day'], ['labels', 'labels'], ['use', 'serve / get in a car']];
+const KEYS_CHIP = [['forward', 'walk'], ['run', 'run'], ['jump', 'jump'], ['fly', 'fly'], ['map', 'map'], ['chat', 'chat'], ['time', 'time of day'], ['labels', 'labels'], ['use', 'serve / get in a car']];
 const Input = {
   device: 'kbm',
   // a bound key is down, or the pad holds a bound button (Pad.btn is empty outside the game), or for jump the on-screen ▲
@@ -2450,8 +2531,10 @@ function kbmInput() { if (performance.now() - touchAt > 1000) Input.setDevice('k
 let started = false, mapOpen = false;
 const locked = () => document.pointerLockElement === canvas;
 function lockPointer() { if (!isTouch && canvas.requestPointerLock && !locked()) { try { const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } } }
+// the game stands still under the news, the map, the account panel or the chat box
+const gamePaused = () => mapOpen || newsOpen || acctOpen || chatOpen;
 canvas.addEventListener('click', () => {
-  if (!started || mapOpen || newsOpen) return;
+  if (!started || gamePaused()) return;
   if (!locked()) { if (isTouch && CFA.onShift) CFA.serve(); else if (isTouch && Bank.canSmash()) Bank.smash(); else if (!(isTouch && !Vehicles.player && Vehicles.tryEnter())) lockPointer(); }
   else if (CFA.onShift) CFA.serve();
   else if (Bank.canSmash()) Bank.smash();
@@ -2462,16 +2545,23 @@ canvas.addEventListener('mousedown', e => { kbmInput(); if (!locked()) drag = [e
 addEventListener('mouseup', () => drag = null);
 addEventListener('mousemove', e => {
   if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) kbmInput();
-  if (!started || mapOpen || newsOpen) return;
+  if (!started || gamePaused()) return;
   let dx = 0, dy = 0;
   if (locked()) { dx = e.movementX; dy = e.movementY; } else if (drag) { dx = e.clientX - drag[0]; dy = e.clientY - drag[1]; drag = [e.clientX, e.clientY]; } else return;
   yaw -= dx * 0.0022; pitch = Math.max(-1.55, Math.min(1.55, pitch - dy * 0.0022));
 });
 addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input,textarea,[contenteditable]')) return;   // typing (chat, sign-in, account forms) never moves the player
   Input.setDevice('kbm');
   if (!started) return;
   if (newsOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeNews(); } return; }
+  if (acctOpen || chatOpen) {   // a panel is open: Esc closes it; Enter brings the chat box back when focus has left it
+    if (e.code === 'Escape') { e.preventDefault(); if (acctOpen) Account.closePanel(); else Chat.close(); }
+    else if (chatOpen && e.code === 'Enter' && !e.target.closest('#chat')) { e.preventDefault(); Chat.focus(); }
+    return;
+  }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+  if (BIND.chat.key.includes(e.code) && !e.repeat && Chat.open()) { e.preventDefault(); return; }   // T or Enter opens the chat box
   onKey(e.code, e.repeat);
 });
 // every key press lives here; the gamepad calls it too with fromPad set (its held buttons reach Input.held instead)
@@ -2496,7 +2586,7 @@ function onKey(code, repeat, fromPad) {
   if (code === 'KeyN') cycleTime();
   if (code === 'KeyE' && !repeat) { if (CFA.onShift) CFA.serve(); else if (Bank.canSmash()) Bank.smash(); else Vehicles.tryEnter(); }
 }
-addEventListener('keyup', e => keys.delete(e.code));
+addEventListener('keyup', e => { if (e.target.closest && e.target.closest('input,textarea,[contenteditable]')) return; keys.delete(e.code); });
 addEventListener('blur', () => keys.clear());
 function toggleFly() {
   if (!flying && Bank.wanted) { toast('No flying while the police are after you', 'bad'); return; }
@@ -2539,7 +2629,7 @@ $('joy').addEventListener('pointermove', e => { if (e.pointerId === joyId) moveJ
 const endJoy = e => { if (e.pointerId === joyId) { joyId = null; joy.x = joy.y = 0; $('joy').firstChild.style.transform = ''; } };
 $('joy').addEventListener('pointerup', endJoy); $('joy').addEventListener('pointercancel', endJoy);
 function moveJoy(e) { const r = $('joy').getBoundingClientRect(); let dx = (e.clientX - r.left - 60) / 50, dy = (e.clientY - r.top - 60) / 50; const l = Math.hypot(dx, dy); if (l > 1) { dx /= l; dy /= l; } joy.x = dx; joy.y = -dy; $('joy').firstChild.style.transform = `translate(${dx * 40}px,${dy * 40}px)`; }
-canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { lookId = e.pointerId; lookLast = [e.clientX, e.clientY]; } });
+canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && !gamePaused()) { lookId = e.pointerId; lookLast = [e.clientX, e.clientY]; } });
 canvas.addEventListener('pointermove', e => { if (e.pointerId === lookId) { yaw -= (e.clientX - lookLast[0]) * 0.005; pitch = Math.max(-1.5, Math.min(1.5, pitch - (e.clientY - lookLast[1]) * 0.005)); lookLast = [e.clientX, e.clientY]; } });
 canvas.addEventListener('pointerup', e => { if (e.pointerId === lookId) lookId = null; });
 $('tJump').addEventListener('pointerdown', () => touchUp = true); $('tJump').addEventListener('pointerup', () => touchUp = false); $('tJump').addEventListener('pointerleave', () => touchUp = false);
@@ -2561,8 +2651,17 @@ const Pad = {
     this.prev = cur; this.btn = [];
     this.x = this.y = this.lx = this.ly = 0;
     if (!gp) return;
-    if (!started) { if (down(0) || down(9)) $('go').click(); return; }
+    if (!started) {   // the intro card: A presses the focused button (ENTER when none is focused), B backs out of a sign-in form
+      if (down(1) && !$('authForm').hidden) $('authBack').click();
+      else if (down(0) || down(9)) { const a = document.activeElement; (a && a.tagName === 'BUTTON' && a.closest('#intro') ? a : $('go')).click(); }
+      return;
+    }
     if (newsOpen) { if (down(0) || down(1) || down(9)) closeNews(); return; }
+    // the account panel or the chat box is open, or a text box has focus: B closes the panel, and the pad does not drive the player
+    if (acctOpen || chatOpen || document.activeElement?.matches?.('input,textarea,[contenteditable]')) {
+      if (down(1)) { if (acctOpen) Account.closePanel(); else if (chatOpen) Chat.close(); }
+      return;
+    }
     if (mapOpen) {
       const mx = this.dz(gp.axes[0] || 0) + this.dz(gp.axes[2] || 0) + (b(15) ? 1 : 0) - (b(14) ? 1 : 0), mz = this.dz(gp.axes[1] || 0) + this.dz(gp.axes[3] || 0) + (b(13) ? 1 : 0) - (b(12) ? 1 : 0);
       const sp = 0.45 * dt * (b(4) || b(5) ? 2.2 : 1);   // fraction of the map per second; hold LB/RB for faster
@@ -2574,6 +2673,7 @@ const Pad = {
     }
     this.btn = cur;   // the game is running: held buttons drive the player through Input.held
     if (down(9)) fsToggle(true);
+    if (down(14)) Chat.open();   // D-pad left opens the chat box
     const ax = this.dz(gp.axes[0] || 0), ay = this.dz(gp.axes[1] || 0), rx = this.dz(gp.axes[2] || 0), ry = this.dz(gp.axes[3] || 0);
     this.lx = ax; this.ly = ay;
     yaw -= Math.sign(rx) * rx * rx * 3.0 * dt; pitch = Math.max(-1.55, Math.min(1.55, pitch - Math.sign(ry) * ry * ry * 2.2 * dt));
@@ -2655,8 +2755,10 @@ function setHint(html) { if (html === hintText) return; hintText = html; $('hint
 
 /* ---------------- what's new: shown once per profile per update; edit UPDATE_NOTES for the next one ---------------- */
 const UPDATE_NOTES = {
-  title: 'Jobs, cars, traffic & a bank job',
+  title: 'Accounts & chat',
   items: [
+    ['👤', 'Accounts', 'Play as a guest or sign up. Guests can save their account any time from the 👤 button.'],
+    ['💬', 'Chat', 'Press T or Enter (💬 on phones) to chat with everyone on the map.'],
     ['🎮', 'Xbox controller support', 'Plug in or pair a controller. Left stick moves, right stick looks, A jumps (double-tap A to fly), LB runs, X uses (serve, smash, get in), Y flies, View opens the map, Menu goes fullscreen. Driving: RT gas, LT brake/reverse, A handbrake, Y camera, X exit, RB siren, LB lights.'],
     ['💵', 'Money & jobs', 'You now carry cash (top right). Earn it, spend it, and keep out of the red: ten minutes in debt and you start over.'],
     ['🥪', 'Work the Chick-fil-A counter', 'Step behind the counter in Breen Student Union to start a shift. Hand customers a sandwich with E or a click for $1 each. Make them wait too long and they leave unhappy.'],
@@ -2698,7 +2800,8 @@ function kickAndReset(msg) {
   netOff = true; const s = netSock; netSock = null; if (s) { try { s.close(); } catch (e) { } }
   for (const id of [...remotes.keys()]) dropRemote(id); myName = '';
   started = false; keys.clear(); if (mapOpen) toggleMap(false); if (newsOpen) { newsOpen = false; $('news').hidden = true; } if (locked()) document.exitPointerLock();
-  for (const id of ['where', 'mini', 'mode', 'cross', 'keys', 'touch', 'online', 'money', 'hint']) $(id).hidden = true;
+  for (const id of ['where', 'mini', 'mode', 'cross', 'keys', 'touch', 'online', 'money', 'hint', 'acct', 'chat']) $(id).hidden = true;
+  Account.closePanel(false); Chat.sync();
   setHint(''); CFA.reset(); Bank.reset();
   if (flying) toggleFly();
   const sp = D.specials.spawn || [0, 0]; teleport(sp[0], sp[1]);
@@ -3732,6 +3835,185 @@ Cops.states.giveup = (cop, dt) => {   // back to the car (on foot), then hand it
   c.v = 0; Cops.setState(cop, 'leave');
 };
 
+/* ---------------- accounts: sign-in on the intro card, and the 👤 panel in the game ----------------
+   The Worker keeps accounts (worker/src/auth.js); this file calls /api/* and shows the state. A guest's secret stays in
+   localStorage (gcc.guest), so reopening the browser resumes the same guest. Where there is no account server (file://,
+   the artifact preview), sign-in is skipped and the game runs single-player, as before. */
+let acctOpen = false;        // the 👤 panel is open: the game stands still, as under the news or the map
+let campusBooted = false;    // the world is built; ENTER also needs an account, or a fact that there is no server
+const GUEST_KEY = 'gcc.guest';
+const NET_ERR = "Can't reach the sign-in server. Check your connection and try again.";
+const setMsg = (id, msg) => { $(id).textContent = msg; };
+const Account = {
+  me: null,            // { id, name, guest, attrs } once signed in
+  offline: false,      // no account server here: single-player
+  checked: false,      // the first /api/me answer has come in
+  busy: false,
+  formMode: null,      // 'login' | 'signup' while that form is open on the intro card
+
+  // one JSON request: GET, or POST when a body is given. Returns { ok, status, data }; data is null for a network error or a non-JSON reply
+  async api(path, body) {
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 10000);
+    try {
+      const res = await fetch(path, {
+        method: body === undefined ? 'GET' : 'POST', credentials: 'same-origin', signal: ctl.signal,
+        headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+      const text = await res.text();
+      let data = null;
+      try { data = JSON.parse(text); } catch (e) { }
+      return { ok: res.ok, status: res.status, data };
+    } catch (e) {
+      return { ok: false, status: 0, data: null };
+    } finally { clearTimeout(timer); }
+  },
+  // the guest secret in localStorage: a per-browser convenience, so every access is guarded
+  secret() { try { return localStorage.getItem(GUEST_KEY); } catch (e) { return null; } },
+  rememberSecret(s) { try { localStorage.setItem(GUEST_KEY, s); } catch (e) { } },
+  forgetSecret() { try { localStorage.removeItem(GUEST_KEY); } catch (e) { } },
+  bold(text) { const b = document.createElement('b'); b.textContent = text; return b; },
+
+  // page load: a session that is still signed in, else the guest kept in this browser, else the choices
+  async init() {
+    if (!/^https?:$/.test(location.protocol)) return this.goOffline();
+    let r = await this.api('/api/me');
+    if (r.data === null) return this.goOffline();          // no answer, or not JSON (the artifact preview)
+    if (r.status === 200 && r.data.me) return this.setMe(r.data.me);
+    if (r.status !== 401) return this.goOffline();
+    const secret = this.secret();
+    if (secret) {
+      r = await this.api('/api/guest/resume', { secret });
+      if (r.data === null) return this.goOffline();
+      if (r.status === 200 && r.data.me) return this.setMe(r.data.me);
+      if (r.status === 401) this.forgetSecret();           // the server does not know this guest any more
+    }
+    this.checked = true; this.render();
+  },
+  goOffline() { this.offline = true; this.checked = true; this.render(); },
+  setMe(me) { this.me = me; this.checked = true; this.render(); },
+
+  // the intro card: who is playing, or the three choices (with the form behind log in and sign up)
+  render() {
+    const have = !!this.me, who = $('authWho');
+    $('auth').hidden = this.offline;
+    who.hidden = this.checked && !have;
+    if (!this.checked) who.textContent = 'Checking sign-in…';
+    else if (have) who.replaceChildren(this.me.guest ? 'Playing as ' : 'Signed in as ', this.bold(this.me.name), this.me.guest ? ' (guest)' : '');
+    $('authChoices').hidden = !this.checked || have || !!this.formMode;
+    $('authForm').hidden = !this.checked || have || !this.formMode;
+    if (acctOpen && have) this.renderPanel();
+    if (acctOpen && !have) this.closePanel();
+    this.paintChip(); this.gate();
+  },
+  // ENTER waits for the world and for an account (or for it to be known that there is no server)
+  gate() {
+    const ready = campusBooted && (!!this.me || this.offline), go = $('go');
+    go.setAttribute('aria-disabled', String(!ready));
+    if (campusBooted) go.textContent = 'ENTER CAMPUS';
+    const note = !campusBooted || !this.checked ? '' : this.offline ? "Sign-in isn't available here, so you'll play single-player." : this.me ? '' : 'Choose how to play above to enter.';
+    $('goNote').textContent = note; $('goNote').hidden = !note;
+  },
+  campusReady() { campusBooted = true; this.gate(); },
+  // the 👤 chip in the game: shown while playing signed in
+  paintChip() { const c = $('acct'); c.hidden = !(started && this.me && !this.offline); c.textContent = this.me ? '👤 ' + this.me.name : ''; },
+
+  // play as a guest: the server makes the account and sends back its secret, which this browser keeps
+  async guest() {
+    if (this.busy) return;
+    this.busy = true; $('authGuest').disabled = true; setMsg('authErr', '');
+    const r = await this.api('/api/guest', {});
+    this.busy = false; $('authGuest').disabled = false;
+    if (r.data === null) return setMsg('authErr', NET_ERR);
+    if (!r.ok || !r.data.me) return setMsg('authErr', r.data.error || 'Could not start a guest account.');
+    if (typeof r.data.secret === 'string') this.rememberSecret(r.data.secret);
+    this.setMe(r.data.me);
+  },
+  openForm(mode) {
+    const su = mode === 'signup';
+    this.formMode = mode;
+    $('authFormH').textContent = su ? 'Sign up' : 'Log in';
+    $('authSubmit').textContent = su ? 'Sign up' : 'Log in';
+    $('authPass').autocomplete = su ? 'new-password' : 'current-password';
+    $('authRules').hidden = !su;
+    setMsg('authErr', ''); this.render(); $('authUser').focus();
+  },
+  closeForm() { this.formMode = null; setMsg('authErr', ''); this.render(); $('authGuest').focus(); },
+  async submit(e) {
+    e.preventDefault();
+    if (this.busy || !this.formMode) return;
+    this.busy = true; $('authSubmit').disabled = true; setMsg('authErr', '');
+    const r = await this.api(this.formMode === 'signup' ? '/api/signup' : '/api/login', { username: $('authUser').value.trim(), password: $('authPass').value });
+    this.busy = false; $('authSubmit').disabled = false;
+    if (r.data === null) return setMsg('authErr', NET_ERR);
+    if (!r.ok || !r.data.me) return setMsg('authErr', r.data.error || 'Could not sign in.');
+    $('authPass').value = ''; this.formMode = null;
+    this.setMe(r.data.me);
+  },
+
+  // the 👤 panel: a guest can save the account; anyone can log out
+  openPanel() {
+    if (!this.me || this.offline || !started || acctOpen || mapOpen || newsOpen) return;
+    if (chatOpen) Chat.close(false);
+    acctOpen = true; keys.clear(); if (locked()) document.exitPointerLock();
+    setMsg('acctErr', ''); this.renderPanel(); $('acctPanel').hidden = false; $('acctClose').focus();
+  },
+  closePanel(relock = true) {
+    if (!acctOpen) return;
+    acctOpen = false;
+    const a = document.activeElement; if (a && $('acctPanel').contains(a)) a.blur();   // so Space jumps instead of pressing the focused button
+    $('acctPanel').hidden = true;
+    if (relock) lockPointer();
+  },
+  renderPanel() {
+    const g = !!this.me.guest;
+    $('acctWho').replaceChildren(g ? 'Playing as ' : 'Signed in as ', this.bold(this.me.name), g ? ' (guest)' : '');
+    $('acctGuest').hidden = !g; $('logoutWarn').hidden = !g;
+  },
+  async save(e) {
+    e.preventDefault();
+    if (this.busy) return;
+    this.busy = true; setMsg('acctErr', '');
+    const r = await this.api('/api/convert', { username: $('saveUser').value.trim(), password: $('savePass').value });
+    this.busy = false;
+    if (r.data === null) return setMsg('acctErr', NET_ERR);
+    if (!r.ok || !r.data.me) return setMsg('acctErr', r.data.error || 'Could not save the account.');
+    this.forgetSecret();
+    $('savePass').value = '';
+    this.me = r.data.me;
+    this.render();
+    toast('Account saved as ' + this.me.name);
+    reconnectNet();   // the room learns the new name from a fresh connection
+  },
+  async logout() {
+    if (this.busy) return;
+    this.busy = true; setMsg('acctErr', '');
+    const r = await this.api('/api/logout', {});
+    this.busy = false;
+    if (r.data === null) return setMsg('acctErr', NET_ERR);
+    location.reload();
+  },
+  // the socket never opened and /api/me says 401: the session has ended
+  async sessionEnded() {
+    const r = await this.api('/api/me');
+    if (r.status !== 401) return false;
+    this.me = null; this.render();
+    toast('Session expired — reload to sign in', 'bad');
+    return true;
+  },
+};
+
+$('authGuest').addEventListener('click', () => Account.guest());
+$('authLogin').addEventListener('click', () => Account.openForm('login'));
+$('authSignup').addEventListener('click', () => Account.openForm('signup'));
+$('authBack').addEventListener('click', () => Account.closeForm());
+$('authForm').addEventListener('submit', e => Account.submit(e));
+$('acct').addEventListener('click', () => Account.openPanel());
+$('saveForm').addEventListener('submit', e => Account.save(e));
+$('logoutBtn').addEventListener('click', () => Account.logout());
+$('acctClose').addEventListener('click', () => Account.closePanel());
+$('acctPanel').addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); Account.closePanel(); } });   // Esc from inside a text box
+Account.init().catch(() => Account.goOffline());
 /* ---------------- multiplayer: the Worker relays positions; names are random and assigned by the server ---------------- */
 const remotes = new Map(); let netSock = null, myId = null, myName = '', netRetries = 0, netSentAt = 0, netSent = null, netOff = false;
 const SHIRTS = ['#c0392b', '#2e86c1', '#28b463', '#f1c40f', '#8e44ad', '#ecf0f1', '#e67e22', '#16a085'];
@@ -3826,9 +4108,10 @@ function onNet(m) {
   else if (m.t === 'took' || m.t === 'deny') { Vehicles.onTake(m); return; }
   else if (m.t === 'evt') { Vehicles.onEvt(m); return; }
   else if (m.t === 'vault') { Bank.onVault(m); return; }
-  else if (m.t === 'join') remoteFor(m);
+  else if (m.t === 'join') { const r = remoteFor(m); if (r.name !== m.name) renameRemote(r, m.name); }   // a renamed account reconnects with its new name
   else if (m.t === 'move') { applyMove(m); return; }
   else if (m.t === 'leave') dropRemote(m.id);
+  else if (m.t === 'chat') { Chat.onMsg(m); return; }
   else if (m.t === 'full') { netOff = true; return updateOnline('The campus is full right now. Try again in a bit.'); }
   updateOnline();
 }
@@ -3839,30 +4122,111 @@ function connectNet() {
   try { sock = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws'); }
   catch (e) { netOff = true; return updateOnline('Single player: multiplayer is unavailable here'); }
   netSock = sock; updateOnline('Connecting to campus…');
-  sock.onopen = () => { netRetries = 0; updateOnline(); };
+  let opened = false;
+  sock.onopen = () => { opened = true; netRetries = 0; updateOnline(); };
   sock.onmessage = e => { try { onNet(JSON.parse(e.data)); } catch (err) { console.error(err); } };
-  sock.onclose = () => {
-    if (netSock !== sock) return;   // dropped on purpose (kickAndReset) or replaced
-    netSock = null; netSent = null; for (const id of [...remotes.keys()]) dropRemote(id);
+  sock.onclose = async e => {
+    if (netSock !== sock) return;   // dropped on purpose (kickAndReset, reconnectNet) or replaced
+    netSock = null; netSent = null; for (const id of [...remotes.keys()]) dropRemote(id); Chat.sync();
+    if (e.code === 4000) {   // the same account opened another tab: this one stays disconnected
+      netOff = true; const msg = 'Signed in in another tab — this one is disconnected';
+      toast(msg, 'bad'); return updateOnline(msg);
+    }
     if (netOff) return;
+    if (!opened && await Account.sessionEnded()) { netOff = true; return updateOnline('Session expired — reload to sign in'); }
     if (++netRetries > 5) { netOff = true; return updateOnline('Offline: could not reach the campus server'); }
     updateOnline('Reconnecting…'); setTimeout(connectNet, Math.min(15000, 1000 * 2 ** netRetries));
   };
 }
+// closes this browser's connection and opens a new one, so the room shows the account's current name (after a save)
+function reconnectNet() {
+  const s = netSock; netSock = null; netSent = null;
+  if (s) { try { s.close(1000, 'renamed'); } catch (e) { } }
+  connectNet();
+}
+// a remote player's name tag, when the room gives them a new name
+function renameRemote(r, name) {
+  r.g.remove(r.tag); r.tag.material.map?.dispose(); r.tag.material.dispose();
+  r.tag = nameTag(name); r.g.add(r.tag); r.name = name;
+}
 function updateOnline(note) {
+  Chat.sync();
   const el = $('online'); if (!el) return;
   el.hidden = false;
   const others = [...remotes.values()].filter(r => r.seen).length;
   el.textContent = note || (myName ? `● ${others + 1} online · you are ${myName}` : 'Connecting to campus…');
 }
 
+/* ---------------- chat: one log for everyone on the map (the Worker caps, filters and rate-limits each line) ---------------- */
+let chatOpen = false;   // the chat box is open: the game stands still and the pointer is free
+const Chat = (() => {
+  const SHOWN = 6, FADE_MS = 12000;   // the last six lines; each fades after 12 s, and all come back while the box is open
+  const COLOURS = ['#ffcf3a', '#7fd1ff', '#9fdc8a', '#ff9ec7', '#c3a6ff', '#ffb36b', '#6fe7d0', '#ff8a9a'];
+  const box = $('chat'), log = $('chatLog'), form = $('chatForm'), input = $('chatIn');
+  let wasLocked = false;
+  // a name keeps its colour: a hash of the account id picks one from COLOURS
+  const colour = id => { let h = 0; for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) | 0; return COLOURS[Math.abs(h) % COLOURS.length]; };
+  const can = () => started && !!netSock && netSock.readyState === 1;   // connected to the room: no chat in single-player or offline
+  // sits just above the highest thing on the left edge: the keys chip, the driving card or the joystick
+  function layout() {
+    let floor = innerHeight - 12;
+    for (const id of ['keys', 'drive', 'joy']) { const el = $(id); if (el && el.getClientRects().length) floor = Math.min(floor, el.getBoundingClientRect().top); }
+    box.style.bottom = (innerHeight - floor + 8) + 'px';
+  }
+  // one line: the name in its colour, then the text (textContent only, so nothing in a message is markup)
+  function add(m) {
+    const line = document.createElement('div'), who = document.createElement('b'), text = document.createElement('span');
+    line.className = 'msg';
+    who.textContent = String(m.name); who.style.color = colour(m.id);
+    text.textContent = ': ' + String(m.text);
+    line.append(who, text); log.appendChild(line);
+    while (log.children.length > SHOWN) log.firstElementChild.remove();
+    setTimeout(() => line.classList.add('old'), FADE_MS);
+  }
+  function shut(relock = true) {
+    if (!chatOpen) return;
+    chatOpen = false; box.classList.remove('open'); form.hidden = true; input.blur();
+    if (relock && wasLocked) lockPointer();
+    wasLocked = false;
+  }
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (text && can()) netSock.send(JSON.stringify({ t: 'chat', text }));   // the Worker checks and relays it
+    shut();
+  });
+  input.addEventListener('keydown', e => { if (e.key === 'Escape') { e.preventDefault(); shut(); } });
+  $('chatClose').addEventListener('click', () => shut());
+  $('tChat').addEventListener('click', () => Chat.open());
+  addEventListener('resize', layout);
+  if (window.ResizeObserver) { const ro = new ResizeObserver(layout); for (const id of ['keys', 'drive', 'joy']) ro.observe($(id)); }
+  return {
+    onMsg(m) { if (typeof m.name === 'string' && typeof m.text === 'string') add(m); },
+    // shows or hides the log and the touch button with the connection; leaving the room closes the box
+    sync() {
+      const on = can();
+      box.hidden = !on; $('tChat').hidden = !on;
+      if (!on) { log.replaceChildren(); if (chatOpen) shut(false); }
+      layout();
+    },
+    open() {
+      if (chatOpen || !can() || mapOpen || newsOpen || acctOpen) return false;
+      chatOpen = true; wasLocked = locked(); keys.clear();
+      if (wasLocked) document.exitPointerLock();
+      box.classList.add('open'); form.hidden = false; input.value = ''; input.focus();
+      return true;
+    },
+    close(relock = true) { shut(relock); },
+    focus() { input.focus(); },
+  };
+})();
 /* ---------------- main ---------------- */
 let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   Rail.update(now); Traffic.update();
   Pad.poll(dt);
-  if (started && !mapOpen && !newsOpen) update(dt);
+  if (started && !gamePaused()) update(dt);
   Cops.update(dt, now); updateRemotes(dt); Vehicles.update(dt, now); Bank.update(dt, now);
   updatePeople(dt, now); updateCFA(now);
   checkDebt();
@@ -3896,15 +4260,17 @@ async function boot() {
   if (D.specials.harbisonTower) { const t = D.specials.harbisonTower; yaw = Math.atan2(-(t[0] - P.x), -(t[1] - P.z)); pitch = 0.12; }
   camera.position.set(P.x, P.y + EYE, P.z); camera.rotation.set(pitch, yaw, 0);
   status(`${D.buildings.length} buildings · ${D.lines.length} roads and paths · ${D.trees.length.toLocaleString()} trees · map data © OpenStreetMap contributors`, 1);
-  $('go').disabled = false; $('go').textContent = 'ENTER CAMPUS';
+  Account.campusReady();   // ENTER waits for an account (or for it to be known there is no server)
   requestAnimationFrame(frame);
 }
 $('go').addEventListener('click', () => {
+  if ($('go').getAttribute('aria-disabled') === 'true') return;
   started = true; $('intro').hidden = true; speechOK = true; Rail.initAudio();
   for (const id of ['where', 'mini', 'mode', 'cross', 'money']) $(id).hidden = false; syncFsBtn();
   if (kicked) { kicked = false; netOff = false; netRetries = 0; }
   connectNet();
   if (isTouch) $('touch').hidden = false; else $('keys').hidden = false;
+  Account.paintChip();
   if (Profile.inDebt() && Profile.debtLeft() === 0) { Profile.reset(); toast('Your ten minutes in debt ran out, so you start over', 'info'); }
   updateMoney();
   if (Profile.state.seenUpdate !== CURRENT_UPDATE_ID) openNews(); else lockPointer();

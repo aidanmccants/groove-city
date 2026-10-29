@@ -3,7 +3,7 @@
    Today that is LocalStore: localStorage keyed by a profile id made up in this browser (memory only if storage is blocked).
    When accounts arrive, a server-backed adapter with the same shape goes in through Profile.useStore(adapter) and no game
    code changes. Money may go negative; debtSince marks when, and after DEBT_GRACE the player is kicked and reset. */
-const CURRENT_UPDATE_ID = '2026-11-jobs-cars-trains';
+const CURRENT_UPDATE_ID = '2026-11-accounts';
 // shared clock: the Worker's time (welcome / pong) minus ours; trains, lights and NPC traffic all run on netNow()
 let clockOffset = 0, clockRtt = 1e9;
 const netNow = () => Date.now() + clockOffset;

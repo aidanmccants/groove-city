@@ -36,6 +36,8 @@
  "audio/sirens.js",
  "systems/cops.js",
  "systems/bank-robbery.js",
+ "ui/account.js",
  "net/net.js",
+ "ui/chat.js",
  "main/main.js"
 ]

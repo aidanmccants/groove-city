@@ -39,10 +39,10 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [x] One input system for keyboard and mouse, touch and controller
 
 ## Accounts and players
-- [ ] Accounts with a username and password (password hashed and stored in a database, hash checked at login)
-- [ ] Users pick their own username
-- [ ] Guest accounts: kept in the browser, lost if the browser is wiped, can be saved as a real account at any time
-- [ ] Chat between players
+- [x] Accounts with a username and password (password hashed and stored in a database, hash checked at login)
+- [x] Users pick their own username
+- [x] Guest accounts: kept in the browser, lost if the browser is wiped, can be saved as a real account at any time
+- [x] Chat between players
 - [ ] Account attributes that are easy to add and scale (money, score, age, name, statuses, …)
 - [ ] Money handled by the server, so it can't be cheated
 

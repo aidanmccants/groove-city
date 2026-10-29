@@ -2,8 +2,10 @@
 let started = false, mapOpen = false;
 const locked = () => document.pointerLockElement === canvas;
 function lockPointer() { if (!isTouch && canvas.requestPointerLock && !locked()) { try { const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } } }
+// the game stands still under the news, the map, the account panel or the chat box
+const gamePaused = () => mapOpen || newsOpen || acctOpen || chatOpen;
 canvas.addEventListener('click', () => {
-  if (!started || mapOpen || newsOpen) return;
+  if (!started || gamePaused()) return;
   if (!locked()) { if (isTouch && CFA.onShift) CFA.serve(); else if (isTouch && Bank.canSmash()) Bank.smash(); else if (!(isTouch && !Vehicles.player && Vehicles.tryEnter())) lockPointer(); }
   else if (CFA.onShift) CFA.serve();
   else if (Bank.canSmash()) Bank.smash();
@@ -14,16 +16,23 @@ canvas.addEventListener('mousedown', e => { kbmInput(); if (!locked()) drag = [e
 addEventListener('mouseup', () => drag = null);
 addEventListener('mousemove', e => {
   if (Math.abs(e.movementX) + Math.abs(e.movementY) > 2) kbmInput();
-  if (!started || mapOpen || newsOpen) return;
+  if (!started || gamePaused()) return;
   let dx = 0, dy = 0;
   if (locked()) { dx = e.movementX; dy = e.movementY; } else if (drag) { dx = e.clientX - drag[0]; dy = e.clientY - drag[1]; drag = [e.clientX, e.clientY]; } else return;
   yaw -= dx * 0.0022; pitch = Math.max(-1.55, Math.min(1.55, pitch - dy * 0.0022));
 });
 addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input,textarea,[contenteditable]')) return;   // typing (chat, sign-in, account forms) never moves the player
   Input.setDevice('kbm');
   if (!started) return;
   if (newsOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeNews(); } return; }
+  if (acctOpen || chatOpen) {   // a panel is open: Esc closes it; Enter brings the chat box back when focus has left it
+    if (e.code === 'Escape') { e.preventDefault(); if (acctOpen) Account.closePanel(); else Chat.close(); }
+    else if (chatOpen && e.code === 'Enter' && !e.target.closest('#chat')) { e.preventDefault(); Chat.focus(); }
+    return;
+  }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
+  if (BIND.chat.key.includes(e.code) && !e.repeat && Chat.open()) { e.preventDefault(); return; }   // T or Enter opens the chat box
   onKey(e.code, e.repeat);
 });
 // every key press lives here; the gamepad calls it too with fromPad set (its held buttons reach Input.held instead)
@@ -48,7 +57,7 @@ function onKey(code, repeat, fromPad) {
   if (code === 'KeyN') cycleTime();
   if (code === 'KeyE' && !repeat) { if (CFA.onShift) CFA.serve(); else if (Bank.canSmash()) Bank.smash(); else Vehicles.tryEnter(); }
 }
-addEventListener('keyup', e => keys.delete(e.code));
+addEventListener('keyup', e => { if (e.target.closest && e.target.closest('input,textarea,[contenteditable]')) return; keys.delete(e.code); });
 addEventListener('blur', () => keys.clear());
 function toggleFly() {
   if (!flying && Bank.wanted) { toast('No flying while the police are after you', 'bad'); return; }
@@ -91,7 +100,7 @@ $('joy').addEventListener('pointermove', e => { if (e.pointerId === joyId) moveJ
 const endJoy = e => { if (e.pointerId === joyId) { joyId = null; joy.x = joy.y = 0; $('joy').firstChild.style.transform = ''; } };
 $('joy').addEventListener('pointerup', endJoy); $('joy').addEventListener('pointercancel', endJoy);
 function moveJoy(e) { const r = $('joy').getBoundingClientRect(); let dx = (e.clientX - r.left - 60) / 50, dy = (e.clientY - r.top - 60) / 50; const l = Math.hypot(dx, dy); if (l > 1) { dx /= l; dy /= l; } joy.x = dx; joy.y = -dy; $('joy').firstChild.style.transform = `translate(${dx * 40}px,${dy * 40}px)`; }
-canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { lookId = e.pointerId; lookLast = [e.clientX, e.clientY]; } });
+canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && !gamePaused()) { lookId = e.pointerId; lookLast = [e.clientX, e.clientY]; } });
 canvas.addEventListener('pointermove', e => { if (e.pointerId === lookId) { yaw -= (e.clientX - lookLast[0]) * 0.005; pitch = Math.max(-1.5, Math.min(1.5, pitch - (e.clientY - lookLast[1]) * 0.005)); lookLast = [e.clientX, e.clientY]; } });
 canvas.addEventListener('pointerup', e => { if (e.pointerId === lookId) lookId = null; });
 $('tJump').addEventListener('pointerdown', () => touchUp = true); $('tJump').addEventListener('pointerup', () => touchUp = false); $('tJump').addEventListener('pointerleave', () => touchUp = false);
