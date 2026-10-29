@@ -21,13 +21,13 @@ npm run dev
 
 Open http://127.0.0.1:8787. Open a second window to see a second visitor.
 
-The build step runs Python (`../src/assemble.py`). It uses `python` by default. On macOS or Linux, if that command is missing, set `PYTHON=python3`, for example `PYTHON=python3 npm run dev`.
+Wrangler runs the build (`node build.mjs`) before every `wrangler dev` and `wrangler deploy`, so nothing else needs installing. During `npm run dev` it rebuilds when `../client` or `../src` changes.
 
 ## Deploy
 
 ```sh
 npx wrangler login     # once, to sign in to your Cloudflare account
-npm run deploy         # rebuilds the page, then publishes the Worker
+npm run deploy         # builds the page, then publishes the Worker
 ```
 
 Wrangler prints the public URL when it finishes, in the form `https://groove-city-college.<your-subdomain>.workers.dev`. Use `npx wrangler deploy` alone only if `public/` is already up to date.
