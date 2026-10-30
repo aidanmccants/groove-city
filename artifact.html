@@ -3245,7 +3245,7 @@ const Vehicles = {
   init(parked) {
     const cops = [];
     for (const k of parked) this.add({ x: k.x, z: k.z, h: k.r + Math.PI / 2, col: k.col, cop: false });
-    for (const q of [[-600, -250], [-560, -320], [-640, -170], [-60, -90], [120, 60]]) {   // police cars parked downtown and on campus
+    for (const q of [[-600, -250], [-560, -320], [-640, -170], [-60, -90], [120, 60], [142.5, -415.6]]) {   // police cars parked downtown, on campus and at the Grove City Police station (its lot)
       let b = null, bd = 1e9; for (const c of this.list) { const d = Math.hypot(c.x - q[0], c.z - q[1]); if (!c.cop && d < bd) { bd = d; b = c; } }
       if (b) { b.cop = true; b.col = '#141619'; b.roof = '#f2f2f2'; }
     }
