@@ -3589,7 +3589,7 @@ const Vehicles = {
     $('dspd').textContent = sp; $('dspd').classList.toggle('over', over && !c.cop);
     const fuel = c.fuel <= 0 ? 'EMPTY · pull up at the Marathon' : `FUEL ${Math.round(c.fuel * 100)}%`;
     line = line ? line + ' · ' + fuel : fuel;
-    if (Gas.canFill(c) && c.fuel < 1) line += ` · ${Input.glyph('use')} fills up ${money(-RULES['gas.fill'].cash / 100)}`;
+    if (Gas.canFill(c) && !Gas.fill) line += ` · ${Input.device === 'pad' ? 'A' : 'E'} fills up ${money(-RULES['gas.fill'].cash / 100)}`;   // plain text: this line is textContent
     $('dinfo').textContent = this.frozen ? 'PULLED OVER · ' + this.frozen : line;
     const kg = (a, ctx) => Input.glyph(a, ctx, Input.device === 'pad' ? 'pad' : 'kbm');   // keyboard or pad hints (a touch screen has its own)
     $('dkeys').innerHTML = isTouch ? '' : `${kg('exit', 'bare')}exit ${kg('camera', 'bare')}${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ` ${kg('siren')}siren ${kg('lights')}lights` : ''} ${kg('handbrake')}brake${Input.device === 'pad' ? ` ${XB('RT')}gas ${XB('LT')}brake/reverse` : ''}`;
