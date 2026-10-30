@@ -3,7 +3,7 @@ let started = false, mapOpen = false;
 const locked = () => document.pointerLockElement === canvas;
 function lockPointer() { if (!isTouch && canvas.requestPointerLock && !locked()) { try { const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } } }
 // the game stands still under the news, the map, the account panel or the chat box
-const gamePaused = () => mapOpen || newsOpen || acctOpen || chatOpen;
+const gamePaused = () => mapOpen || newsOpen || guideOpen || acctOpen || chatOpen;
 canvas.addEventListener('click', () => {
   if (!started || gamePaused()) return;
   if (!locked()) { if (isTouch && CFA.onShift) CFA.serve(); else if (isTouch && Bank.canSmash()) Bank.smash(); else if (!(isTouch && !Vehicles.player && Vehicles.tryEnter())) lockPointer(); }
@@ -26,6 +26,7 @@ addEventListener('keydown', e => {
   Input.setDevice('kbm');
   if (!started) return;
   if (newsOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeNews(); } return; }
+  if (guideOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeGuide(); } return; }
   if (acctOpen || chatOpen) {   // a panel is open: Esc closes it; Enter brings the chat box back when focus has left it
     if (e.code === 'Escape') { e.preventDefault(); if (acctOpen) Account.closePanel(); else Chat.close(); }
     else if (chatOpen && e.code === 'Enter' && !e.target.closest('#chat')) { e.preventDefault(); Chat.focus(); }
@@ -40,21 +41,22 @@ function onKey(code, repeat, fromPad) {
   if (!fromPad) keys.add(code);
   if (Vehicles.player) {   // driving: E/F get out, C/V camera, H siren and L lights in a police car
     const cop = Vehicles.player.cop;
-    if ((code === 'KeyE' || code === 'KeyF') && !repeat) Vehicles.exit();
+    if (code === 'KeyE' && !repeat && Gas.tryFill(Vehicles.player)) { /* E at a pump fills the tank; E again gets out */ }
+    else if ((code === 'KeyE' || code === 'KeyF') && !repeat) Vehicles.exit();
     else if ((code === 'KeyC' || code === 'KeyV') && !repeat) Vehicles.toggleCam();
     else if (code === 'KeyH' && cop && !repeat) { Vehicles.siren = !Vehicles.siren; if (Vehicles.siren) Vehicles.lights = true; }
     else if (code === 'KeyL' && cop && !repeat) Vehicles.lights = !Vehicles.lights;
     else if (code === 'KeyL') showLabels = !showLabels;
     if (code === 'KeyM') toggleMap();
     if (code === 'Escape' && mapOpen) toggleMap(false);
-    if (code === 'KeyN') cycleTime();
+    if (code === 'KeyG') openGuide();
     return;
   }
   if (code === 'KeyF') toggleFly();
   if (code === 'KeyM') toggleMap();
   if (code === 'Escape' && mapOpen) toggleMap(false);
   if (code === 'KeyL') { showLabels = !showLabels; }
-  if (code === 'KeyN') cycleTime();
+  if (code === 'KeyG') openGuide();
   if (code === 'KeyE' && !repeat) { if (CFA.onShift) CFA.serve(); else if (Bank.canSmash()) Bank.smash(); else Vehicles.tryEnter(); }
 }
 addEventListener('keyup', e => { if (e.target.closest && e.target.closest('input,textarea,[contenteditable]')) return; keys.delete(e.code); });

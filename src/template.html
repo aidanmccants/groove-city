@@ -67,6 +67,8 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 #cash{font-family:var(--f-display);font-size:18px;letter-spacing:.04em;color:#9fdc8a;font-variant-numeric:tabular-nums}
 #money.debt{border-color:rgba(224,86,107,.7)}#money.debt #cash{color:#ff6b7f}
 #debt{font-family:var(--f-mono);font-size:11px;color:#ffb3bd;font-variant-numeric:tabular-nums}
+#guideBtn{top:calc(12px + env(safe-area-inset-top,0px));right:146px;width:44px;height:44px;padding:0;font-size:20px;line-height:42px;text-align:center;color:var(--ink);cursor:pointer}
+#clock{top:calc(110px + env(safe-area-inset-top,0px));left:12px;padding:6px 10px;font-family:var(--f-display);font-size:13px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
 #fsbtn{top:calc(12px + env(safe-area-inset-top,0px));right:200px;width:44px;height:44px;padding:0;font-size:20px;line-height:42px;text-align:center;color:var(--ink);cursor:pointer}
 #toasts{position:fixed;top:calc(250px + env(safe-area-inset-top,0px));right:12px;display:grid;justify-items:end;gap:6px;pointer-events:none}
 .toast{background:var(--hud);border:1px solid var(--hud-line);border-radius:3px;padding:5px 10px;font-family:var(--f-display);font-size:12px;letter-spacing:.04em;color:#9fdc8a;animation:toast 2.4s ease-out forwards}
@@ -74,12 +76,12 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 @keyframes toast{0%{opacity:0;transform:translateY(6px)}10%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
 #hint{left:50%;transform:translateX(-50%);bottom:calc(62px + env(safe-area-inset-bottom,0px));padding:8px 14px;font-size:15px;text-align:center;max-width:calc(100vw - 48px)}
 #hint kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--hud-line);border-bottom-width:2px;border-radius:3px;padding:0 5px;margin:0 2px;background:rgba(255,255,255,.04)}
-#news,#acctPanel{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgba(10,9,8,.72);z-index:5}
-#news .card,#acctPanel .card{width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto}
-#news ul{margin:0;padding:0;list-style:none;display:grid;gap:9px}
-#news li{display:grid;grid-template-columns:22px 1fr;gap:2px 10px;font-size:15px;line-height:1.35;color:var(--muted)}
-#news li b{color:var(--ink);font-weight:600}#news li i{font-style:normal;grid-row:span 2;font-size:17px;line-height:1.2}
-#newsOk{font-family:var(--f-display);font-size:15px;letter-spacing:.1em;padding:12px 18px;background:var(--crimson);color:#fff;border:0;border-radius:2px;cursor:pointer;justify-self:start}
+#news,#guide,#acctPanel{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgba(10,9,8,.72);z-index:5}
+#news .card,#guide .card,#acctPanel .card{width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto}
+#news ul,#guide ul{margin:0;padding:0;list-style:none;display:grid;gap:9px}
+#news li,#guide li{display:grid;grid-template-columns:22px 1fr;gap:2px 10px;font-size:15px;line-height:1.35;color:var(--muted)}
+#news li b,#guide li b{color:var(--ink);font-weight:600}#news li i,#guide li i{font-style:normal;grid-row:span 2;font-size:17px;line-height:1.2}
+#newsOk,#guideOk{font-family:var(--f-display);font-size:15px;letter-spacing:.1em;padding:12px 18px;background:var(--crimson);color:#fff;border:0;border-radius:2px;cursor:pointer;justify-self:start}
 #drive{left:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px));padding:8px 12px;display:grid;gap:2px;min-width:180px}
 #drive .spd{font-family:var(--f-display);font-size:30px;line-height:1;color:var(--limestone);font-variant-numeric:tabular-nums}#drive .spd small{font-size:12px;letter-spacing:.1em;margin-left:4px;color:var(--muted)}
 #dspd.over{color:#ff8a9a}#dinfo{font-size:13px;color:var(--ink)}#dkeys{font-size:12px;color:var(--muted)}#dkeys kbd{font-family:var(--f-mono);font-size:10px;border:1px solid var(--hud-line);border-radius:3px;padding:0 4px;margin:0 3px 0 6px}
@@ -132,7 +134,9 @@ input:focus-visible{outline:2px solid var(--limestone);outline-offset:2px}
 /* ---- touch (html.touch is set by the head script for coarse pointers): phones in portrait and landscape ---- */
 html.touch{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--mini:120px;--R:calc(10px + var(--sr));--B:calc(12px + var(--sb))}
 @media (max-height:500px){html.touch{--mini:104px}html.touch #coords{display:none}}
-html.touch .chip:not(#fsbtn){pointer-events:none}
+html.touch .chip:not(#fsbtn):not(#guideBtn){pointer-events:none}
+html.touch #guideBtn{top:calc(10px + var(--st));right:calc(var(--R) + var(--mini) + 62px);width:44px;height:44px;font-size:18px;line-height:42px}
+html.touch #clock{top:calc(10px + var(--st) + var(--mini) + 56px);right:var(--R);padding:4px 10px;font-size:12px}
 /* top-left stack: location card, then mode and online chips */
 html.touch #where{top:calc(10px + var(--st));left:calc(10px + var(--sl));max-width:min(230px,calc(100vw - var(--mini) - 104px));padding:6px 10px;gap:1px}
 html.touch #where .brand{font-size:10px;letter-spacing:.05em}
@@ -174,7 +178,7 @@ html.touch #intro{padding:12px calc(16px + var(--sr)) 12px calc(16px + var(--sl)
 /* intro card: scrolls inside the screen; ENTER sits in a sticky footer */
 html.touch #intro .card{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;padding:20px 22px 0;gap:12px}
 html.touch #intro .foot{position:sticky;bottom:0;z-index:1;gap:10px;margin:0 -22px;padding:12px 22px calc(16px + var(--sb));background:rgba(24,21,19,.98);border-top:1px solid var(--hud-line)}
-html.touch #go,html.touch #newsOk{min-height:46px}
+html.touch #go,html.touch #newsOk,html.touch #guideOk{min-height:46px}
 html.touch .ctl-kbm{display:none}
 html.touch .ctl-touch{display:grid}
 .ctl-touch{display:none}
@@ -208,7 +212,9 @@ html.touch .ctl-touch{display:grid}
 <div id="online" class="chip" hidden></div>
 <button id="acct" class="chip" type="button" title="Your account" hidden></button>
 <div id="money" class="chip" hidden aria-live="polite"><span id="cash">$0</span><span id="debt" hidden></span></div>
+<div id="clock" class="chip" hidden aria-live="off"></div>
 <button id="fsbtn" class="chip" hidden aria-label="Toggle fullscreen" title="Fullscreen">⛶</button>
+<button id="guideBtn" class="chip" type="button" hidden aria-label="What to do" title="What to do (G)">?</button>
 <div id="toasts" aria-live="polite"></div>
 <div id="hint" class="chip" hidden></div>
 <div id="wanted" class="chip" hidden role="status"><b>WANTED</b><span id="wtime">2:00</span><small id="wcops"></small></div>
@@ -286,6 +292,13 @@ html.touch .ctl-touch{display:grid}
   </div>
 </div>
 
+<div id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="guideH">
+  <div class="card">
+    <h1 id="guideH">WHAT TO DO<span>GROOVE CITY</span></h1>
+    <ul id="guideList"></ul>
+    <div class="btnrow"><button type="button" class="btn" id="guideMusic">Music: on</button><button id="guideOk">GOT IT</button></div>
+  </div>
+</div>
 <div id="acctPanel" hidden role="dialog" aria-modal="true" aria-labelledby="acctH">
   <div class="card">
     <h1 id="acctH">YOUR ACCOUNT</h1>

@@ -1,8 +1,8 @@
 /* ---------------- sirens (WebAudio, on Rail's audio context) ---------------- */
 const Siren = {
-  wail(secs = 2.4, vol = .05) {   // a short whoop-whoop for a pull-over
-    const ac = Rail.ac; if (!ac || ac.state !== 'running') return; const t0 = ac.currentTime;
-    const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; g.gain.value = vol; o.connect(g); g.connect(ac.destination);
+  wail(secs = 2.4, vol = .05, x, z) {   // a short whoop-whoop for a pull-over; (x, z) makes it come from that car, quieter with distance
+    const ac = Rail.ac; if (!ac || ac.state !== 'running') return; const t0 = ac.currentTime, out = Mix.node(x, z);
+    const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; g.gain.value = vol; o.connect(g); g.connect(out);
     for (let s = 0; s < secs; s += .6) { o.frequency.setValueAtTime(620, t0 + s); o.frequency.linearRampToValueAtTime(1350, t0 + s + .3); o.frequency.linearRampToValueAtTime(620, t0 + s + .6); }
     g.gain.setValueAtTime(vol, t0 + secs - .1); g.gain.linearRampToValueAtTime(0, t0 + secs); o.start(t0); o.stop(t0 + secs + .05);
   },
@@ -17,4 +17,3 @@ const Siren = {
   },
   stop() { if (this.o) { try { this.o.stop(); this.lfo.stop(); } catch (e) { } this.o = this.lfo = this.g = null; } },
 };
-

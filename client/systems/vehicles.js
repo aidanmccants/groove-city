@@ -43,7 +43,7 @@ const Vehicles = {
     for (const c of cops) Cops.add(c);
   },
   // each car is also a node. vehicle.ref is the live car, so its position is not copied into the node every frame
-  add(o) { const c = Object.assign({ id: this.list.length, y: 0, v: 0, pt: 0, rl: 0, kind: 'parked', roof: null, flash: false, steer: 0 }, o); if (!c.roof) c.roof = c.col; this.list.push(c); World.add({ id: 'car:' + c.id, kind: c.cop ? 'copcar' : 'car', x: c.x, z: c.z, c: { vehicle: { ref: c } } }); return c; },
+  add(o) { const c = Object.assign({ id: this.list.length, y: 0, v: 0, pt: 0, rl: 0, kind: 'parked', roof: null, flash: false, steer: 0, fuel: 1 }, o); if (!c.roof) c.roof = c.col; this.list.push(c); World.add({ id: 'car:' + c.id, kind: c.cop ? 'copcar' : 'car', x: c.x, z: c.z, c: { vehicle: { ref: c } } }); return c; },
   addDecals(car) {   // GROOVE CITY POLICE on both front doors (the white door panel); placed in place()
     if (!this._decalMat) {
       const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96; const g = cv.getContext('2d');
@@ -201,7 +201,7 @@ const Vehicles = {
   /* ---- the player's car ---- */
   updatePlayer(dt) {
     const c = this.player, frozen = !!this.frozen;
-    const ax = Input.axis(), f = frozen ? 0 : ax.y, s = frozen ? 0 : ax.x;
+    const ax = Input.axis(), f = frozen || c.fuel <= 0 ? 0 : ax.y, s = frozen ? 0 : ax.x;   // an empty tank gives no drive
     const vmax = c.cop ? 36 : 30, brake = frozen || Input.held('handbrake');
     if (brake) c.v -= Math.sign(c.v) * Math.min(Math.abs(c.v), 14 * dt);
     else if (f > 0.1) c.v += c.v < -.2 ? 12 * dt * f : 6.5 * f * (1 - Math.max(0, c.v) / vmax) * dt;
@@ -209,7 +209,7 @@ const Vehicles = {
     else c.v -= Math.sign(c.v) * Math.min(Math.abs(c.v), (1.6 + .015 * c.v * c.v) * dt);
     c.steer += (Math.max(-1, Math.min(1, s)) * .6 / (1 + Math.abs(c.v) / 11) - c.steer) * Math.min(1, dt * 8);
     c.h -= c.v / 2.7 * Math.tan(c.steer) * dt;
-    const px = c.x, pz = c.z; this.drive(c, dt);
+    const px = c.x, pz = c.z; this.drive(c, dt); c.fuel = Math.max(0, c.fuel - Math.abs(c.v) * dt / TANK_M);
     const heading = Math.atan2(c.x - px, c.z - pz), moved = Math.hypot(c.x - px, c.z - pz) > 1e-3;
     this.ranRed = moved && c.v > 1 ? Traffic.ranRed([px, pz], [c.x, c.z], heading) : null;
     if (this.ranRed) this.redT = performance.now();
@@ -238,6 +238,9 @@ const Vehicles = {
     let line = c.cop ? `🚓 POLICE · lights ${this.lights ? 'ON' : 'off'} · siren ${this.siren ? 'ON' : 'off'}` : '';
     if (this.rental) { const s = Math.floor((Date.now() - this.rental.t0) / 1000); line = `RENTAL ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} · ${money(this.rental.paid * RENT_BLOCK)} · $5/min · billed every 10 s`; }
     $('dspd').textContent = sp; $('dspd').classList.toggle('over', over && !c.cop);
+    const fuel = c.fuel <= 0 ? 'EMPTY · pull up at the Marathon' : `FUEL ${Math.round(c.fuel * 100)}%`;
+    line = line ? line + ' · ' + fuel : fuel;
+    if (Gas.canFill(c) && c.fuel < 1) line += ` · ${Input.glyph('use')} fills up ${money(-RULES['gas.fill'].cash / 100)}`;
     $('dinfo').textContent = this.frozen ? 'PULLED OVER · ' + this.frozen : line;
     const kg = (a, ctx) => Input.glyph(a, ctx, Input.device === 'pad' ? 'pad' : 'kbm');   // keyboard or pad hints (a touch screen has its own)
     $('dkeys').innerHTML = isTouch ? '' : `${kg('exit', 'bare')}exit ${kg('camera', 'bare')}${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ` ${kg('siren')}siren ${kg('lights')}lights` : ''} ${kg('handbrake')}brake${Input.device === 'pad' ? ` ${XB('RT')}gas ${XB('LT')}brake/reverse` : ''}`;

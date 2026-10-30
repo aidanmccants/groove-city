@@ -58,6 +58,8 @@ function paintGround() {
       // white edge lines and a solid double-yellow centre, as on East Main and Madison
       g.strokeStyle = '#e9e9e4'; g.lineWidth = (l.w - 0.8) * SS; g.stroke();
       g.strokeStyle = c; g.lineWidth = (l.w - 1.1) * SS; g.stroke();
+      // protected bike lanes on the two big roads: green strips at each edge, so the car lanes are narrower and calmer
+      if (l.k !== 'tertiary') { g.strokeStyle = '#3f8a57'; g.lineWidth = (l.w - 1.1) * SS; g.stroke(); g.strokeStyle = c; g.lineWidth = (l.w - 4.4) * SS; g.stroke(); }
       g.strokeStyle = '#e3bd3a'; g.lineWidth = 0.6 * SS; g.stroke();
       g.strokeStyle = c; g.lineWidth = 0.2 * SS; g.stroke();
     }

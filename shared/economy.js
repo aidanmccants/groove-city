@@ -8,6 +8,7 @@ export const RULES = {
   'ticket':        { cash: -1000, cool: 5000,  stat: 'tickets' },
   'rent.start':    { cash: -83,   cool: 2000, need: 83 },   // car rental: $5/min, billed every 10 s (83 cents)
   'rent.tick':     { cash: -83,   cool: 9000 },
+  'gas.fill':      { cash: -800, cool: 2000, need: 800 },   // fill-up at a Marathon pump: $8, whatever the tank had left
   'die':           { set: { cash: 0 } },                     // unalived / kicked: cash lost, bank kept
 };
 

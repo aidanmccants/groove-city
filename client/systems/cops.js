@@ -44,7 +44,7 @@ const Cops = {
   // pull over a car at target {x, z, h}; ticket is the local player's car (charged $10) or null for another player's
   pullOver(cop, target, ticket) {
     cop.car.flash = true; this.setState(cop, 'pull', { target, ticket, step: 'approach' });
-    if (Math.hypot(cop.car.x - P.x, cop.car.z - P.z) < 150) Siren.wail();
+    if (Math.hypot(cop.car.x - P.x, cop.car.z - P.z) < 150) Siren.wail(2.4, .05, cop.car.x, cop.car.z);
   },
   update(dt, now) {
     for (const cop of this.list) { cop.st += dt; const fn = this.states[cop.state]; if (fn) fn(cop, dt, now); }

@@ -14,7 +14,7 @@ const BIND = {
   map:      { key: ['KeyM'], pad: [8], touch: 'MAP' },
   chat:     { key: ['KeyT', 'Enter'], pad: [14], touch: '💬' },                  // opens the chat box (typing uses the on-screen or OS keyboard)
   labels:   { key: ['KeyL'], pad: [12] },
-  time:     { key: ['KeyN'], pad: [13] },
+  guide:    { key: ['KeyG'] },                                                // What to do (the ? button on screen)
   exit:     { key: ['KeyE', 'KeyF'], pad: [1, 2], touch: 'EXIT' },             // in a car
   camera:   { key: ['KeyV', 'KeyC'], pad: [3], touch: 'USE' },                 // in a car
   siren:    { key: ['KeyH'], pad: [5], touch: 'SIREN' },                       // in a police car
@@ -28,7 +28,7 @@ const PADNAME = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'LS
 const KEYNAME = { Space: 'Space', ShiftLeft: 'Shift', ShiftRight: 'Shift', ControlLeft: 'Ctrl', Escape: 'Esc', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' };
 const keyName = c => KEYNAME[c] || c.replace(/^Key/, '');
 // the #keys chip: keyboard and pad share this list (keysChipHTML adds each device's own extras)
-const KEYS_CHIP = [['forward', 'walk'], ['run', 'run'], ['jump', 'jump'], ['fly', 'fly'], ['map', 'map'], ['chat', 'chat'], ['time', 'time of day'], ['labels', 'labels'], ['use', 'serve / get in a car']];
+const KEYS_CHIP = [['forward', 'walk'], ['run', 'run'], ['jump', 'jump'], ['fly', 'fly'], ['map', 'map'], ['chat', 'chat'], ['guide', 'what to do'], ['labels', 'labels'], ['use', 'serve / get in a car']];
 const Input = {
   device: 'kbm',
   // a bound key is down, or the pad holds a bound button (Pad.btn is empty outside the game), or for jump the on-screen ▲

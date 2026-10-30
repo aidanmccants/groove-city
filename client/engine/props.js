@@ -40,6 +40,19 @@ function buildTrees() {
       }
     }
   }
+  // street trees: a row on both sides of the primary and secondary roads, every 14 m, clear of buildings and the bridges
+  for (const l of D.lines) if ((l.k === 'primary' || l.k === 'secondary') && !l.br) {
+    for (let i = 0; i < l.p.length - 1; i++) {
+      const a = l.p[i], c = l.p[i + 1], dx = c[0] - a[0], dz = c[1] - a[1], L = Math.hypot(dx, dz);
+      for (let s = 7; s < L; s += 14) for (const side of [-1, 1]) {
+        const off = l.w / 2 + 2.6, x = a[0] + dx / L * s + dz / L * off * side, z = a[1] + dz / L * s - dx / L * off * side;
+        if (onBridge(x, z) || D.buildings.some(b => pip(x, z, b.p))) continue;
+        const hh = hash(x * 5.3 - z * 1.7), sz = 2.2 + hh * .6, y = terrainY(x, z);
+        trunks.push({ x, z, y, w: .45, h: 2.6 + sz * .5 });
+        leaves.push({ x, z, y: y + 2.6, sx: sz, sy: sz * .8, sz, col: greens[Math.floor(hh * 997) % greens.length], r: hh * 6 });
+      }
+    }
+  }
   instanced(boxGeo, lambert(TEX.bark, { vertexColors: false }), trunks, (t, o) => { o.position.set(t.x, t.y - .3, t.z); o.scale.set(t.w, t.h, t.w); o.rotation.set(0, 0, 0); });
   instanced(boxGeo, new THREE.MeshLambertMaterial({ map: TEX.leaves }), leaves, (t, o, c) => { o.position.set(t.x, t.y, t.z); o.scale.set(t.sx, t.sy, t.sz); o.rotation.set(0, t.r, 0); c.set(t.col); });
 }

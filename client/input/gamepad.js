@@ -52,7 +52,6 @@ const Pad = {
       if (down(0)) { const t = performance.now(); if (t - (this.lastA || 0) < 300) { onKey('KeyF', false, true); this.lastA = 0; } else this.lastA = t; }   // double-tap A flies (A still jumps)
       if (down(8)) onKey('KeyM', false, true);
       if (down(12)) onKey('KeyL', false, true);
-      if (down(13)) onKey('KeyN', false, true);
     }
   },
   rumble(ms, strong) { try { const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g && g.connected); const p = gp?.vibrationActuator?.playEffect('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: strong / 2 }); if (p && p.catch) p.catch(() => { }); } catch (e) { } },

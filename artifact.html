@@ -67,6 +67,8 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 #cash{font-family:var(--f-display);font-size:18px;letter-spacing:.04em;color:#9fdc8a;font-variant-numeric:tabular-nums}
 #money.debt{border-color:rgba(224,86,107,.7)}#money.debt #cash{color:#ff6b7f}
 #debt{font-family:var(--f-mono);font-size:11px;color:#ffb3bd;font-variant-numeric:tabular-nums}
+#guideBtn{top:calc(12px + env(safe-area-inset-top,0px));right:146px;width:44px;height:44px;padding:0;font-size:20px;line-height:42px;text-align:center;color:var(--ink);cursor:pointer}
+#clock{top:calc(110px + env(safe-area-inset-top,0px));left:12px;padding:6px 10px;font-family:var(--f-display);font-size:13px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
 #fsbtn{top:calc(12px + env(safe-area-inset-top,0px));right:200px;width:44px;height:44px;padding:0;font-size:20px;line-height:42px;text-align:center;color:var(--ink);cursor:pointer}
 #toasts{position:fixed;top:calc(250px + env(safe-area-inset-top,0px));right:12px;display:grid;justify-items:end;gap:6px;pointer-events:none}
 .toast{background:var(--hud);border:1px solid var(--hud-line);border-radius:3px;padding:5px 10px;font-family:var(--f-display);font-size:12px;letter-spacing:.04em;color:#9fdc8a;animation:toast 2.4s ease-out forwards}
@@ -74,12 +76,12 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 @keyframes toast{0%{opacity:0;transform:translateY(6px)}10%{opacity:1;transform:none}75%{opacity:1}100%{opacity:0;transform:translateY(-14px)}}
 #hint{left:50%;transform:translateX(-50%);bottom:calc(62px + env(safe-area-inset-bottom,0px));padding:8px 14px;font-size:15px;text-align:center;max-width:calc(100vw - 48px)}
 #hint kbd{font-family:var(--f-mono);font-size:11px;border:1px solid var(--hud-line);border-bottom-width:2px;border-radius:3px;padding:0 5px;margin:0 2px;background:rgba(255,255,255,.04)}
-#news,#acctPanel{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgba(10,9,8,.72);z-index:5}
-#news .card,#acctPanel .card{width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto}
-#news ul{margin:0;padding:0;list-style:none;display:grid;gap:9px}
-#news li{display:grid;grid-template-columns:22px 1fr;gap:2px 10px;font-size:15px;line-height:1.35;color:var(--muted)}
-#news li b{color:var(--ink);font-weight:600}#news li i{font-style:normal;grid-row:span 2;font-size:17px;line-height:1.2}
-#newsOk{font-family:var(--f-display);font-size:15px;letter-spacing:.1em;padding:12px 18px;background:var(--crimson);color:#fff;border:0;border-radius:2px;cursor:pointer;justify-self:start}
+#news,#guide,#acctPanel{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgba(10,9,8,.72);z-index:5}
+#news .card,#guide .card,#acctPanel .card{width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto}
+#news ul,#guide ul{margin:0;padding:0;list-style:none;display:grid;gap:9px}
+#news li,#guide li{display:grid;grid-template-columns:22px 1fr;gap:2px 10px;font-size:15px;line-height:1.35;color:var(--muted)}
+#news li b,#guide li b{color:var(--ink);font-weight:600}#news li i,#guide li i{font-style:normal;grid-row:span 2;font-size:17px;line-height:1.2}
+#newsOk,#guideOk{font-family:var(--f-display);font-size:15px;letter-spacing:.1em;padding:12px 18px;background:var(--crimson);color:#fff;border:0;border-radius:2px;cursor:pointer;justify-self:start}
 #drive{left:12px;bottom:calc(58px + env(safe-area-inset-bottom,0px));padding:8px 12px;display:grid;gap:2px;min-width:180px}
 #drive .spd{font-family:var(--f-display);font-size:30px;line-height:1;color:var(--limestone);font-variant-numeric:tabular-nums}#drive .spd small{font-size:12px;letter-spacing:.1em;margin-left:4px;color:var(--muted)}
 #dspd.over{color:#ff8a9a}#dinfo{font-size:13px;color:var(--ink)}#dkeys{font-size:12px;color:var(--muted)}#dkeys kbd{font-family:var(--f-mono);font-size:10px;border:1px solid var(--hud-line);border-radius:3px;padding:0 4px;margin:0 3px 0 6px}
@@ -132,7 +134,9 @@ input:focus-visible{outline:2px solid var(--limestone);outline-offset:2px}
 /* ---- touch (html.touch is set by the head script for coarse pointers): phones in portrait and landscape ---- */
 html.touch{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--mini:120px;--R:calc(10px + var(--sr));--B:calc(12px + var(--sb))}
 @media (max-height:500px){html.touch{--mini:104px}html.touch #coords{display:none}}
-html.touch .chip:not(#fsbtn){pointer-events:none}
+html.touch .chip:not(#fsbtn):not(#guideBtn){pointer-events:none}
+html.touch #guideBtn{top:calc(10px + var(--st));right:calc(var(--R) + var(--mini) + 62px);width:44px;height:44px;font-size:18px;line-height:42px}
+html.touch #clock{top:calc(10px + var(--st) + var(--mini) + 56px);right:var(--R);padding:4px 10px;font-size:12px}
 /* top-left stack: location card, then mode and online chips */
 html.touch #where{top:calc(10px + var(--st));left:calc(10px + var(--sl));max-width:min(230px,calc(100vw - var(--mini) - 104px));padding:6px 10px;gap:1px}
 html.touch #where .brand{font-size:10px;letter-spacing:.05em}
@@ -174,7 +178,7 @@ html.touch #intro{padding:12px calc(16px + var(--sr)) 12px calc(16px + var(--sl)
 /* intro card: scrolls inside the screen; ENTER sits in a sticky footer */
 html.touch #intro .card{max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;padding:20px 22px 0;gap:12px}
 html.touch #intro .foot{position:sticky;bottom:0;z-index:1;gap:10px;margin:0 -22px;padding:12px 22px calc(16px + var(--sb));background:rgba(24,21,19,.98);border-top:1px solid var(--hud-line)}
-html.touch #go,html.touch #newsOk{min-height:46px}
+html.touch #go,html.touch #newsOk,html.touch #guideOk{min-height:46px}
 html.touch .ctl-kbm{display:none}
 html.touch .ctl-touch{display:grid}
 .ctl-touch{display:none}
@@ -208,7 +212,9 @@ html.touch .ctl-touch{display:grid}
 <div id="online" class="chip" hidden></div>
 <button id="acct" class="chip" type="button" title="Your account" hidden></button>
 <div id="money" class="chip" hidden aria-live="polite"><span id="cash">$0</span><span id="debt" hidden></span></div>
+<div id="clock" class="chip" hidden aria-live="off"></div>
 <button id="fsbtn" class="chip" hidden aria-label="Toggle fullscreen" title="Fullscreen">⛶</button>
+<button id="guideBtn" class="chip" type="button" hidden aria-label="What to do" title="What to do (G)">?</button>
 <div id="toasts" aria-live="polite"></div>
 <div id="hint" class="chip" hidden></div>
 <div id="wanted" class="chip" hidden role="status"><b>WANTED</b><span id="wtime">2:00</span><small id="wcops"></small></div>
@@ -286,6 +292,13 @@ html.touch .ctl-touch{display:grid}
   </div>
 </div>
 
+<div id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="guideH">
+  <div class="card">
+    <h1 id="guideH">WHAT TO DO<span>GROOVE CITY</span></h1>
+    <ul id="guideList"></ul>
+    <div class="btnrow"><button type="button" class="btn" id="guideMusic">Music: on</button><button id="guideOk">GOT IT</button></div>
+  </div>
+</div>
 <div id="acctPanel" hidden role="dialog" aria-modal="true" aria-labelledby="acctH">
   <div class="card">
     <h1 id="acctH">YOUR ACCOUNT</h1>
@@ -345,6 +358,7 @@ const RULES = {
   'ticket':        { cash: -1000, cool: 5000,  stat: 'tickets' },
   'rent.start':    { cash: -83,   cool: 2000, need: 83 },   // car rental: $5/min, billed every 10 s (83 cents)
   'rent.tick':     { cash: -83,   cool: 9000 },
+  'gas.fill':      { cash: -800, cool: 2000, need: 800 },   // fill-up at a Marathon pump: $8, whatever the tank had left
   'die':           { set: { cash: 0 } },                     // unalived / kicked: cash lost, bank kept
 };
 
@@ -526,7 +540,7 @@ const Profile = (() => {
 // 100 ms online). extra: { quiet: no toast, done(result) } where result is { ok, reason }.
 const Econ = (() => {
   // the word after the amount in the toast: "+$1 sandwich"
-  const LABEL = { 'cfa.serve': 'sandwich', 'bank.rob': 'bank robbery', 'cop.pullover': 'pull-over', 'ticket': 'ticket', 'rent.start': 'car rental', 'rent.tick': 'car rental' };
+  const LABEL = { 'cfa.serve': 'sandwich', 'bank.rob': 'bank robbery', 'cop.pullover': 'pull-over', 'ticket': 'ticket', 'rent.start': 'car rental', 'rent.tick': 'car rental', 'gas.fill': 'fuel' };
   const waiting = {};   // action -> extras sent to the server and not answered yet, oldest first
   const lastRun = {};   // offline cooldowns: action -> when it last ran
   const connected = () => !!(Account.me && netSock && netSock.readyState === 1);
@@ -812,6 +826,8 @@ function paintGround() {
       // white edge lines and a solid double-yellow centre, as on East Main and Madison
       g.strokeStyle = '#e9e9e4'; g.lineWidth = (l.w - 0.8) * SS; g.stroke();
       g.strokeStyle = c; g.lineWidth = (l.w - 1.1) * SS; g.stroke();
+      // protected bike lanes on the two big roads: green strips at each edge, so the car lanes are narrower and calmer
+      if (l.k !== 'tertiary') { g.strokeStyle = '#3f8a57'; g.lineWidth = (l.w - 1.1) * SS; g.stroke(); g.strokeStyle = c; g.lineWidth = (l.w - 4.4) * SS; g.stroke(); }
       g.strokeStyle = '#e3bd3a'; g.lineWidth = 0.6 * SS; g.stroke();
       g.strokeStyle = c; g.lineWidth = 0.2 * SS; g.stroke();
     }
@@ -1717,6 +1733,19 @@ function buildTrees() {
       }
     }
   }
+  // street trees: a row on both sides of the primary and secondary roads, every 14 m, clear of buildings and the bridges
+  for (const l of D.lines) if ((l.k === 'primary' || l.k === 'secondary') && !l.br) {
+    for (let i = 0; i < l.p.length - 1; i++) {
+      const a = l.p[i], c = l.p[i + 1], dx = c[0] - a[0], dz = c[1] - a[1], L = Math.hypot(dx, dz);
+      for (let s = 7; s < L; s += 14) for (const side of [-1, 1]) {
+        const off = l.w / 2 + 2.6, x = a[0] + dx / L * s + dz / L * off * side, z = a[1] + dz / L * s - dx / L * off * side;
+        if (onBridge(x, z) || D.buildings.some(b => pip(x, z, b.p))) continue;
+        const hh = hash(x * 5.3 - z * 1.7), sz = 2.2 + hh * .6, y = terrainY(x, z);
+        trunks.push({ x, z, y, w: .45, h: 2.6 + sz * .5 });
+        leaves.push({ x, z, y: y + 2.6, sx: sz, sy: sz * .8, sz, col: greens[Math.floor(hh * 997) % greens.length], r: hh * 6 });
+      }
+    }
+  }
   instanced(boxGeo, lambert(TEX.bark, { vertexColors: false }), trunks, (t, o) => { o.position.set(t.x, t.y - .3, t.z); o.scale.set(t.w, t.h, t.w); o.rotation.set(0, 0, 0); });
   instanced(boxGeo, new THREE.MeshLambertMaterial({ map: TEX.leaves }), leaves, (t, o, c) => { o.position.set(t.x, t.y, t.z); o.scale.set(t.sx, t.sy, t.sz); o.rotation.set(0, t.r, 0); c.set(t.col); });
 }
@@ -2225,7 +2254,7 @@ const Rail = {
           const nx = cx + fwd[0] * 10.42, nz = cz + fwd[1] * 10.42;
           put(this.heads, counts.head++, cx + fwd[0] * 10.42, cy + 2.55, cz + fwd[1] * 10.42, yaw, pt, .55, .28, .05);
           for (const e of [-1, 1]) put(this.heads, counts.head++, nx + fwd[1] * e * 1.15, cy + .95, nz - fwd[0] * e * 1.15, yaw, pt, .26, .26, .05);
-          this.spot.position.set(nx, cy + 2.6, nz); this.spot.target.position.set(nx + fwd[0] * 40, cy - 1, nz + fwd[1] * 40); this.spot.intensity = timeIdx === 2 ? 900 : 250;
+          this.spot.position.set(nx, cy + 2.6, nz); this.spot.target.position.set(nx + fwd[0] * 40, cy - 1, nz + fwd[1] * 40); this.spot.intensity = nightLevel > .5 ? 900 : 250;
         }
         this.units.push({ x: cx, z: cz, y: cy, fx: fwd[0], fz: fwd[1], hl: u.L / 2, lead, R });
         lead = false;
@@ -2345,7 +2374,18 @@ const Traffic = {
   paint(g) {   // stop lines across each approach lane
     this.plan(); g.strokeStyle = '#ecebe4'; g.lineWidth = 0.55 * SS; g.lineCap = 'butt';
     for (const I of this.lights) for (const a of I.arms) {
-      const cx = I.x + a.u[0] * (I.r + .3), cz = I.z + a.u[1] * (I.r + .3), rx = a.u[1], rz = -a.u[0];   // right of a car arriving along -u
+      const ux = a.u[0], uz = a.u[1], rx = uz, rz = -ux;   // u points out along the arm; r is right of a car arriving along -u
+      const quad = pts => { g.beginPath(); pts.forEach((q, i) => i ? g.lineTo(gx(q[0]), gz(q[1])) : g.moveTo(gx(q[0]), gz(q[1]))); g.closePath(); };
+      // at a point s out along the arm and t to the right: the crossing's pavement and bars are laid from these
+      const at = (s, t) => [I.x + ux * s + rx * t, I.z + uz * s + rz * t];
+      // curb extensions: pavement pushed out into the lane on both sides, so the crossing is shorter for walkers
+      g.fillStyle = '#b9b3a6';
+      for (const side of [-1, 1]) { quad([at(I.r + .6, side * (a.w / 2 - 1.6)), at(I.r + 3.2, side * (a.w / 2 - 1.6)), at(I.r + 3.2, side * (a.w / 2 + .6)), at(I.r + .6, side * (a.w / 2 + .6))]); g.fill(); }
+      // zebra crossing: white bars across the road, just beyond the stop line
+      g.fillStyle = '#e4e2da';
+      for (let k = 0; k < 4; k++) { const s = I.r + 1.6 + k * .9; quad([at(s - .3, -(a.w / 2 - 1)), at(s - .3, a.w / 2 - 1), at(s + .3, a.w / 2 - 1), at(s + .3, -(a.w / 2 - 1))]); g.fill(); }
+      // the stop line itself, right of a car arriving along -u
+      const cx = I.x + ux * (I.r + .3), cz = I.z + uz * (I.r + .3);
       g.beginPath(); g.moveTo(gx(cx + rx * .3), gz(cz + rz * .3)); g.lineTo(gx(cx + rx * (a.w / 2 - .3)), gz(cz + rz * (a.w / 2 - .3))); g.stroke();
     }
     g.lineCap = 'round';
@@ -2567,7 +2607,7 @@ const BIND = {
   map:      { key: ['KeyM'], pad: [8], touch: 'MAP' },
   chat:     { key: ['KeyT', 'Enter'], pad: [14], touch: '💬' },                  // opens the chat box (typing uses the on-screen or OS keyboard)
   labels:   { key: ['KeyL'], pad: [12] },
-  time:     { key: ['KeyN'], pad: [13] },
+  guide:    { key: ['KeyG'] },                                                // What to do (the ? button on screen)
   exit:     { key: ['KeyE', 'KeyF'], pad: [1, 2], touch: 'EXIT' },             // in a car
   camera:   { key: ['KeyV', 'KeyC'], pad: [3], touch: 'USE' },                 // in a car
   siren:    { key: ['KeyH'], pad: [5], touch: 'SIREN' },                       // in a police car
@@ -2581,7 +2621,7 @@ const PADNAME = ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'LS
 const KEYNAME = { Space: 'Space', ShiftLeft: 'Shift', ShiftRight: 'Shift', ControlLeft: 'Ctrl', Escape: 'Esc', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→' };
 const keyName = c => KEYNAME[c] || c.replace(/^Key/, '');
 // the #keys chip: keyboard and pad share this list (keysChipHTML adds each device's own extras)
-const KEYS_CHIP = [['forward', 'walk'], ['run', 'run'], ['jump', 'jump'], ['fly', 'fly'], ['map', 'map'], ['chat', 'chat'], ['time', 'time of day'], ['labels', 'labels'], ['use', 'serve / get in a car']];
+const KEYS_CHIP = [['forward', 'walk'], ['run', 'run'], ['jump', 'jump'], ['fly', 'fly'], ['map', 'map'], ['chat', 'chat'], ['guide', 'what to do'], ['labels', 'labels'], ['use', 'serve / get in a car']];
 const Input = {
   device: 'kbm',
   // a bound key is down, or the pad holds a bound button (Pad.btn is empty outside the game), or for jump the on-screen ▲
@@ -2632,7 +2672,7 @@ let started = false, mapOpen = false;
 const locked = () => document.pointerLockElement === canvas;
 function lockPointer() { if (!isTouch && canvas.requestPointerLock && !locked()) { try { const r = canvas.requestPointerLock(); if (r && r.catch) r.catch(() => { }); } catch (e) { } } }
 // the game stands still under the news, the map, the account panel or the chat box
-const gamePaused = () => mapOpen || newsOpen || acctOpen || chatOpen;
+const gamePaused = () => mapOpen || newsOpen || guideOpen || acctOpen || chatOpen;
 canvas.addEventListener('click', () => {
   if (!started || gamePaused()) return;
   if (!locked()) { if (isTouch && CFA.onShift) CFA.serve(); else if (isTouch && Bank.canSmash()) Bank.smash(); else if (!(isTouch && !Vehicles.player && Vehicles.tryEnter())) lockPointer(); }
@@ -2655,6 +2695,7 @@ addEventListener('keydown', e => {
   Input.setDevice('kbm');
   if (!started) return;
   if (newsOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeNews(); } return; }
+  if (guideOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeGuide(); } return; }
   if (acctOpen || chatOpen) {   // a panel is open: Esc closes it; Enter brings the chat box back when focus has left it
     if (e.code === 'Escape') { e.preventDefault(); if (acctOpen) Account.closePanel(); else Chat.close(); }
     else if (chatOpen && e.code === 'Enter' && !e.target.closest('#chat')) { e.preventDefault(); Chat.focus(); }
@@ -2669,21 +2710,22 @@ function onKey(code, repeat, fromPad) {
   if (!fromPad) keys.add(code);
   if (Vehicles.player) {   // driving: E/F get out, C/V camera, H siren and L lights in a police car
     const cop = Vehicles.player.cop;
-    if ((code === 'KeyE' || code === 'KeyF') && !repeat) Vehicles.exit();
+    if (code === 'KeyE' && !repeat && Gas.tryFill(Vehicles.player)) { /* E at a pump fills the tank; E again gets out */ }
+    else if ((code === 'KeyE' || code === 'KeyF') && !repeat) Vehicles.exit();
     else if ((code === 'KeyC' || code === 'KeyV') && !repeat) Vehicles.toggleCam();
     else if (code === 'KeyH' && cop && !repeat) { Vehicles.siren = !Vehicles.siren; if (Vehicles.siren) Vehicles.lights = true; }
     else if (code === 'KeyL' && cop && !repeat) Vehicles.lights = !Vehicles.lights;
     else if (code === 'KeyL') showLabels = !showLabels;
     if (code === 'KeyM') toggleMap();
     if (code === 'Escape' && mapOpen) toggleMap(false);
-    if (code === 'KeyN') cycleTime();
+    if (code === 'KeyG') openGuide();
     return;
   }
   if (code === 'KeyF') toggleFly();
   if (code === 'KeyM') toggleMap();
   if (code === 'Escape' && mapOpen) toggleMap(false);
   if (code === 'KeyL') { showLabels = !showLabels; }
-  if (code === 'KeyN') cycleTime();
+  if (code === 'KeyG') openGuide();
   if (code === 'KeyE' && !repeat) { if (CFA.onShift) CFA.serve(); else if (Bank.canSmash()) Bank.smash(); else Vehicles.tryEnter(); }
 }
 addEventListener('keyup', e => { if (e.target.closest && e.target.closest('input,textarea,[contenteditable]')) return; keys.delete(e.code); });
@@ -2791,7 +2833,6 @@ const Pad = {
       if (down(0)) { const t = performance.now(); if (t - (this.lastA || 0) < 300) { onKey('KeyF', false, true); this.lastA = 0; } else this.lastA = t; }   // double-tap A flies (A still jumps)
       if (down(8)) onKey('KeyM', false, true);
       if (down(12)) onKey('KeyL', false, true);
-      if (down(13)) onKey('KeyN', false, true);
     }
   },
   rumble(ms, strong) { try { const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g && g.connected); const p = gp?.vibrationActuator?.playEffect('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: strong / 2 }); if (p && p.catch) p.catch(() => { }); } catch (e) { } },
@@ -2800,21 +2841,72 @@ addEventListener('gamepadconnected', () => { Pad.connected = true; toast('🎮 C
 addEventListener('gamepaddisconnected', () => { Pad.connected = false; toast('🎮 Controller disconnected'); });
 // the starting device: a touch screen starts on touch, anything else on keyboard and mouse
 Input.device = isTouch ? 'touch' : 'kbm'; Input.sync();
-/* ---------------- time of day ---------------- */
-const TIMES = [
-  { name: 'Afternoon', sun: [-0.45, 0.72, 0.52], sc: 0xfff1dc, si: 2.4, hs: 0xcfe3ff, hg: 0x5d6b45, hi: 1.0, top: 0x4a86cf, hor: 0xcfe0ee, lamp: 0x000000, exp: 1.05, cloud: 0x777777 },
-  { name: 'Golden hour', sun: [-0.85, 0.2, 0.45], sc: 0xffb36b, si: 2.2, hs: 0xf3c6a0, hg: 0x4d4a3a, hi: 0.75, top: 0x40568f, hor: 0xf2a76a, lamp: 0x553311, exp: 1.0, cloud: 0x8a5a44 },
-  { name: 'Night', sun: [0.35, 0.65, -0.3], sc: 0x9fb4ff, si: 0.35, hs: 0x3a4a7a, hg: 0x10140f, hi: 0.35, top: 0x060b1c, hor: 0x1b2744, lamp: 0xffd890, exp: 1.2, cloud: 0x10141f },
-];
-let timeIdx = 0;
-function applyTime() {
-  const t = TIMES[timeIdx]; sunDir.set(...t.sun).normalize(); sun.color.set(t.sc); sun.intensity = t.si; hemi.color.set(t.hs); hemi.groundColor.set(t.hg); hemi.intensity = t.hi;
-  skyU.top.value.set(t.top); skyU.hor.value.set(t.hor); scene.fog.color.set(t.hor); renderer.toneMappingExposure = t.exp;
-  if (lampHeads) lampHeads.material.emissive.set(t.lamp); if (lanternMat) lanternMat.emissive.set(timeIdx === 2 ? 0xffc870 : 0x332211); if (clouds) clouds.material.emissive.set(t.cloud);
+/* ---------------- day and night: one 20-minute day, the same for everyone (phase from the shared clock, netNow) ----------------
+   skyPhase: 0 = midnight, 0.25 = sunrise (6:00), 0.5 = noon, 0.75 = sunset (18:00). The sun's height drives the light, the sky
+   colours (a blend of day, golden hour and night), the lamps and the stars and moon. Below the horizon the moon lights the scene. */
+const DAY_MS = 20 * 60 * 1000;
+const SKY = {   // the three looks; look() blends them by how high the sun is
+  day:   { sun: 0xfff1dc, si: 2.4, hs: 0xcfe3ff, hg: 0x5d6b45, hi: 1.0, top: 0x4a86cf, hor: 0xcfe0ee, exp: 1.05, cloud: 0x777777 },
+  gold:  { sun: 0xffb36b, si: 2.2, hs: 0xf3c6a0, hg: 0x4d4a3a, hi: 0.75, top: 0x40568f, hor: 0xf2a76a, exp: 1.0, cloud: 0x8a5a44 },
+  night: { sun: 0x9fb4ff, si: 0.35, hs: 0x3a4a7a, hg: 0x10140f, hi: 0.35, top: 0x060b1c, hor: 0x1b2744, exp: 1.2, cloud: 0x10141f },
+};
+const NUM = ['si', 'hi', 'exp'], COL = ['sun', 'hs', 'hg', 'top', 'hor', 'cloud'];
+const HORIZ = new THREE.Vector2(-0.45, 0.52).normalize();   // the compass line the sun rises and sets along
+const LAMP_ON = new THREE.Color(0xffd890), LANTERN_OFF = new THREE.Color(0x332211), LANTERN_ON = new THREE.Color(0xffc870), BLACK = new THREE.Color(0);
+let nightLevel = 0;   // 0 = full day, 1 = full night; read by the crossing lights and the lamps
+let skyBodies = null; // the stars, the moon and the sun disc (inside the sky dome)
+let clouds;           // the cloud layer (buildClouds in main.js); its glow follows the time of day
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const skyPhase = (now = netNow()) => ((now % DAY_MS) + DAY_MS) % DAY_MS / DAY_MS;
+// the in-game clock: the same time for everyone, from the same shared phase
+function clockText(p = skyPhase()) { const m = Math.floor(p * 1440) % 1440, h = Math.floor(m / 60); return `${h % 12 || 12}:${String(m % 60).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`; }
+// the light and sky at phase p: the direction the light comes from (always above the horizon), colours and levels
+function look(p) {
+  const sinE = Math.sin(2 * Math.PI * (p - 0.25));   // sun height: -1 midnight, 0 sunrise or sunset, 1 noon
+  const d = smooth(-0.1, 0.12, sinE), g = Math.max(0, 1 - Math.abs(sinE) / 0.3);
+  const w = { day: (1 - g) * d, gold: g, night: (1 - g) * (1 - d) };
+  const out = { sinE, d, dir: null };
+  for (const f of NUM) out[f] = w.day * SKY.day[f] + w.gold * SKY.gold[f] + w.night * SKY.night[f];
+  for (const f of COL) {
+    const c = new THREE.Color(0, 0, 0);
+    for (const k of ['day', 'gold', 'night']) { const s = new THREE.Color(SKY[k][f]), m = w[k]; c.r += s.r * m; c.g += s.g * m; c.b += s.b * m; }
+    out[f] = c;
+  }
+  const cosE = Math.sqrt(Math.max(0, 1 - sinE * sinE)), sign = sinE >= 0 ? 1 : -1;   // below the horizon the light is the moon, on the far side
+  out.dir = new THREE.Vector3(HORIZ.x * cosE, sinE, HORIZ.y * cosE).multiplyScalar(sign);
+  return out;
 }
-function cycleTime() { timeIdx = (timeIdx + 1) % TIMES.length; applyTime(); }
-let clouds;
-
+// stars, moon and sun disc on the sky dome; deterministic star field so everyone sees the same sky
+function buildSkyBodies() {
+  const n = 700, pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const a = hash(i * 12.9898) * Math.PI * 2, y = hash(i * 78.233 + 1) * 0.92 + 0.06, r = Math.sqrt(1 - y * y) * 3900;
+    pos.set([Math.cos(a) * r, y * 3900, Math.sin(a) * r], i * 3);
+  }
+  const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const stars = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xffffff, size: 2.2, sizeAttenuation: false, transparent: true, opacity: 0, fog: false, depthWrite: false }));
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(70, 20, 14), new THREE.MeshBasicMaterial({ color: 0xeef1f8, transparent: true, opacity: 0, fog: false, depthWrite: false }));
+  const disc = new THREE.Mesh(new THREE.SphereGeometry(110, 20, 14), new THREE.MeshBasicMaterial({ color: 0xfff3c4, transparent: true, opacity: 0, fog: false, depthWrite: false }));
+  sky.add(stars, moon, disc);
+  skyBodies = { stars, moon, disc };
+}
+// set the light, sky, fog, lamps and clouds for the current shared time; called every frame (cheap)
+function updateSky(now = netNow()) {
+  const L = look(skyPhase(now));
+  nightLevel = 1 - L.d;
+  sunDir.copy(L.dir); sun.color.copy(L.sun); sun.intensity = L.si; hemi.color.copy(L.hs); hemi.groundColor.copy(L.hg); hemi.intensity = L.hi;
+  skyU.top.value.copy(L.top); skyU.hor.value.copy(L.hor); scene.fog.color.copy(L.hor); renderer.toneMappingExposure = L.exp;
+  if (lampHeads) lampHeads.material.emissive.lerpColors(BLACK, LAMP_ON, nightLevel);
+  if (lanternMat) lanternMat.emissive.lerpColors(LANTERN_OFF, LANTERN_ON, nightLevel);
+  if (clouds) clouds.material.emissive.copy(L.cloud);
+  if (skyBodies) {
+    const { stars, moon, disc } = skyBodies;
+    stars.material.opacity = smooth(0.1, -0.25, L.sinE);
+    disc.material.opacity = smooth(-0.04, 0.02, L.sinE);
+    moon.material.opacity = smooth(0.02, -0.06, L.sinE);
+    disc.position.copy(sunDir).multiplyScalar(3800); moon.position.copy(sunDir).multiplyScalar(3800);
+  }
+}
 /* ---------------- HUD ---------------- */
 let hudT = 0;
 function updateHUD() {
@@ -2831,6 +2923,7 @@ function updateHUD() {
   $('coords').textContent = `${lat.toFixed(5)}°N ${(-lon).toFixed(5)}°W · ${Math.round(P.y + D.base)} m elev`;
   $('heading').textContent = `${dirs[Math.round(hd / 45) % 8]} ${Math.round(hd)}°`;
   if (Profile.inDebt()) updateMoney();
+  $('clock').textContent = clockText();
   Vehicles.hud(); $('tSiren').hidden = !(isTouch && Vehicles.player && Vehicles.player.cop);
 }
 const money = v => (v < 0 ? '-$' : '$') + Math.abs(v).toFixed(Math.abs(v) % 1 ? 2 : 0);
@@ -2887,6 +2980,39 @@ function closeNews() {
 }
 $('newsOk').addEventListener('click', closeNews);
 
+/* ---------------- What to do: a guide to everything on the map (G, or the ? button); the music switch lives here too ---------------- */
+const GUIDE_ITEMS = [
+  ['🥪', 'Chick-fil-A counter', 'Step behind the counter in Breen Student Union to start a shift. Hand out sandwiches with E (or a click) for $1 each.'],
+  ['🚗', 'Rent a car', 'Look at a parked car and press E to rent it: $5 a minute, billed every 10 seconds. Press E or F to get out and hand it back.'],
+  ['⛽', 'Fill up at the Marathon', 'Stop beside a red pump outside the Marathon and press E. A full tank costs $8. A tank lasts about 6 km of driving. An empty car coasts to a stop.'],
+  ['🚓', 'Become a cop', 'Get in a parked police car, then H for the siren and L for the lights. Stay behind a speeder with the siren on for 3 seconds to pull them over for $5.'],
+  ['🎫', 'Speeding and red lights', 'Go over 25 mph, or run a red light, with a cop within 20 ft, and you are pulled over for a $10 ticket.'],
+  ['🏦', 'PNC Bank', 'Smash the vault door for $100 (five hits). Then you are wanted for two minutes. Keep away from the police.'],
+  ['🚂', 'Trains', 'A freight train runs through town on a schedule, and the gates come down before it. Wait for it to pass. You cannot drive through one.'],
+  ['🚦', 'Traffic lights', 'Everyone shares the same signals. Running a red near a cop gets you pulled over.'],
+  ['🌗', 'Day and night', 'One day lasts 20 minutes, and the clock at the top right is the same for everyone. The sun sets at 6 PM and rises at 6 AM. The lamps come on at night.'],
+  ['🚲', 'Streets', 'The big roads have painted bike lanes and narrower car lanes. Zebra crossings sit before each signal, with curb extensions on the corners. Street trees line the main roads.'],
+  ['💬', 'Chat and map', 'T or Enter to chat with everyone on the map. M opens the map.'],
+];
+let guideOpen = false;
+function openGuide() {
+  if (guideOpen || !started) return;
+  const ul = $('guideList'); ul.innerHTML = '';
+  for (const [icon, title, text] of GUIDE_ITEMS) {
+    const li = document.createElement('li'), i = document.createElement('i'), b = document.createElement('b'), sp = document.createElement('span');
+    i.textContent = icon; i.setAttribute('aria-hidden', 'true'); b.textContent = title; sp.textContent = text; li.append(i, b, sp); ul.appendChild(li);
+  }
+  $('guideMusic').textContent = 'Music: ' + (Music.on ? 'on' : 'off');
+  guideOpen = true; keys.clear(); if (locked()) document.exitPointerLock();
+  $('guide').hidden = false; $('guideOk').focus();
+}
+function closeGuide() {
+  if (!guideOpen) return;
+  guideOpen = false; $('guide').hidden = true; lockPointer();
+}
+$('guideOk').addEventListener('click', closeGuide);
+$('guideBtn').addEventListener('click', openGuide);
+$('guideMusic').addEventListener('click', () => { $('guideMusic').textContent = 'Music: ' + (Music.toggle() ? 'on' : 'off'); });
 /* ---------------- debt: ten minutes below $0 and the player is sent back to the start with a fresh profile ---------------- */
 let kicked = false;
 function checkDebt() {
@@ -3262,7 +3388,7 @@ const Vehicles = {
     for (const c of cops) Cops.add(c);
   },
   // each car is also a node. vehicle.ref is the live car, so its position is not copied into the node every frame
-  add(o) { const c = Object.assign({ id: this.list.length, y: 0, v: 0, pt: 0, rl: 0, kind: 'parked', roof: null, flash: false, steer: 0 }, o); if (!c.roof) c.roof = c.col; this.list.push(c); World.add({ id: 'car:' + c.id, kind: c.cop ? 'copcar' : 'car', x: c.x, z: c.z, c: { vehicle: { ref: c } } }); return c; },
+  add(o) { const c = Object.assign({ id: this.list.length, y: 0, v: 0, pt: 0, rl: 0, kind: 'parked', roof: null, flash: false, steer: 0, fuel: 1 }, o); if (!c.roof) c.roof = c.col; this.list.push(c); World.add({ id: 'car:' + c.id, kind: c.cop ? 'copcar' : 'car', x: c.x, z: c.z, c: { vehicle: { ref: c } } }); return c; },
   addDecals(car) {   // GROOVE CITY POLICE on both front doors (the white door panel); placed in place()
     if (!this._decalMat) {
       const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96; const g = cv.getContext('2d');
@@ -3420,7 +3546,7 @@ const Vehicles = {
   /* ---- the player's car ---- */
   updatePlayer(dt) {
     const c = this.player, frozen = !!this.frozen;
-    const ax = Input.axis(), f = frozen ? 0 : ax.y, s = frozen ? 0 : ax.x;
+    const ax = Input.axis(), f = frozen || c.fuel <= 0 ? 0 : ax.y, s = frozen ? 0 : ax.x;   // an empty tank gives no drive
     const vmax = c.cop ? 36 : 30, brake = frozen || Input.held('handbrake');
     if (brake) c.v -= Math.sign(c.v) * Math.min(Math.abs(c.v), 14 * dt);
     else if (f > 0.1) c.v += c.v < -.2 ? 12 * dt * f : 6.5 * f * (1 - Math.max(0, c.v) / vmax) * dt;
@@ -3428,7 +3554,7 @@ const Vehicles = {
     else c.v -= Math.sign(c.v) * Math.min(Math.abs(c.v), (1.6 + .015 * c.v * c.v) * dt);
     c.steer += (Math.max(-1, Math.min(1, s)) * .6 / (1 + Math.abs(c.v) / 11) - c.steer) * Math.min(1, dt * 8);
     c.h -= c.v / 2.7 * Math.tan(c.steer) * dt;
-    const px = c.x, pz = c.z; this.drive(c, dt);
+    const px = c.x, pz = c.z; this.drive(c, dt); c.fuel = Math.max(0, c.fuel - Math.abs(c.v) * dt / TANK_M);
     const heading = Math.atan2(c.x - px, c.z - pz), moved = Math.hypot(c.x - px, c.z - pz) > 1e-3;
     this.ranRed = moved && c.v > 1 ? Traffic.ranRed([px, pz], [c.x, c.z], heading) : null;
     if (this.ranRed) this.redT = performance.now();
@@ -3457,6 +3583,9 @@ const Vehicles = {
     let line = c.cop ? `🚓 POLICE · lights ${this.lights ? 'ON' : 'off'} · siren ${this.siren ? 'ON' : 'off'}` : '';
     if (this.rental) { const s = Math.floor((Date.now() - this.rental.t0) / 1000); line = `RENTAL ${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')} · ${money(this.rental.paid * RENT_BLOCK)} · $5/min · billed every 10 s`; }
     $('dspd').textContent = sp; $('dspd').classList.toggle('over', over && !c.cop);
+    const fuel = c.fuel <= 0 ? 'EMPTY · pull up at the Marathon' : `FUEL ${Math.round(c.fuel * 100)}%`;
+    line = line ? line + ' · ' + fuel : fuel;
+    if (Gas.canFill(c) && c.fuel < 1) line += ` · ${Input.glyph('use')} fills up ${money(-RULES['gas.fill'].cash / 100)}`;
     $('dinfo').textContent = this.frozen ? 'PULLED OVER · ' + this.frozen : line;
     const kg = (a, ctx) => Input.glyph(a, ctx, Input.device === 'pad' ? 'pad' : 'kbm');   // keyboard or pad hints (a touch screen has its own)
     $('dkeys').innerHTML = isTouch ? '' : `${kg('exit', 'bare')}exit ${kg('camera', 'bare')}${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ` ${kg('siren')}siren ${kg('lights')}lights` : ''} ${kg('handbrake')}brake${Input.device === 'pad' ? ` ${XB('RT')}gas ${XB('LT')}brake/reverse` : ''}`;
@@ -3619,11 +3748,72 @@ function updateKnock(pp, dt) {
   if (t > 5.3) { pp.knock = null; pp.g.rotation.set(0, K.h, 0); pp.g.rotation.order = 'XYZ'; }
 }
 
+/* ---------------- fuel: a tank lasts about 6 km of driving; the two pumps outside the Marathon fill it for $8 ----------------
+   Stop beside a pump (within 6 m, not moving) and press E: the server takes the money (economy 'gas.fill'), then the tank fills
+   over about four seconds while the nozzle is out. Fuel is per car and lives in this session only. */
+const TANK_M = 6000, FILL_S = 4;
+const PUMPS = [[-703, -323], [-707, -327]];   // on the Marathon's forecourt, clear of its walls
+const Gas = {
+  fill: null,   // { car, t } while a car is being filled
+  nozzle: 0,    // 0 = in the holster, 1 = out
+  pumps: [],
+  build() {
+    for (const [x, z] of PUMPS) {
+      const grp = new THREE.Group(); grp.position.set(x, terrainY(x, z), z); scene.add(grp);
+      const body = new THREE.Mesh(boxGeo, new THREE.MeshLambertMaterial({ color: 0xb3262e })); body.scale.set(.9, 1.5, .5); body.castShadow = true;
+      const screen = new THREE.Mesh(boxGeo, new THREE.MeshBasicMaterial({ color: 0x9ff7b0 })); screen.scale.set(.6, .25, .02); screen.position.set(0, 1.15, .26);
+      const head = new THREE.Mesh(boxGeo, new THREE.MeshLambertMaterial({ color: 0x222222 })); head.scale.set(.5, .3, .5); head.position.y = 1.5;
+      grp.add(body, screen, head); this.pumps.push({ grp, head, screen });
+    }
+  },
+  near(x, z, r = 6) { return PUMPS.some(([px, pz]) => Math.hypot(px - x, pz - z) < r); },
+  // E in a car: if it is stopped at a pump and the tank is not full, start a fill (true); otherwise false and E does its usual job
+  tryFill(car) {
+    if (!car || this.fill || car.fuel >= .999 || Math.abs(car.v) > .5 || !this.near(car.x, car.z)) return !!this.fill && this.fill.car === car;
+    Econ.act('gas.fill', { done: r => { if (r.ok && car === Vehicles.player && !this.fill) { this.fill = { car, t: 0 }; toast('Filling up…', 'info'); } } });
+    return true;
+  },
+  // the player's car is at a pump and could be filled (for the driving prompt)
+  canFill(car) { return !!car && car.fuel < .999 && Math.abs(car.v) < .5 && this.near(car.x, car.z); },
+  update(dt, now) {
+    const F = this.fill;
+    if (F) {
+      if (F.car !== Vehicles.player || !this.near(F.car.x, F.car.z)) { this.fill = null; toast('Fill stopped: stay beside the pump', 'bad'); }
+      else { F.t += dt; F.car.fuel = Math.min(1, F.car.fuel + dt / FILL_S); if (F.car.fuel >= 1) { this.fill = null; toast('Tank full', 'info'); } }
+    }
+    this.nozzle += ((this.fill ? 1 : 0) - this.nozzle) * Math.min(1, dt * 4);
+    const blink = this.fill && Math.floor(now / 300) % 2;
+    for (const p of this.pumps) { p.head.position.y = 1.5 - this.nozzle * .3; p.screen.material.color.set(blink ? 0xffe066 : 0x9ff7b0); }
+  },
+};
+/* ---------------- positional sound: the listener is the player; a source out in the world is a panner that gets quieter with distance ---------------- */
+const Mix = {
+  // where a sound connects: the speakers (no position), or a panner at (x, y, z), quieter the further away the player is
+  node(x, z, y = 1.5) {
+    const ac = Rail.ac; if (!ac) return null;
+    if (x == null) return ac.destination;
+    const pn = this.panner(ac); this.place(pn, x, y, z); return pn;
+  },
+  panner(ac) {
+    const pn = ac.createPanner(); pn.panningModel = 'equalpower'; pn.distanceModel = 'inverse'; pn.refDistance = 8; pn.rolloffFactor = 1.3; pn.maxDistance = 400;
+    pn.connect(ac.destination); return pn;
+  },
+  place(o, x, y, z) {   // set a panner's or listener's position (the newer API first)
+    if (o.positionX) { o.positionX.value = x; o.positionY.value = y; o.positionZ.value = z; } else o.setPosition(x, y, z);
+  },
+  // called each frame: the listener follows the camera (yaw is the look direction, as in player.js)
+  listen() {
+    const ac = Rail.ac; if (!ac || ac.state !== 'running') return;
+    const L = ac.listener, fx = -Math.sin(yaw), fz = -Math.cos(yaw);
+    this.place(L, P.x, P.y + 1.6, P.z);
+    if (L.forwardX) { L.forwardX.value = fx; L.forwardY.value = 0; L.forwardZ.value = fz; L.upX.value = 0; L.upY.value = 1; L.upZ.value = 0; } else L.setOrientation(fx, 0, fz, 0, 1, 0);
+  },
+};
 /* ---------------- sirens (WebAudio, on Rail's audio context) ---------------- */
 const Siren = {
-  wail(secs = 2.4, vol = .05) {   // a short whoop-whoop for a pull-over
-    const ac = Rail.ac; if (!ac || ac.state !== 'running') return; const t0 = ac.currentTime;
-    const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; g.gain.value = vol; o.connect(g); g.connect(ac.destination);
+  wail(secs = 2.4, vol = .05, x, z) {   // a short whoop-whoop for a pull-over; (x, z) makes it come from that car, quieter with distance
+    const ac = Rail.ac; if (!ac || ac.state !== 'running') return; const t0 = ac.currentTime, out = Mix.node(x, z);
+    const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; g.gain.value = vol; o.connect(g); g.connect(out);
     for (let s = 0; s < secs; s += .6) { o.frequency.setValueAtTime(620, t0 + s); o.frequency.linearRampToValueAtTime(1350, t0 + s + .3); o.frequency.linearRampToValueAtTime(620, t0 + s + .6); }
     g.gain.setValueAtTime(vol, t0 + secs - .1); g.gain.linearRampToValueAtTime(0, t0 + secs); o.start(t0); o.stop(t0 + secs + .05);
   },
@@ -3638,7 +3828,82 @@ const Siren = {
   },
   stop() { if (this.o) { try { this.o.stop(); this.lfo.stop(); } catch (e) { } this.o = this.lfo = this.g = null; } },
 };
-
+/* ---------------- car engines: your car revs with the throttle; the nearest moving cars hum from where they are ---------------- */
+const Engine = {
+  rev: 0, voices: null, scanT: 0,
+  init(ac) {
+    this.voices = [];
+    for (let i = 0; i < 6; i++) {   // voice 0 is your own car (not panned); the rest follow the nearest moving cars
+      const o = ac.createOscillator(), lp = ac.createBiquadFilter(), g = ac.createGain(), pan = i ? Mix.panner(ac) : null;
+      o.type = 'sawtooth'; lp.type = 'lowpass'; lp.frequency.value = 600; g.gain.value = 0;
+      o.connect(lp); lp.connect(g); g.connect(pan || ac.destination); o.start();
+      this.voices.push({ o, g, pan, car: null });
+    }
+  },
+  set(ac, v, hz, gain) { v.o.frequency.setTargetAtTime(hz, ac.currentTime, .08); v.g.gain.setTargetAtTime(gain, ac.currentTime, .15); },
+  update(dt, now) {
+    const ac = Rail.ac; if (!ac || ac.state !== 'running') return;
+    if (!this.voices) this.init(ac);
+    const me = Vehicles.player, fuel = !!me && me.fuel > 0;
+    // your own engine: idle, then a rev while the throttle is held (no fuel, no sound)
+    this.rev += ((fuel && Input.held('forward') && !Vehicles.frozen ? 1 : 0) - this.rev) * Math.min(1, dt * 3);
+    if (fuel) this.set(ac, this.voices[0], 34 + Math.abs(me.v) * 2.6 + this.rev * 46, .028);
+    else this.set(ac, this.voices[0], 34, 0);
+    // every half second, the five nearest moving cars (not yours) take the other voices
+    if ((this.scanT -= dt) <= 0) {
+      this.scanT = .5;
+      const near = [];
+      for (const c of Vehicles.list) if (c !== me && Math.abs(c.v) > .5) { const d = Math.hypot(c.x - P.x, c.z - P.z); if (d < 90) near.push([d, c]); }
+      near.sort((a, b) => a[0] - b[0]);
+      for (let i = 1; i < this.voices.length; i++) this.voices[i].car = near[i - 1] ? near[i - 1][1] : null;
+    }
+    for (let i = 1; i < this.voices.length; i++) {
+      const v = this.voices[i], c = v.car;
+      if (!c) { this.set(ac, v, 34, 0); continue; }
+      Mix.place(v.pan, c.x, 1, c.z);
+      this.set(ac, v, 34 + Math.abs(c.v) * 2.6, .02);
+    }
+  },
+};
+/* ---------------- background music: a calm loop made as it plays (new chords each bar, a few plucked notes), quiet under everything else ---------------- */
+const Music = {
+  on: true, bus: null, next: 0, n: 0,
+  // the four chords (semitones above C) and the scale the plucked notes come from: C, Am, F, G
+  CHORDS: [[0, 4, 7], [9, 0, 4], [5, 9, 0], [7, 11, 2]],
+  start() {
+    const ac = Rail.ac; if (!ac || this.bus) return;
+    try { this.on = localStorage.getItem('gcc.music') !== 'off'; } catch (e) { }
+    const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500; lp.connect(ac.destination);
+    this.bus = ac.createGain(); this.bus.gain.value = this.on ? .5 : 0; this.bus.connect(lp);
+    this.next = ac.currentTime + .3;
+  },
+  toggle() {   // the Music button in What to do
+    this.on = !this.on;
+    try { localStorage.setItem('gcc.music', this.on ? 'on' : 'off'); } catch (e) { }
+    if (this.bus) this.bus.gain.setTargetAtTime(this.on ? .5 : 0, Rail.ac.currentTime, .4);
+    return this.on;
+  },
+  tick() {
+    const ac = Rail.ac; if (!this.bus || ac.state !== 'running') return;
+    if (this.next < ac.currentTime - 1) this.next = ac.currentTime + .1;   // after a stall, carry on from now rather than bunch up
+    while (this.next < ac.currentTime + .8) { this.bar(this.next); this.next += 4.8; }
+  },
+  bar(t) {
+    const ch = this.CHORDS[this.n++ % this.CHORDS.length], root = ch[0];
+    for (const s of ch) this.note('triangle', NOTE(-12 + s + (Math.random() < .3 ? 12 : 0)), t, 5.5, .05, 1.2);   // pads: root, third, fifth
+    for (let k = 0; k < 2; k++) if (Math.random() < .65) {   // plucked notes from the chord's pentatonic, an octave up
+      const p = PENTA[Math.floor(Math.random() * PENTA.length)];
+      this.note('sine', NOTE(12 + ((root + p) % 12)), t + Math.random() * 4.2, 2.2, .07, .02);
+    }
+  },
+  note(type, f, t, dur, peak, atk) {   // one voice: an attack, then a long fade
+    const ac = Rail.ac, o = ac.createOscillator(), g = ac.createGain();
+    o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + atk); g.gain.linearRampToValueAtTime(0, t + dur);
+    o.connect(g); g.connect(this.bus); o.start(t); o.stop(t + dur + .05);
+  },
+};
+const NOTE = n => 261.63 * Math.pow(2, n / 12);   // n semitones above middle C
+const PENTA = [0, 2, 4, 7, 9];
 /* ---------------- police: NPC cops patrol on the shared schedule and react to the local player ----------------
    Cops.list: [{ id, car, state, st (seconds in state), data, officer: { g, x, z, onFoot }, busy }]. Each frame
    Cops.update runs Cops.states[cop.state](cop, dt, now). 'patrol' follows the car's schedule; any other state takes the
@@ -3685,7 +3950,7 @@ const Cops = {
   // pull over a car at target {x, z, h}; ticket is the local player's car (charged $10) or null for another player's
   pullOver(cop, target, ticket) {
     cop.car.flash = true; this.setState(cop, 'pull', { target, ticket, step: 'approach' });
-    if (Math.hypot(cop.car.x - P.x, cop.car.z - P.z) < 150) Siren.wail();
+    if (Math.hypot(cop.car.x - P.x, cop.car.z - P.z) < 150) Siren.wail(2.4, .05, cop.car.x, cop.car.z);
   },
   update(dt, now) {
     for (const cop of this.list) { cop.st += dt; const fn = this.states[cop.state]; if (fn) fn(cop, dt, now); }
@@ -4339,6 +4604,7 @@ function frame(now) {
   Pad.poll(dt);
   if (started && !gamePaused()) update(dt);
   Cops.update(dt, now); updateRemotes(dt); Vehicles.update(dt, now); Bank.update(dt, now);
+  updateSky(); Gas.update(dt, now); Engine.update(dt, now); Music.tick(); Mix.listen();
   updatePeople(dt, now); updateCFA(now);
   checkDebt();
   if (started) sendMove(now);
@@ -4364,9 +4630,9 @@ async function boot() {
   status(`Extruding ${D.buildings.length} buildings and fitting hipped roofs…`, .5); await tick();
   buildBuildings(); addSignText(); addBrandSigns(); planDoors(); setupCFA();
   status(`Planting ${D.trees.length.toLocaleString()} trees where the satellite sees canopy…`, .7); await tick();
-  buildTrees(); buildLamps(); buildDoors(); const parked = buildCars(); Rail.build(); Traffic.build(); Vehicles.init(parked); clouds = buildClouds();
+  buildTrees(); buildLamps(); buildDoors(); const parked = buildCars(); Rail.build(); Traffic.build(); Vehicles.init(parked); Gas.build(); clouds = buildClouds();
   status('Drawing the campus map…', .9); await tick();
-  buildMapCanvas(ground); buildLabels(); applyTime(); buildPeople();
+  buildMapCanvas(ground); buildLabels(); buildSkyBodies(); updateSky(); buildPeople();
   const sp = D.specials.spawn || [0, 0]; teleport(sp[0], sp[1]);
   if (D.specials.harbisonTower) { const t = D.specials.harbisonTower; yaw = Math.atan2(-(t[0] - P.x), -(t[1] - P.z)); pitch = 0.12; }
   camera.position.set(P.x, P.y + EYE, P.z); camera.rotation.set(pitch, yaw, 0);
@@ -4376,8 +4642,8 @@ async function boot() {
 }
 $('go').addEventListener('click', () => {
   if ($('go').getAttribute('aria-disabled') === 'true') return;
-  started = true; $('intro').hidden = true; speechOK = true; Rail.initAudio();
-  for (const id of ['where', 'mini', 'mode', 'cross', 'money']) $(id).hidden = false; syncFsBtn();
+  started = true; $('intro').hidden = true; speechOK = true; Rail.initAudio(); Music.start();
+  for (const id of ['where', 'mini', 'mode', 'cross', 'money', 'clock', 'guideBtn']) $(id).hidden = false; syncFsBtn();
   if (kicked) { kicked = false; netOff = false; netRetries = 0; }
   connectNet();
   if (isTouch) $('touch').hidden = false; else $('keys').hidden = false;
@@ -4391,6 +4657,7 @@ window.__gcc = {
   World, Components, MAP,
   net: () => ({ me: myName, others: [...remotes.values()].filter(r => r.seen).map(r => r.name) }),
   Profile, CFA, Bank, bank: () => bank, Rail, Traffic, people, Vehicles, Cops, Roads, netNow, Siren, npcAt, walkGraph: () => updatePeople.ctx, doors: () => doorList, kickAndReset,
+  Gas, Music, Engine, clockText, skyPhase, look,
   P, view(x, y, z, yw, pt) { flying = true; P.set(x, y, z); yaw = yw; pitch = pt; update(0); },
   // stand at a lat/lon facing a compass heading (matches Google Street View's camera)
   at(lat, lon, hdg, pt = 0) { flying = false; teleport((lon - D.lon0) * 111320 * Math.cos(D.lat0 * Math.PI / 180), -(lat - D.lat0) * 110574); yaw = -hdg * Math.PI / 180; pitch = pt; update(0); },

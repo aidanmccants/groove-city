@@ -332,7 +332,7 @@ const Rail = {
           const nx = cx + fwd[0] * 10.42, nz = cz + fwd[1] * 10.42;
           put(this.heads, counts.head++, cx + fwd[0] * 10.42, cy + 2.55, cz + fwd[1] * 10.42, yaw, pt, .55, .28, .05);
           for (const e of [-1, 1]) put(this.heads, counts.head++, nx + fwd[1] * e * 1.15, cy + .95, nz - fwd[0] * e * 1.15, yaw, pt, .26, .26, .05);
-          this.spot.position.set(nx, cy + 2.6, nz); this.spot.target.position.set(nx + fwd[0] * 40, cy - 1, nz + fwd[1] * 40); this.spot.intensity = timeIdx === 2 ? 900 : 250;
+          this.spot.position.set(nx, cy + 2.6, nz); this.spot.target.position.set(nx + fwd[0] * 40, cy - 1, nz + fwd[1] * 40); this.spot.intensity = nightLevel > .5 ? 900 : 250;
         }
         this.units.push({ x: cx, z: cz, y: cy, fx: fwd[0], fz: fwd[1], hl: u.L / 2, lead, R });
         lead = false;

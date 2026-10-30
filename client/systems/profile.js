@@ -75,7 +75,7 @@ const Profile = (() => {
 // 100 ms online). extra: { quiet: no toast, done(result) } where result is { ok, reason }.
 const Econ = (() => {
   // the word after the amount in the toast: "+$1 sandwich"
-  const LABEL = { 'cfa.serve': 'sandwich', 'bank.rob': 'bank robbery', 'cop.pullover': 'pull-over', 'ticket': 'ticket', 'rent.start': 'car rental', 'rent.tick': 'car rental' };
+  const LABEL = { 'cfa.serve': 'sandwich', 'bank.rob': 'bank robbery', 'cop.pullover': 'pull-over', 'ticket': 'ticket', 'rent.start': 'car rental', 'rent.tick': 'car rental', 'gas.fill': 'fuel' };
   const waiting = {};   // action -> extras sent to the server and not answered yet, oldest first
   const lastRun = {};   // offline cooldowns: action -> when it last ran
   const connected = () => !!(Account.me && netSock && netSock.readyState === 1);
