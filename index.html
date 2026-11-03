@@ -5,7 +5,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Barlow+Semi+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<script>if (matchMedia('(pointer: coarse)').matches) document.documentElement.classList.add('touch');</script>
+<script>if (matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches) document.documentElement.classList.add('touch');</script>
 <style>
 /* Layout: full-bleed 3D viewport; HUD chips pinned to corners; one centered title card at start. */
 :root{
@@ -2710,6 +2710,7 @@ const Input = {
   // the page follows the device: body classes, the #keys chip, the map's help line and the pad cursor
   sync() {
     const pad = this.device === 'pad';
+    if ((this.device === 'touch') !== isTouch) setTouchMode(this.device === 'touch');
     document.body.classList.toggle('pad', pad); document.body.classList.toggle('touch', this.device === 'touch');
     $('keys').innerHTML = keysChipHTML();
     $('maphelp').textContent = pad ? 'Left stick to aim · A to teleport · B to close' : 'Click to teleport · M or Esc to close';
@@ -2828,7 +2829,14 @@ $('fsbtn').addEventListener('click', () => fsToggle(false));
 document.addEventListener('fullscreenchange', syncFsBtn);
 // touch
 const joy = { x: 0, y: 0 }; let touchUp = false, joyId = null, lookId = null, lookLast = null;
-const isTouch = matchMedia('(pointer: coarse)').matches;
+// touch mode (phone buttons, html.touch layout) follows the device in use: a real touch turns it on, a mouse or key turns it off.
+// It starts on only for a touch-only screen; a touch laptop has a trackpad or mouse too (any-pointer: fine), so it starts on desktop
+let isTouch = matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
+function setTouchMode(on) {
+  isTouch = on; document.documentElement.classList.toggle('touch', on);
+  if (started) { $('touch').hidden = !on; $('keys').hidden = on; }
+  if (on && locked()) document.exitPointerLock();
+}
 $('joy').addEventListener('pointerdown', e => { joyId = e.pointerId; e.target.setPointerCapture?.(e.pointerId); moveJoy(e); });
 $('joy').addEventListener('pointermove', e => { if (e.pointerId === joyId) moveJoy(e); });
 const endJoy = e => { if (e.pointerId === joyId) { joyId = null; joy.x = joy.y = 0; $('joy').firstChild.style.transform = ''; } };

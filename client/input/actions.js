@@ -54,6 +54,7 @@ const Input = {
   // the page follows the device: body classes, the #keys chip, the map's help line and the pad cursor
   sync() {
     const pad = this.device === 'pad';
+    if ((this.device === 'touch') !== isTouch) setTouchMode(this.device === 'touch');
     document.body.classList.toggle('pad', pad); document.body.classList.toggle('touch', this.device === 'touch');
     $('keys').innerHTML = keysChipHTML();
     $('maphelp').textContent = pad ? 'Left stick to aim · A to teleport · B to close' : 'Click to teleport · M or Esc to close';

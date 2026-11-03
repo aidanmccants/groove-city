@@ -2,7 +2,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Barlow+Semi+Condensed:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<script>if (matchMedia('(pointer: coarse)').matches) document.documentElement.classList.add('touch');</script>
+<script>if (matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches) document.documentElement.classList.add('touch');</script>
 <style>
 /* Layout: full-bleed 3D viewport; HUD chips pinned to corners; one centered title card at start. */
 :root{

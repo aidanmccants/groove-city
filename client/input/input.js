@@ -96,7 +96,14 @@ $('fsbtn').addEventListener('click', () => fsToggle(false));
 document.addEventListener('fullscreenchange', syncFsBtn);
 // touch
 const joy = { x: 0, y: 0 }; let touchUp = false, joyId = null, lookId = null, lookLast = null;
-const isTouch = matchMedia('(pointer: coarse)').matches;
+// touch mode (phone buttons, html.touch layout) follows the device in use: a real touch turns it on, a mouse or key turns it off.
+// It starts on only for a touch-only screen; a touch laptop has a trackpad or mouse too (any-pointer: fine), so it starts on desktop
+let isTouch = matchMedia('(pointer: coarse)').matches && !matchMedia('(any-pointer: fine)').matches;
+function setTouchMode(on) {
+  isTouch = on; document.documentElement.classList.toggle('touch', on);
+  if (started) { $('touch').hidden = !on; $('keys').hidden = on; }
+  if (on && locked()) document.exitPointerLock();
+}
 $('joy').addEventListener('pointerdown', e => { joyId = e.pointerId; e.target.setPointerCapture?.(e.pointerId); moveJoy(e); });
 $('joy').addEventListener('pointermove', e => { if (e.pointerId === joyId) moveJoy(e); });
 const endJoy = e => { if (e.pointerId === joyId) { joyId = null; joy.x = joy.y = 0; $('joy').firstChild.style.transform = ''; } };
