@@ -43,7 +43,18 @@ const Traffic = {
   paint(g) {   // stop lines across each approach lane
     this.plan(); g.strokeStyle = '#ecebe4'; g.lineWidth = 0.55 * SS; g.lineCap = 'butt';
     for (const I of this.lights) for (const a of I.arms) {
-      const cx = I.x + a.u[0] * (I.r + .3), cz = I.z + a.u[1] * (I.r + .3), rx = a.u[1], rz = -a.u[0];   // right of a car arriving along -u
+      const ux = a.u[0], uz = a.u[1], rx = uz, rz = -ux;   // u points out along the arm; r is right of a car arriving along -u
+      const quad = pts => { g.beginPath(); pts.forEach((q, i) => i ? g.lineTo(gx(q[0]), gz(q[1])) : g.moveTo(gx(q[0]), gz(q[1]))); g.closePath(); };
+      // at a point s out along the arm and t to the right: the crossing's pavement and bars are laid from these
+      const at = (s, t) => [I.x + ux * s + rx * t, I.z + uz * s + rz * t];
+      // curb extensions: pavement pushed out into the lane on both sides, so the crossing is shorter for walkers
+      g.fillStyle = '#b9b3a6';
+      for (const side of [-1, 1]) { quad([at(I.r + .6, side * (a.w / 2 - 1.6)), at(I.r + 3.2, side * (a.w / 2 - 1.6)), at(I.r + 3.2, side * (a.w / 2 + .6)), at(I.r + .6, side * (a.w / 2 + .6))]); g.fill(); }
+      // zebra crossing: white bars across the road, just beyond the stop line
+      g.fillStyle = '#e4e2da';
+      for (let k = 0; k < 4; k++) { const s = I.r + 1.6 + k * .9; quad([at(s - .3, -(a.w / 2 - 1)), at(s - .3, a.w / 2 - 1), at(s + .3, a.w / 2 - 1), at(s + .3, -(a.w / 2 - 1))]); g.fill(); }
+      // the stop line itself, right of a car arriving along -u
+      const cx = I.x + ux * (I.r + .3), cz = I.z + uz * (I.r + .3);
       g.beginPath(); g.moveTo(gx(cx + rx * .3), gz(cz + rz * .3)); g.lineTo(gx(cx + rx * (a.w / 2 - .3)), gz(cz + rz * (a.w / 2 - .3))); g.stroke();
     }
     g.lineCap = 'round';

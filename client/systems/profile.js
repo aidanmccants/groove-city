@@ -5,7 +5,7 @@
    rules run here on this browser's copy. That copy is always the last state the server sent, so a reconnect replaces it.
    Storage is an adapter { id, load() -> state | null, save(state) }; today that is LocalStore (localStorage, or memory if blocked).
    Money may go negative; debtSince marks when, and after DEBT_GRACE the player is kicked and reset (debt.js). */
-const CURRENT_UPDATE_ID = '2026-11-accounts';
+const CURRENT_UPDATE_ID = '2026-11-day-night';
 // shared clock: the Worker's time (welcome / pong) minus ours; trains, lights and NPC traffic all run on netNow()
 let clockOffset = 0, clockRtt = 1e9;
 const netNow = () => Date.now() + clockOffset;
@@ -75,7 +75,7 @@ const Profile = (() => {
 // 100 ms online). extra: { quiet: no toast, done(result) } where result is { ok, reason }.
 const Econ = (() => {
   // the word after the amount in the toast: "+$1 sandwich"
-  const LABEL = { 'cfa.serve': 'sandwich', 'bank.rob': 'bank robbery', 'cop.pullover': 'pull-over', 'ticket': 'ticket', 'rent.start': 'car rental', 'rent.tick': 'car rental' };
+  const LABEL = { 'cfa.serve': 'sandwich', 'bank.rob': 'bank robbery', 'cop.pullover': 'pull-over', 'ticket': 'ticket', 'rent.start': 'car rental', 'rent.tick': 'car rental', 'gas.fill': 'fuel' };
   const waiting = {};   // action -> extras sent to the server and not answered yet, oldest first
   const lastRun = {};   // offline cooldowns: action -> when it last ran
   const connected = () => !!(Account.me && netSock && netSock.readyState === 1);

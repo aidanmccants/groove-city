@@ -18,6 +18,12 @@ const Pad = {
       return;
     }
     if (newsOpen) { if (down(0) || down(1) || down(9)) closeNews(); return; }
+    if (guideOpen) {   // left stick scrolls, X switches the music, A, B or Menu closes
+      document.querySelector('#guide .card').scrollTop += this.dz(gp.axes[1] || 0) * 600 * dt;
+      if (down(2)) $('guideMusic').click();
+      if (down(0) || down(1) || down(9)) closeGuide();
+      return;
+    }
     // the account panel or the chat box is open, or a text box has focus: B closes the panel, and the pad does not drive the player
     if (acctOpen || chatOpen || document.activeElement?.matches?.('input,textarea,[contenteditable]')) {
       if (down(1)) { if (acctOpen) Account.closePanel(); else if (chatOpen) Chat.close(); }
@@ -35,12 +41,14 @@ const Pad = {
     this.btn = cur;   // the game is running: held buttons drive the player through Input.held
     if (down(9)) fsToggle(true);
     if (down(14)) Chat.open();   // D-pad left opens the chat box
+    if (down(13)) openGuide();   // D-pad down opens What to do
     const ax = this.dz(gp.axes[0] || 0), ay = this.dz(gp.axes[1] || 0), rx = this.dz(gp.axes[2] || 0), ry = this.dz(gp.axes[3] || 0);
     this.lx = ax; this.ly = ay;
     yaw -= Math.sign(rx) * rx * rx * 3.0 * dt; pitch = Math.max(-1.55, Math.min(1.55, pitch - Math.sign(ry) * ry * ry * 2.2 * dt));
     if (Vehicles.player) {   // driving: RT gas, LT brake/reverse, A handbrake (Input.held('handbrake'))
       this.lastA = 0; this.x = ax; this.y = (gp.buttons[7]?.value || 0) - (gp.buttons[6]?.value || 0);
-      if (down(1) || down(2)) onKey('KeyE', false, true);
+      if (down(1)) onKey('KeyF', false, true);   // B always gets out; X fills up at a pump, otherwise gets out
+      if (down(2)) onKey('KeyE', false, true);
       if (down(3)) onKey('KeyV', false, true);
       if (down(5)) onKey('KeyH', false, true);
       if (down(4)) onKey('KeyL', false, true);
@@ -52,7 +60,6 @@ const Pad = {
       if (down(0)) { const t = performance.now(); if (t - (this.lastA || 0) < 300) { onKey('KeyF', false, true); this.lastA = 0; } else this.lastA = t; }   // double-tap A flies (A still jumps)
       if (down(8)) onKey('KeyM', false, true);
       if (down(12)) onKey('KeyL', false, true);
-      if (down(13)) onKey('KeyN', false, true);
     }
   },
   rumble(ms, strong) { try { const gp = [...(navigator.getGamepads ? navigator.getGamepads() : [])].find(g => g && g.connected); const p = gp?.vibrationActuator?.playEffect('dual-rumble', { duration: ms, strongMagnitude: strong, weakMagnitude: strong / 2 }); if (p && p.catch) p.catch(() => { }); } catch (e) { } },

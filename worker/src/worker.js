@@ -126,11 +126,12 @@ export class MapRoom {
 
   liveIds() { return new Set(this.ctx.getWebSockets().map(s => s.deserializeAttachment()?.id).filter(Boolean)); }
 
-  // car id -> { x, z, h }: put it down where its driver left it and tell everyone
-  park(id, x, z, h) {
-    this.cars.set(id, { x, z, h, d: null, t: Date.now() });
+  // car id -> { x, z, h, u (fuel, 0 to 1) }: put it down where its driver left it and tell everyone. Without a fuel reading
+  // (the driver disconnected) the car keeps the fuel it was taken with
+  park(id, x, z, h, u = this.cars.get(id)?.u ?? 1) {
+    this.cars.set(id, { x, z, h, d: null, t: Date.now(), u });
     this.saveCars();
-    this.broadcast(JSON.stringify({ t: 'car', id, x, z, h, d: null }));
+    this.broadcast(JSON.stringify({ t: 'car', id, x, z, h, d: null, u }));
   }
 
   async fetch(request) {
@@ -179,7 +180,7 @@ export class MapRoom {
       .map(s => s.deserializeAttachment())
       .filter(p => p && p.x !== null && p.id !== id)
       .map(({ id, name, x, y, z, yaw, v, cy, f }) => ({ id, name, x, y, z, yaw, v, cy, f }));
-    const live = new Set(players.map(p => p.id)), cars = [...(await this.loadCars())].map(([id, c]) => [id, c.x, c.z, c.h, c.d && live.has(c.d) ? c.d : null]);
+    const live = new Set(players.map(p => p.id)), cars = [...(await this.loadCars())].map(([id, c]) => [id, c.x, c.z, c.h, c.d && live.has(c.d) ? c.d : null, c.u ?? 1]);
     const vault = await this.loadVault();
     server.send(JSON.stringify({ t: 'welcome', id: me.id, name: me.name, now: Date.now(), players, cars, vault: vault.until > Date.now() ? vault : null }));
     server.send(JSON.stringify({ t: 'attrs', a: attrs }));   // the account's money, right after the welcome
@@ -230,7 +231,7 @@ export class MapRoom {
         ws.send(JSON.stringify({ t: 'deny', id }));
       } else {
         if (me.car !== null && me.car !== id && this.cars.get(me.car)?.d === me.id) this.park(me.car, me.x ?? 0, me.z ?? 0, me.cy);
-        this.cars.set(id, { x: c?.x ?? null, z: c?.z ?? null, h: c?.h ?? 0, d: me.id, t: now });
+        this.cars.set(id, { x: c?.x ?? null, z: c?.z ?? null, h: c?.h ?? 0, d: me.id, t: now, u: c?.u ?? 1 });
         this.saveCars();
         me.car = id;
         ws.send(JSON.stringify({ t: 'took', id }));
@@ -239,7 +240,7 @@ export class MapRoom {
     } else if (m.t === 'park') {
       const id = int(m.id, 0, CAR_IDS - 1), x = num(m.x, -BOUNDS.x, BOUNDS.x), z = num(m.z, -BOUNDS.z, BOUNDS.z), h = num(m.h, -1e3, 1e3);
       if (id !== null && x !== null && z !== null && h !== null && this.cars.get(id)?.d === me.id) {
-        this.park(id, x, z, h);
+        this.park(id, x, z, h, num(m.u, 0, 1) ?? undefined);
         if (me.car === id) me.car = null;
       }
     } else if (m.t === 'rob') {

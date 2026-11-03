@@ -54,7 +54,7 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [ ] Entering your house loads a standard house interior (the same default for everyone)
 - [ ] Item shop for decorating your house
 - [ ] Broad Street Gambling House, where Crimson Vapes was: a well-designed building with roulette, blackjack and slots inside; in-game money only
-- [ ] Park cop cars around town and at the police station so players can become cops
+- [x] Park cop cars around town and at the police station so players can become cops
 - [ ] Bus to Slippery Rock, and a Slippery Rock map that looks normal but is a drunken-wasteland parody (idea only for now, don't build)
 
 ## Jobs and money
@@ -62,17 +62,17 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [ ] ATM: talk to it to deposit and withdraw, with ATM animations
 - [ ] Money in the bank is kept when you die; money you're carrying is lost
 - [x] Car rentals deduct money as you drive, every 10 s at $5/min (83¢ per 10 s)
-- [ ] Cars need gas; fill up at the Marathon, with a gas-pump animation
+- [x] Cars need gas; fill up at the Marathon, with a gas-pump animation
 
 ## Feel and presentation
-- [ ] Day/night cycle, the same for everyone; on-screen clock; sunrise, sunset, stars and moon; 20 minutes per full day
-- [ ] Sound gets quieter with distance (train, cars, etc.)
-- [ ] Gentle background music, something like Minecraft's
-- [ ] Car engine sounds that rev
+- [x] Day/night cycle, the same for everyone; on-screen clock; sunrise, sunset, stars and moon; 20 minutes per full day
+- [x] Sound gets quieter with distance (train, cars, etc.)
+- [x] Gentle background music, something like Minecraft's
+- [x] Car engine sounds that rev
 - [ ] Animated ticket cutscene with goofy, over-the-top characters
 - [ ] Dying: show "Unalived" with a Respawn button instead of kicking you straight out; respawning sets carried money to 0 and keeps bank money
-- [ ] Streets like a walkability nerd would design them: bike lanes, traffic calming, good street design (better than the real Grove City)
-- [ ] A "What to do" menu explaining everything on the map
+- [ ] Streets like a walkability nerd would design them: bike lanes, traffic calming, good street design (better than the real Grove City) *(done: painted bike lanes, narrower car lanes, zebra crossings, curb extensions, street trees; still to do: raised crosswalks and lower speeds on calmed streets)*
+- [x] A "What to do" menu explaining everything on the map
 - [ ] All UI/UX makes sense and is accessible on mobile, controller and keyboard and mouse
 
 ## Competitive and replay
@@ -105,4 +105,4 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [x] cop cars should say "groove city police"
 - [x] cops should show up on the map when chasing you with little  lights blinking. 
 - [x] hud map is clipping, make it not clip? 
-- [ ] fix the bridges, they look like they're falling in the ocean, and just do a whole urbansim street design *(planned with the street redesign in Phase 3)*
+- [x] fix the bridges, they look like they're falling in the ocean, and just do a whole urbansim street design *(bridges sit flush with graded banks; the rest of the street design is tracked under "Streets like a walkability nerd" above)*

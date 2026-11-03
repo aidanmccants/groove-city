@@ -14,6 +14,7 @@ function updateHUD() {
   $('coords').textContent = `${lat.toFixed(5)}°N ${(-lon).toFixed(5)}°W · ${Math.round(P.y + D.base)} m elev`;
   $('heading').textContent = `${dirs[Math.round(hd / 45) % 8]} ${Math.round(hd)}°`;
   if (Profile.inDebt()) updateMoney();
+  $('clock').textContent = clockText();
   Vehicles.hud(); $('tSiren').hidden = !(isTouch && Vehicles.player && Vehicles.player.cop);
 }
 const money = v => (v < 0 ? '-$' : '$') + Math.abs(v).toFixed(Math.abs(v) % 1 ? 2 : 0);

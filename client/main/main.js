@@ -6,6 +6,7 @@ function frame(now) {
   Pad.poll(dt);
   if (started && !gamePaused()) update(dt);
   Cops.update(dt, now); updateRemotes(dt); Vehicles.update(dt, now); Bank.update(dt, now);
+  updateSky(); Gas.update(dt, now); Engine.update(dt, now); Music.tick(); Mix.listen();
   updatePeople(dt, now); updateCFA(now);
   checkDebt();
   if (started) sendMove(now);
@@ -31,9 +32,9 @@ async function boot() {
   status(`Extruding ${D.buildings.length} buildings and fitting hipped roofs…`, .5); await tick();
   buildBuildings(); addSignText(); addBrandSigns(); planDoors(); setupCFA();
   status(`Planting ${D.trees.length.toLocaleString()} trees where the satellite sees canopy…`, .7); await tick();
-  buildTrees(); buildLamps(); buildDoors(); const parked = buildCars(); Rail.build(); Traffic.build(); Vehicles.init(parked); clouds = buildClouds();
+  buildTrees(); buildLamps(); buildDoors(); const parked = buildCars(); Rail.build(); Traffic.build(); Vehicles.init(parked); Gas.build(); clouds = buildClouds();
   status('Drawing the campus map…', .9); await tick();
-  buildMapCanvas(ground); buildLabels(); applyTime(); buildPeople();
+  buildMapCanvas(ground); buildLabels(); buildSkyBodies(); updateSky(); buildPeople();
   const sp = D.specials.spawn || [0, 0]; teleport(sp[0], sp[1]);
   if (D.specials.harbisonTower) { const t = D.specials.harbisonTower; yaw = Math.atan2(-(t[0] - P.x), -(t[1] - P.z)); pitch = 0.12; }
   camera.position.set(P.x, P.y + EYE, P.z); camera.rotation.set(pitch, yaw, 0);
@@ -43,8 +44,8 @@ async function boot() {
 }
 $('go').addEventListener('click', () => {
   if ($('go').getAttribute('aria-disabled') === 'true') return;
-  started = true; $('intro').hidden = true; speechOK = true; Rail.initAudio();
-  for (const id of ['where', 'mini', 'mode', 'cross', 'money']) $(id).hidden = false; syncFsBtn();
+  started = true; $('intro').hidden = true; speechOK = true; Rail.initAudio(); Music.start();
+  for (const id of ['where', 'mini', 'mode', 'cross', 'money', 'clock', 'guideBtn']) $(id).hidden = false; syncFsBtn();
   if (kicked) { kicked = false; netOff = false; netRetries = 0; }
   connectNet();
   if (isTouch) $('touch').hidden = false; else $('keys').hidden = false;
@@ -58,6 +59,7 @@ window.__gcc = {
   World, Components, MAP,
   net: () => ({ me: myName, others: [...remotes.values()].filter(r => r.seen).map(r => r.name) }),
   Profile, CFA, Bank, bank: () => bank, Rail, Traffic, people, Vehicles, Cops, Roads, netNow, Siren, npcAt, walkGraph: () => updatePeople.ctx, doors: () => doorList, kickAndReset,
+  Gas, Music, Engine, clockText, skyPhase, look,
   P, view(x, y, z, yw, pt) { flying = true; P.set(x, y, z); yaw = yw; pitch = pt; update(0); },
   // stand at a lat/lon facing a compass heading (matches Google Street View's camera)
   at(lat, lon, hdg, pt = 0) { flying = false; teleport((lon - D.lon0) * 111320 * Math.cos(D.lat0 * Math.PI / 180), -(lat - D.lat0) * 110574); yaw = -hdg * Math.PI / 180; pitch = pt; update(0); },
