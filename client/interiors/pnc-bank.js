@@ -236,18 +236,24 @@ function specials(B) {
   // bridges
   for (const l of D.lines) if (l.br && l.n === 'Rainbow Bridge') rainbowBridge(B, l);
   for (const l of D.lines) if (l.br && l.n !== 'Rainbow Bridge') {
-    const p = l.p, y0 = terrainY(...p[0]), y1 = terrainY(...p[p.length - 1]);
-    let tot = 0; const cum = [0]; for (let i = 1; i < p.length; i++) { tot += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]); cum.push(tot); }
-    const Y = i => Math.max(y0, y1) * 0.5 + (y0 + (y1 - y0) * cum[i] / (tot || 1)) * 0.5 + 0.35;
-    const w = Math.max(l.w, 2.4), foot = l.w < 5, deck = col3(foot ? '#a69886' : '#56575a'), rail = col3('#40433f');
-    for (let i = 0; i < p.length - 1; i++) {
+    const p = l.p, n = p.length, w = Math.max(l.w, 2.4), foot = l.w < 5, deck = col3(foot ? '#a69886' : '#56575a'), rail = col3('#40433f');
+    const lift = 0.05;   // the deck top sits this far above the ground at each bank
+    let tot = 0; const cum = [0]; for (let i = 1; i < n; i++) { tot += Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]); cum.push(tot); }
+    // flush at each bank on both sides: the left and right edges take the terrain under them at the first and last points,
+    // then the height rises evenly between the banks by distance along the bridge
+    const unit = i => { const j = Math.min(i, n - 2), dx = p[j + 1][0] - p[j][0], dz = p[j + 1][1] - p[j][1], L = Math.hypot(dx, dz) || 1; return [-dz / L, dx / L]; };   // left-hand normal
+    const bank = i => { const [ux, uz] = unit(i), hw = w / 2, X = p[i][0], Z = p[i][1]; return [terrainY(X + ux * hw, Z + uz * hw) + lift, terrainY(X - ux * hw, Z - uz * hw) + lift]; };
+    const [A0, A1] = bank(0), [B0, B1] = bank(n - 1);
+    const HL = cum.map(c => A0 + (B0 - A0) * c / (tot || 1)), HR = cum.map(c => A1 + (B1 - A1) * c / (tot || 1));
+    for (let i = 0; i < n - 1; i++) {
       const a = p[i], b = p[i + 1], dx = b[0] - a[0], dz = b[1] - a[1], L = Math.hypot(dx, dz); if (L < .05) continue;
-      const nx = -dz / L * w / 2, nz = dx / L * w / 2, ya = Y(i), yb = Y(i + 1);
-      B.plain.quad([a[0] + nx, ya, a[1] + nz], [b[0] + nx, yb, b[1] + nz], [b[0] - nx, yb, b[1] - nz], [a[0] - nx, ya, a[1] - nz], [0, 0], [L, 0], [L, w], [0, w], deck, [0, 1, 0]);
+      const nx = -dz / L * w / 2, nz = dx / L * w / 2, hl0 = HL[i], hl1 = HL[i + 1], hr0 = HR[i], hr1 = HR[i + 1];
+      B.plain.quad([a[0] + nx, hl0, a[1] + nz], [b[0] + nx, hl1, b[1] + nz], [b[0] - nx, hr1, b[1] - nz], [a[0] - nx, hr0, a[1] - nz], [0, 0], [L, 0], [L, w], [0, w], deck, [0, 1, 0]);
       for (const sgn of [1, -1]) {
-        B.plain.quad([a[0] + nx * sgn, ya - .5, a[1] + nz * sgn], [b[0] + nx * sgn, yb - .5, b[1] + nz * sgn], [b[0] + nx * sgn, yb + 1.05, b[1] + nz * sgn], [a[0] + nx * sgn, ya + 1.05, a[1] + nz * sgn], [0, 0], [L, 0], [L, 1], [0, 1], rail, [nx * sgn, 0, nz * sgn]);
+        const ha = sgn > 0 ? hl0 : hr0, hb = sgn > 0 ? hl1 : hr1;
+        B.plain.quad([a[0] + nx * sgn, ha - .5, a[1] + nz * sgn], [b[0] + nx * sgn, hb - .5, b[1] + nz * sgn], [b[0] + nx * sgn, hb + 1.05, b[1] + nz * sgn], [a[0] + nx * sgn, ha + 1.05, a[1] + nz * sgn], [0, 0], [L, 0], [L, 1], [0, 1], rail, [nx * sgn, 0, nz * sgn]);
       }
-      bridges.push({ a, b, w, ya, yb });
+      bridges.push({ a, b, w, ya: (hl0 + hr0) / 2, yb: (hl1 + hr1) / 2, h: [hl0, hr0, hl1, hr1], n: [-dz / L, dx / L] });
     }
   }
   // buff stone college sign wall at the east end of Rainbow Bridge, by the stairs

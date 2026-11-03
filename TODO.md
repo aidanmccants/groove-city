@@ -105,4 +105,4 @@ Add ideas anywhere, as `- [ ] your idea`. Claude reads this file before each rou
 - [x] cop cars should say "groove city police"
 - [x] cops should show up on the map when chasing you with little  lights blinking. 
 - [x] hud map is clipping, make it not clip? 
-- [ ] fix the bridges, they look like they're falling in the ocean, and just do a whole urbansim street design *(planned with the street redesign in Phase 3)*
+- [x] fix the bridges, they look like they're falling in the ocean, and just do a whole urbansim street design *(bridges sit flush with graded banks; the rest of the street design is tracked under "Streets like a walkability nerd" above)*

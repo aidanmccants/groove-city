@@ -67,7 +67,7 @@ html,body{height:100%;margin:0;overflow:hidden;background:var(--slate);color:var
 #cash{font-family:var(--f-display);font-size:18px;letter-spacing:.04em;color:#9fdc8a;font-variant-numeric:tabular-nums}
 #money.debt{border-color:rgba(224,86,107,.7)}#money.debt #cash{color:#ff6b7f}
 #debt{font-family:var(--f-mono);font-size:11px;color:#ffb3bd;font-variant-numeric:tabular-nums}
-#guideBtn{top:calc(12px + env(safe-area-inset-top,0px));right:146px;width:44px;height:44px;padding:0;font-size:20px;line-height:42px;text-align:center;color:var(--ink);cursor:pointer}
+#guideBtn{top:calc(12px + env(safe-area-inset-top,0px));right:254px;width:44px;height:44px;padding:0;font-size:20px;line-height:42px;text-align:center;color:var(--ink);cursor:pointer}
 #clock{top:calc(110px + env(safe-area-inset-top,0px));left:12px;padding:6px 10px;font-family:var(--f-display);font-size:13px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
 #fsbtn{top:calc(12px + env(safe-area-inset-top,0px));right:200px;width:44px;height:44px;padding:0;font-size:20px;line-height:42px;text-align:center;color:var(--ink);cursor:pointer}
 #toasts{position:fixed;top:calc(250px + env(safe-area-inset-top,0px));right:12px;display:grid;justify-items:end;gap:6px;pointer-events:none}
@@ -102,7 +102,7 @@ kbd.xb{border-radius:999px!important;min-width:18px;text-align:center;font-weigh
 @media (max-width:640px){#money{top:calc(140px + env(safe-area-inset-top,0px))}#toasts{top:calc(190px + env(safe-area-inset-top,0px))}#hint{bottom:calc(200px + env(safe-area-inset-bottom,0px));font-size:14px}}
 @media (prefers-reduced-motion: reduce){.toast{animation-duration:2.4s;animation-name:toastfade}}
 @keyframes toastfade{0%,80%{opacity:1}100%{opacity:0}}
-@media (max-width:640px){#mini{width:120px;height:120px}#keys{display:none}#where{max-width:calc(100vw - 160px)}#near{font-size:15px}#fsbtn{right:140px}}
+@media (max-width:640px){#mini{width:120px;height:120px}#keys{display:none}#where{max-width:calc(100vw - 160px)}#near{font-size:15px}#fsbtn{right:140px}#guideBtn{right:194px}}
 @media (prefers-reduced-motion: reduce){#bar i{transition:none}}
 /* ---- accounts and chat ---- */
 #intro .card{max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto}
@@ -135,8 +135,8 @@ input:focus-visible{outline:2px solid var(--limestone);outline-offset:2px}
 html.touch{--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);--mini:120px;--R:calc(10px + var(--sr));--B:calc(12px + var(--sb))}
 @media (max-height:500px){html.touch{--mini:104px}html.touch #coords{display:none}}
 html.touch .chip:not(#fsbtn):not(#guideBtn){pointer-events:none}
-html.touch #guideBtn{top:calc(10px + var(--st));right:calc(var(--R) + var(--mini) + 62px);width:44px;height:44px;font-size:18px;line-height:42px}
-html.touch #clock{top:calc(10px + var(--st) + var(--mini) + 56px);right:var(--R);padding:4px 10px;font-size:12px}
+html.touch #guideBtn{top:calc(62px + var(--st));right:calc(var(--R) + var(--mini) + 10px);width:44px;height:44px;font-size:18px;line-height:42px}
+html.touch #clock{top:calc(10px + var(--st) + var(--mini) + 56px);left:auto;right:var(--R);padding:4px 10px;font-size:12px}
 /* top-left stack: location card, then mode and online chips */
 html.touch #where{top:calc(10px + var(--st));left:calc(10px + var(--sl));max-width:min(230px,calc(100vw - var(--mini) - 104px));padding:6px 10px;gap:1px}
 html.touch #where .brand{font-size:10px;letter-spacing:.05em}

@@ -26,7 +26,7 @@ addEventListener('keydown', e => {
   Input.setDevice('kbm');
   if (!started) return;
   if (newsOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeNews(); } return; }
-  if (guideOpen) { if (e.code === 'Escape' || e.code === 'Enter') { e.preventDefault(); closeGuide(); } return; }
+  if (guideOpen) { if (e.code === 'Escape' || (e.code === 'Enter' && e.target.id !== 'guideMusic')) { e.preventDefault(); closeGuide(); } return; }
   if (acctOpen || chatOpen) {   // a panel is open: Esc closes it; Enter brings the chat box back when focus has left it
     if (e.code === 'Escape') { e.preventDefault(); if (acctOpen) Account.closePanel(); else Chat.close(); }
     else if (chatOpen && e.code === 'Enter' && !e.target.closest('#chat')) { e.preventDefault(); Chat.focus(); }
@@ -106,7 +106,7 @@ canvas.addEventListener('pointerdown', e => { if (e.pointerType === 'touch' && !
 canvas.addEventListener('pointermove', e => { if (e.pointerId === lookId) { yaw -= (e.clientX - lookLast[0]) * 0.005; pitch = Math.max(-1.5, Math.min(1.5, pitch - (e.clientY - lookLast[1]) * 0.005)); lookLast = [e.clientX, e.clientY]; } });
 canvas.addEventListener('pointerup', e => { if (e.pointerId === lookId) lookId = null; });
 $('tJump').addEventListener('pointerdown', () => touchUp = true); $('tJump').addEventListener('pointerup', () => touchUp = false); $('tJump').addEventListener('pointerleave', () => touchUp = false);
-$('tFly').addEventListener('click', () => Vehicles.player ? Vehicles.exit() : toggleFly());
+$('tFly').addEventListener('click', () => { if (!Vehicles.player) toggleFly(); else if (!Gas.tryFill(Vehicles.player)) Vehicles.exit(); });   // reads FILL at a pump, EXIT otherwise
 $('tUse').addEventListener('click', () => { if (Vehicles.player) Vehicles.toggleCam(); else if (CFA.onShift) CFA.serve(); else if (Bank.canSmash()) Bank.smash(); else Vehicles.tryEnter(); });
 $('tSiren').addEventListener('click', () => { Vehicles.siren = !Vehicles.siren; Vehicles.lights = Vehicles.siren; }); $('tMap').addEventListener('click', () => toggleMap());
 

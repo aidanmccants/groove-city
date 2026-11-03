@@ -10,10 +10,31 @@ function buildTrees() {
   const trunks = [], leaves = [];
   const greens = ['#3f7a2e', '#4d8a34', '#5b9a3c', '#477f30', '#386b29', '#6a9f3f'];
   const onBridge = (x, z) => bridges.some(br => { const [cx, cz] = closestOnSeg(x, z, br.a, br.b); return Math.hypot(x - cx, z - cz) < br.w / 2 + 2.5; });
+  // roadGap(x, z): metres from a point to the nearest road edge (negative = on the road). Car roads, bike paths, footways and
+  // service ways count; tunnels do not (they are underground). Each segment is filed under every grid cell its box reaches, so a
+  // lookup only has to read its own cell. REACH is wider than any road half-width plus tree canopy
+  const roadKinds = ['primary', 'secondary', 'tertiary', 'residential', 'unclassified', 'service', 'footway', 'path', 'pedestrian', 'steps', 'cycleway', 'track'];
+  const CELL = 32, REACH = 30, roadCells = new Map();
+  for (const l of D.lines) if (roadKinds.includes(l.k) && !l.tu) {
+    const half = (l.w || 6) / 2;
+    for (let i = 0; i < l.p.length - 1; i++) {
+      const a = l.p[i], b = l.p[i + 1];
+      for (let ci = Math.floor((Math.min(a[0], b[0]) - REACH) / CELL); ci <= Math.floor((Math.max(a[0], b[0]) + REACH) / CELL); ci++)
+        for (let cj = Math.floor((Math.min(a[1], b[1]) - REACH) / CELL); cj <= Math.floor((Math.max(a[1], b[1]) + REACH) / CELL); cj++) {
+          const k = ci + ',' + cj; if (!roadCells.has(k)) roadCells.set(k, []); roadCells.get(k).push({ a, b, half });
+        }
+    }
+  }
+  const roadGap = (x, z) => {
+    let best = Infinity;
+    for (const s of roadCells.get(Math.floor(x / CELL) + ',' + Math.floor(z / CELL)) || []) { const [qx, qz] = closestOnSeg(x, z, s.a, s.b); best = Math.min(best, Math.hypot(x - qx, z - qz) - s.half); }
+    return best;
+  };
   for (const t of D.trees) {
     if (onBridge(t[0], t[1])) continue;
     const [x, z, kind, y] = t, h = hash(x * 3.1 + z * 7.7), h2 = hash(x * 1.3 - z * 2.9);
     const conifer = h2 < 0.14, s = 3.6 + h * 3.4, th = 2.5 + h2 * 3;
+    if (roadGap(x, z) < s * .6 + .3) continue;   // off the road: the trunk and the canopy both stay clear of it
     trunks.push({ x, z, y, w: conifer ? .5 : .6 + h * .3, h: th + s * 0.5 });
     addTrunk(x, z, 0.45);
     if (conifer) {
@@ -46,8 +67,9 @@ function buildTrees() {
       const a = l.p[i], c = l.p[i + 1], dx = c[0] - a[0], dz = c[1] - a[1], L = Math.hypot(dx, dz);
       for (let s = 7; s < L; s += 14) for (const side of [-1, 1]) {
         const off = l.w / 2 + 2.6, x = a[0] + dx / L * s + dz / L * off * side, z = a[1] + dz / L * s - dx / L * off * side;
-        if (onBridge(x, z) || D.buildings.some(b => pip(x, z, b.p))) continue;
-        const hh = hash(x * 5.3 - z * 1.7), sz = 2.2 + hh * .6, y = terrainY(x, z);
+        const hh = hash(x * 5.3 - z * 1.7), sz = 2.2 + hh * .6;
+        if (onBridge(x, z) || D.buildings.some(b => pip(x, z, b.p)) || roadGap(x, z) < sz * .6 + .3) continue;
+        const y = terrainY(x, z);
         trunks.push({ x, z, y, w: .45, h: 2.6 + sz * .5 });
         leaves.push({ x, z, y: y + 2.6, sx: sz, sy: sz * .8, sz, col: greens[Math.floor(hh * 997) % greens.length], r: hh * 6 });
       }

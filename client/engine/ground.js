@@ -33,6 +33,13 @@ function paintGround() {
     else if (k[0] === 'track') paintTrack(g, a);
     else if (k[0] === 'pitch') paintPitch(g, a, k[1], k[2]);
   }
+  // grain over the grass, lots and fields only: it goes on before the roads so road surfaces and their lines stay clean
+  const img = g.getImageData(0, 0, CW, CH), d = img.data;
+  for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) {
+    const i = (y * CW + x) * 4, k = (hash(x * 0.917 + y * 13.13) - .5) * 20;
+    d[i] += k; d[i + 1] += k * 1.1; d[i + 2] += k * .8;
+  }
+  g.putImageData(img, 0, 0);
   // mulch beds around campus buildings
   for (const b of D.buildings) if (b.n && (b.k === 'brick' || b.k === 'stone')) { trace(g, b.p); g.strokeStyle = '#4a3527'; g.lineWidth = 3.4 * SS; g.stroke(); }
   // lines
@@ -44,19 +51,21 @@ function paintGround() {
     trace(g, l.p, false); g.strokeStyle = '#a0614c'; g.lineWidth = (l.w + 11) * SS; g.stroke();
     g.strokeStyle = '#b9b3a6'; g.lineWidth = (l.w + 1.2) * SS; g.stroke();   // curb
   }
+  // a light curb band under every car road, drawn before any asphalt so junctions join cleanly: the road reads as a strip apart from the grass
+  for (const l of L) if (CAR_KINDS.includes(l.k) && !l.br) { trace(g, l.p, false); g.strokeStyle = '#b9b3a7'; g.lineWidth = (l.w + 0.9) * SS; g.stroke(); }
   Rail.paint(g);
   for (const l of L) {
     if (l.k === 'fence' || l.k === 'wall') { trace(g, l.p, false); g.strokeStyle = '#3a3a36'; g.lineWidth = 1; g.stroke(); continue; }
     if (l.k === 'stream') { trace(g, l.p, false); g.strokeStyle = '#3c6a86'; g.lineWidth = 5 * SS; g.stroke(); continue; }
     if (l.k === 'rail') continue;   // Rail.paint laid the gravel; the track itself is 3D
     const foot = ['footway', 'path', 'steps', 'pedestrian', 'cycleway'].includes(l.k);
-    let c = foot ? (l.k === 'path' ? '#a8977a' : '#d3cbbb') : (l.k === 'service' ? '#6c6d70' : '#5f6063');
+    let c = foot ? (l.k === 'path' ? '#a8977a' : '#d3cbbb') : (l.k === 'service' ? '#6c6d70' : l.k === 'primary' || l.k === 'secondary' ? '#4b4d52' : '#5f6063');
     if (l.s === 'gravel') c = '#9b9282'; if (l.s === 'concrete' && !foot) c = '#8e8d88'; if (l.s === 'cobblestone') c = '#8b7a6b';
     if (l.br) continue;   // bridges are 3D
     trace(g, l.p, false); g.strokeStyle = c; g.lineWidth = l.w * SS; g.stroke();
     if (!foot && (l.k === 'primary' || l.k === 'secondary' || l.k === 'tertiary')) {
       // white edge lines and a solid double-yellow centre, as on East Main and Madison
-      g.strokeStyle = '#e9e9e4'; g.lineWidth = (l.w - 0.8) * SS; g.stroke();
+      g.strokeStyle = '#e9e9e4'; g.lineWidth = (l.w - 0.2) * SS; g.stroke();
       g.strokeStyle = c; g.lineWidth = (l.w - 1.1) * SS; g.stroke();
       // protected bike lanes on the two big roads: green strips at each edge, so the car lanes are narrower and calmer
       if (l.k !== 'tertiary') { g.strokeStyle = '#3f8a57'; g.lineWidth = (l.w - 1.1) * SS; g.stroke(); g.strokeStyle = c; g.lineWidth = (l.w - 4.4) * SS; g.stroke(); }
@@ -68,13 +77,6 @@ function paintGround() {
   Traffic.paint(g);
   // curbs / plinths under buildings
   for (const b of D.buildings) { trace(g, b.p); g.fillStyle = '#8b8780'; g.fill(); g.strokeStyle = '#b8b2a6'; g.lineWidth = 1.2 * SS; g.stroke(); }
-  // pixel noise pass: per 40 cm cell
-  const img = g.getImageData(0, 0, CW, CH), d = img.data;
-  for (let y = 0; y < CH; y++) for (let x = 0; x < CW; x++) {
-    const i = (y * CW + x) * 4, k = (hash(x * 0.917 + y * 13.13) - .5) * 20;
-    d[i] += k; d[i + 1] += k * 1.1; d[i + 2] += k * .8;
-  }
-  g.putImageData(img, 0, 0);
   return cv;
 }
 function paintTrack(g, a) {

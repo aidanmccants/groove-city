@@ -5,7 +5,7 @@ const DAY_MS = 20 * 60 * 1000;
 const SKY = {   // the three looks; look() blends them by how high the sun is
   day:   { sun: 0xfff1dc, si: 2.4, hs: 0xcfe3ff, hg: 0x5d6b45, hi: 1.0, top: 0x4a86cf, hor: 0xcfe0ee, exp: 1.05, cloud: 0x777777 },
   gold:  { sun: 0xffb36b, si: 2.2, hs: 0xf3c6a0, hg: 0x4d4a3a, hi: 0.75, top: 0x40568f, hor: 0xf2a76a, exp: 1.0, cloud: 0x8a5a44 },
-  night: { sun: 0x9fb4ff, si: 0.35, hs: 0x3a4a7a, hg: 0x10140f, hi: 0.35, top: 0x060b1c, hor: 0x1b2744, exp: 1.2, cloud: 0x10141f },
+  night: { sun: 0x9fb4ff, si: 1.0, hs: 0x6478b4, hg: 0x303a2c, hi: 1.1, top: 0x060b1c, hor: 0x1b2744, exp: 1.4, cloud: 0x10141f },
 };
 const NUM = ['si', 'hi', 'exp'], COL = ['sun', 'hs', 'hg', 'top', 'hor', 'cloud'];
 const HORIZ = new THREE.Vector2(-0.45, 0.52).normalize();   // the compass line the sun rises and sets along
@@ -29,6 +29,7 @@ function look(p) {
     for (const k of ['day', 'gold', 'night']) { const s = new THREE.Color(SKY[k][f]), m = w[k]; c.r += s.r * m; c.g += s.g * m; c.b += s.b * m; }
     out[f] = c;
   }
+  out.si *= smooth(0, .1, Math.abs(sinE));   // the light fades out at the horizon, so swapping sun for moon there doesn't jump the shadows
   const cosE = Math.sqrt(Math.max(0, 1 - sinE * sinE)), sign = sinE >= 0 ? 1 : -1;   // below the horizon the light is the moon, on the far side
   out.dir = new THREE.Vector3(HORIZ.x * cosE, sinE, HORIZ.y * cosE).multiplyScalar(sign);
   return out;

@@ -6,7 +6,13 @@ function groundAt(x, z, y) {
   for (const f of floors) { const fy = f(x, z); if (fy !== null && (y === undefined || y > fy - 1.2)) g = Math.max(g, fy); }
   for (const br of bridges) {
     const [cx, cz, t] = closestOnSeg(x, z, br.a, br.b);
-    if (Math.hypot(x - cx, z - cz) < br.w / 2 + .1) { const dy = br.ya + (br.yb - br.ya) * t; if (y === undefined || y > dy - 1.2) g = Math.max(g, dy); }
+    if (Math.hypot(x - cx, z - cz) < br.w / 2 + .1) {
+      // a flush deck (h: edge heights at each bank) reads its height from the nearer edge; the Rainbow Bridge's deck is level across
+      const s = br.h ? Math.max(-1, Math.min(1, ((x - cx) * br.n[0] + (z - cz) * br.n[1]) / (br.w / 2))) : 0, Lw = (1 + s) / 2, Rw = (1 - s) / 2;
+      const hA = br.h ? br.h[0] * Lw + br.h[1] * Rw : br.ya, hB = br.h ? br.h[2] * Lw + br.h[3] * Rw : br.yb;
+      const dy = hA + (hB - hA) * t;
+      if (y === undefined || y > dy - 1.2) g = Math.max(g, dy);
+    }
   }
   return g;
 }

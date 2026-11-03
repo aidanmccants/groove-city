@@ -16,7 +16,7 @@ const Engine = {
     if (!this.voices) this.init(ac);
     const me = Vehicles.player, fuel = !!me && me.fuel > 0;
     // your own engine: idle, then a rev while the throttle is held (no fuel, no sound)
-    this.rev += ((fuel && Input.held('forward') && !Vehicles.frozen ? 1 : 0) - this.rev) * Math.min(1, dt * 3);
+    this.rev += ((fuel && Input.axis().y > .1 && !Vehicles.frozen ? 1 : 0) - this.rev) * Math.min(1, dt * 3);
     if (fuel) this.set(ac, this.voices[0], 34 + Math.abs(me.v) * 2.6 + this.rev * 46, .028);
     else this.set(ac, this.voices[0], 34, 0);
     // every half second, the five nearest moving cars (not yours) take the other voices

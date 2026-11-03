@@ -14,7 +14,7 @@ const BIND = {
   map:      { key: ['KeyM'], pad: [8], touch: 'MAP' },
   chat:     { key: ['KeyT', 'Enter'], pad: [14], touch: '💬' },                  // opens the chat box (typing uses the on-screen or OS keyboard)
   labels:   { key: ['KeyL'], pad: [12] },
-  guide:    { key: ['KeyG'] },                                                // What to do (the ? button on screen)
+  guide:    { key: ['KeyG'], pad: [13] },                                      // What to do (the ? button on screen)
   exit:     { key: ['KeyE', 'KeyF'], pad: [1, 2], touch: 'EXIT' },             // in a car
   camera:   { key: ['KeyV', 'KeyC'], pad: [3], touch: 'USE' },                 // in a car
   siren:    { key: ['KeyH'], pad: [5], touch: 'SIREN' },                       // in a police car

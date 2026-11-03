@@ -1,10 +1,16 @@
 /* ---------------- what's new: shown once per profile per update; edit UPDATE_NOTES for the next one ---------------- */
 const UPDATE_NOTES = {
-  title: 'Accounts & chat',
+  title: 'Day, night & fuel',
   items: [
+    ['🌗', 'Day and night', 'One day now lasts 20 minutes and is the same for everyone, with sunrise, sunset, stars and a moon. The on-screen clock shows the time.'],
+    ['⛽', 'Cars need gas', 'A tank lasts about 6 km. Stop beside a red pump outside the Marathon and press E (X on a controller, FILL on a phone) to fill up for $8. An empty car stays empty for whoever takes it next.'],
+    ['🎵', 'Sound and music', 'Calm background music, engines that rev, and sounds that fade with distance. Switch the music off in What to do.'],
+    ['🚲', 'Better streets', 'Bike lanes on the big roads, zebra crossings, curb extensions and street trees. The bridges now sit flush with their banks.'],
+    ['❓', 'What to do', 'The ? button, G, or D-pad down on a controller, explains everything on the map.'],
+    ['🚓', 'Police station', 'A police car is now parked at the Grove City Police station.'],
     ['👤', 'Accounts', 'Play as a guest or sign up. Guests can save their account any time from the 👤 button.'],
     ['💬', 'Chat', 'Press T or Enter (💬 on phones) to chat with everyone on the map.'],
-    ['🎮', 'Xbox controller support', 'Plug in or pair a controller. Left stick moves, right stick looks, A jumps (double-tap A to fly), LB runs, X uses (serve, smash, get in), Y flies, View opens the map, Menu goes fullscreen. Driving: RT gas, LT brake/reverse, A handbrake, Y camera, X exit, RB siren, LB lights.'],
+    ['🎮', 'Xbox controller support', 'Plug in or pair a controller. Left stick moves, right stick looks, A jumps (double-tap A to fly), LB runs, X uses (serve, smash, get in), Y flies, View opens the map, Menu goes fullscreen. Driving: RT gas, LT brake/reverse, A handbrake, Y camera, B or X exit, RB siren, LB lights.'],
     ['💵', 'Money & jobs', 'You now carry cash (top right). Earn it, spend it, and keep out of the red: ten minutes in debt and you start over.'],
     ['🥪', 'Work the Chick-fil-A counter', 'Step behind the counter in Breen Student Union to start a shift. Hand customers a sandwich with E or a click for $1 each. Make them wait too long and they leave unhappy.'],
     ['🚗', 'Rent any car', 'Look at a parked car and press E (or click) to rent it: $5 a minute, charged every 10 seconds. W/S drive, A/D steer, Space brakes, V swaps the driver\'s seat for a top-down view, E gets you out and the car stays where you left it, for everyone.'],

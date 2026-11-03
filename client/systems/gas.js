@@ -1,6 +1,6 @@
 /* ---------------- fuel: a tank lasts about 6 km of driving; the two pumps outside the Marathon fill it for $8 ----------------
    Stop beside a pump (within 6 m, not moving) and press E: the server takes the money (economy 'gas.fill'), then the tank fills
-   over about four seconds while the nozzle is out. Fuel is per car and lives in this session only. */
+   over about four seconds while the nozzle is out. Fuel is per car: the room keeps it with the parked car, so everyone shares it. */
 const TANK_M = 6000, FILL_S = 4;
 const PUMPS = [[-703, -323], [-707, -327]];   // on the Marathon's forecourt, clear of its walls
 const Gas = {
@@ -19,12 +19,12 @@ const Gas = {
   near(x, z, r = 6) { return PUMPS.some(([px, pz]) => Math.hypot(px - x, pz - z) < r); },
   // E in a car: if it is stopped at a pump and the tank is not full, start a fill (true); otherwise false and E does its usual job
   tryFill(car) {
-    if (!car || this.fill || car.fuel >= .999 || Math.abs(car.v) > .5 || !this.near(car.x, car.z)) return !!this.fill && this.fill.car === car;
+    if (!this.canFill(car) || this.fill) return !!this.fill && this.fill.car === car;
     Econ.act('gas.fill', { done: r => { if (r.ok && car === Vehicles.player && !this.fill) { this.fill = { car, t: 0 }; toast('Filling up…', 'info'); } } });
     return true;
   },
-  // the player's car is at a pump and could be filled (for the driving prompt)
-  canFill(car) { return !!car && car.fuel < .999 && Math.abs(car.v) < .5 && this.near(car.x, car.z); },
+  // the player's car is at a pump and can be filled: it needs fuel and the player has the money (otherwise E gets out as usual)
+  canFill(car) { return !!car && car.fuel < .999 && Math.abs(car.v) < .5 && this.near(car.x, car.z) && Profile.canAfford(-RULES['gas.fill'].cash / 100); },
   update(dt, now) {
     const F = this.fill;
     if (F) {

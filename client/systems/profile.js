@@ -5,7 +5,7 @@
    rules run here on this browser's copy. That copy is always the last state the server sent, so a reconnect replaces it.
    Storage is an adapter { id, load() -> state | null, save(state) }; today that is LocalStore (localStorage, or memory if blocked).
    Money may go negative; debtSince marks when, and after DEBT_GRACE the player is kicked and reset (debt.js). */
-const CURRENT_UPDATE_ID = '2026-11-accounts';
+const CURRENT_UPDATE_ID = '2026-11-day-night';
 // shared clock: the Worker's time (welcome / pong) minus ours; trains, lights and NPC traffic all run on netNow()
 let clockOffset = 0, clockRtt = 1e9;
 const netNow = () => Date.now() + clockOffset;

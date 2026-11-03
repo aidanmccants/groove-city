@@ -192,7 +192,7 @@ const Vehicles = {
     if (this.frozen && !quiet) { toast('Wait for the officer to finish', 'info'); return; }
     this.player = null; this.frozen = null; c.kind = 'parked'; c.v = 0; this.setFlash(c, false); this.setBrake(c, false); Siren.stop(); this.lights = this.siren = false; this.pull = null;
     if (this.rental) { if (!quiet) toast(`Rental ended: ${money(this.rental.paid * RENT_BLOCK)} for ${this.rental.paid * 10} s`, 'info'); this.rental = null; }
-    if (netSock && netSock.readyState === 1) netSock.send(JSON.stringify({ t: 'park', id: c.id, x: +c.x.toFixed(2), z: +c.z.toFixed(2), h: +c.h.toFixed(3) }));
+    if (netSock && netSock.readyState === 1) netSock.send(JSON.stringify({ t: 'park', id: c.id, x: +c.x.toFixed(2), z: +c.z.toFixed(2), h: +c.h.toFixed(3), u: +c.fuel.toFixed(3) }));
     // step out of the driver's door
     const lx = Math.cos(c.h), lz = -Math.sin(c.h); P.set(c.x + lx * 1.9, 0, c.z + lz * 1.9); P.y = groundAt(P.x, P.z, c.y + 1) + .05; V.set(0, 0, 0);
     for (let i = 0; i < 20; i++) collide();
@@ -240,7 +240,9 @@ const Vehicles = {
     $('dspd').textContent = sp; $('dspd').classList.toggle('over', over && !c.cop);
     const fuel = c.fuel <= 0 ? 'EMPTY · pull up at the Marathon' : `FUEL ${Math.round(c.fuel * 100)}%`;
     line = line ? line + ' · ' + fuel : fuel;
-    if (Gas.canFill(c) && !Gas.fill) line += ` · ${Input.device === 'pad' ? 'A' : 'E'} fills up ${money(-RULES['gas.fill'].cash / 100)}`;   // plain text: this line is textContent
+    const fillable = Gas.canFill(c) && !Gas.fill;
+    if (fillable) line += ` · ${{ pad: 'X', touch: 'FILL' }[Input.device] || 'E'} fills up ${money(-RULES['gas.fill'].cash / 100)}`;   // plain text: this line is textContent
+    $('tFly').textContent = fillable ? 'FILL' : 'EXIT';
     $('dinfo').textContent = this.frozen ? 'PULLED OVER · ' + this.frozen : line;
     const kg = (a, ctx) => Input.glyph(a, ctx, Input.device === 'pad' ? 'pad' : 'kbm');   // keyboard or pad hints (a touch screen has its own)
     $('dkeys').innerHTML = isTouch ? '' : `${kg('exit', 'bare')}exit ${kg('camera', 'bare')}${this.cam === 'cab' ? 'top view' : 'driver view'}${c.cop ? ` ${kg('siren')}siren ${kg('lights')}lights` : ''} ${kg('handbrake')}brake${Input.device === 'pad' ? ` ${XB('RT')}gas ${XB('LT')}brake/reverse` : ''}`;
@@ -346,9 +348,10 @@ const Vehicles = {
     $('gdist').textContent = d < 15 ? 'Chick-fil-A is here: step behind the counter' : `Chick-fil-A (Breen) · ${Math.round(d)} m`;
   },
   /* ---- multiplayer ---- */
-  applyServer(list) {   // [[id, x, z, h, driver]] from the Worker
-    for (const [id, x, z, h, d] of list) {
+  applyServer(list) {   // [[id, x, z, h, driver, fuel]] from the Worker
+    for (const [id, x, z, h, d, u] of list) {
       const c = this.list[id]; if (!c || id >= this.parked || c === this.player) continue;
+      if (u != null) c.fuel = u;
       if (x != null && !d) { c.x = x; c.z = z; c.h = h; c.kind = 'parked'; c.v = 0; this.pose(c, true); this.place(c); }
       if (d && d !== myId) c.kind = 'remote';
     }
@@ -357,6 +360,7 @@ const Vehicles = {
     const c = this.list[m.id]; if (!c || m.id >= this.parked || c === this.player) return;
     if (m.d) { if (m.d !== myId) c.kind = 'remote'; return; }
     c.kind = 'parked'; c.v = 0; c.flash = false; this.setFlash(c, false); this.setBrake(c, false);
+    if (m.u != null) c.fuel = m.u;
     if (m.x != null) { c.x = m.x; c.z = m.z; c.h = m.h; this.pose(c, true); this.place(c); }
   },
   onEvt(m) {
